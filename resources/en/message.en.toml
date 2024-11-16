@@ -1,0 +1,3 @@
+user_already_exists = "user already exists"
+login_or_password_wrong = "login or password incorrect"
+user_not_found = "user not found"
