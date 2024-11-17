@@ -1,7 +1,10 @@
 package jsonerror
 
 import (
+	"errors"
 	"fmt"
+	"go_echo/internal/config"
+	"go_echo/internal/config/env"
 	"net/http"
 	"runtime"
 
@@ -26,17 +29,37 @@ type ErrorData struct {
 }
 
 func NewError(err error, code int, status int) *APIError {
-	return NewErrorString(err.Error(), code, status)
+	var stack *string
+	var e config.StackTracer
+	stack = nil
+	if errors.As(err, &e) {
+		st := ""
+		for _, f := range e.StackTrace() {
+			st += fmt.Sprintf("%+s:%d\n", f, f)
+		}
+		if st != "" {
+			stack = &st
+		}
+	}
+	return NewErrorString(err.Error(), code, status, stack)
 }
 
-func NewErrorString(err string, code int, status int) *APIError {
-	return NewErrorMap(map[string]interface{}{"api": err}, code, status)
+func NewErrorString(err string, code int, status int, stack *string) *APIError {
+	return NewErrorMap(map[string]interface{}{"api": err}, code, status, stack)
 }
 
-func NewErrorMap(err map[string]interface{}, code int, status int) *APIError {
+func NewErrorMap(err map[string]interface{}, code int, status int, stack *string) *APIError {
+	cfg := env.GetConfigInstance()
 	pc, _, line, _ := runtime.Caller(2)
 	details := runtime.FuncForPC(pc)
-	source := Source{Pointer: fmt.Sprintf("%s#%d", details.Name(), line)}
+	var source Source
+	if (cfg.Debug) && details != nil {
+		if stack != nil {
+			source = Source{Pointer: *stack}
+		} else {
+			source = Source{Pointer: fmt.Sprintf("%s#%d", details.Name(), line)}
+		}
+	}
 	data := make([]ErrorData, 0, len(err))
 	for key, value := range err {
 		data = append(data, ErrorData{Title: key, Detail: fmt.Sprintf("%v", value)})
@@ -50,98 +73,69 @@ func NewErrorMap(err map[string]interface{}, code int, status int) *APIError {
 }
 
 func ErrorNotFound(c echo.Context, err error, code int) {
-	e := jsonapi.MarshalPayload(c.Response(), NewError(err, code, http.StatusNotFound))
-	if e != nil {
-		c.JSON(http.StatusNotFound, e.Error())
-		return
-	}
-	c.JSON(http.StatusNotFound, c.Response())
+	errorError(c, err, code, http.StatusNotFound)
 }
 func ErrorInternal(c echo.Context, err error, code int) {
-	e := jsonapi.MarshalPayload(c.Response(), NewError(err, code, http.StatusInternalServerError))
-	if e != nil {
-		http.Error(c.Response(), e.Error(), http.StatusInternalServerError)
-	}
+	errorError(c, err, code, http.StatusInternalServerError)
 }
 func ErrorUnauthorized(c echo.Context, err error, code int) {
-	e := jsonapi.MarshalPayload(c.Response(), NewError(err, code, http.StatusUnauthorized))
-	if e != nil {
-		c.JSON(http.StatusUnauthorized, e.Error())
-		return
-	}
-	c.JSON(http.StatusUnauthorized, c.Response())
+	errorError(c, err, code, http.StatusUnauthorized)
 }
 func ErrorUnprocessableEntity(c echo.Context, err error, code int) {
-	e := jsonapi.MarshalPayload(c.Response(), NewError(err, code, http.StatusUnprocessableEntity))
-	if e != nil {
-		c.JSON(http.StatusUnprocessableEntity, e.Error())
-		return
-	}
-	c.JSON(http.StatusUnprocessableEntity, c.Response())
+	errorError(c, err, code, http.StatusUnprocessableEntity)
 }
 
 func ErrorNotFoundMap(c echo.Context, err map[string]interface{}, code int) {
-	e := jsonapi.MarshalPayload(c.Response(), NewErrorMap(err, code, http.StatusNotFound))
-	if e != nil {
-		c.JSON(http.StatusNotFound, e.Error())
-		return
-	}
-	c.JSON(http.StatusNotFound, c.Response())
+	errorMap(c, err, code, http.StatusNotFound)
 }
 func ErrorInternalMap(c echo.Context, err map[string]interface{}, code int) {
-	e := jsonapi.MarshalPayload(c.Response(), NewErrorMap(err, code, http.StatusInternalServerError))
-	if e != nil {
-		c.JSON(http.StatusInternalServerError, e.Error())
-		return
-	}
-	c.JSON(http.StatusInternalServerError, c.Response())
+	errorMap(c, err, code, http.StatusInternalServerError)
 }
 func ErrorUnauthorizedMap(c echo.Context, err map[string]interface{}, code int) {
-	e := jsonapi.MarshalPayload(c.Response(), NewErrorMap(err, code, http.StatusUnauthorized))
-	if e != nil {
-		c.JSON(http.StatusUnauthorized, e.Error())
-		return
-	}
-	c.JSON(http.StatusUnauthorized, c.Response())
+	errorMap(c, err, code, http.StatusUnauthorized)
 }
 func ErrorUnprocessableEntityMap(c echo.Context, err map[string]interface{}, code int) {
-	e := jsonapi.MarshalPayload(c.Response(), NewErrorMap(err, code, http.StatusUnprocessableEntity))
-	if e != nil {
-		c.JSON(http.StatusUnprocessableEntity, e.Error())
-		return
-	}
-	c.JSON(http.StatusUnprocessableEntity, c.Response())
+	errorMap(c, err, code, http.StatusUnprocessableEntity)
 }
-
 func ErrorNotFoundString(c echo.Context, err string, code int) {
-	e := jsonapi.MarshalPayload(c.Response(), NewErrorString(err, code, http.StatusNotFound))
-	if e != nil {
-		c.JSON(http.StatusUnprocessableEntity, e.Error())
-		return
-	}
-	c.JSON(http.StatusUnprocessableEntity, c.Response())
+	errorString(c, err, code, http.StatusNotFound)
 }
 func ErrorInternalString(c echo.Context, err string, code int) {
-	e := jsonapi.MarshalPayload(c.Response(), NewErrorString(err, code, http.StatusInternalServerError))
-	if e != nil {
-		c.JSON(http.StatusInternalServerError, e.Error())
-		return
-	}
-	c.JSON(http.StatusInternalServerError, c.Response())
+	errorString(c, err, code, http.StatusInternalServerError)
 }
 func ErrorUnauthorizedString(c echo.Context, err string, code int) {
-	e := jsonapi.MarshalPayload(c.Response(), NewErrorString(err, code, http.StatusUnauthorized))
-	if e != nil {
-		c.JSON(http.StatusUnauthorized, e.Error())
-		return
-	}
-	c.JSON(http.StatusUnauthorized, c.Response())
+	errorString(c, err, code, http.StatusUnauthorized)
 }
 func ErrorUnprocessableEntityString(c echo.Context, err string, code int) {
-	e := jsonapi.MarshalPayload(c.Response(), NewErrorString(err, code, http.StatusUnprocessableEntity))
+	errorString(c, err, code, http.StatusUnprocessableEntity)
+}
+
+func errorString(c echo.Context, err string, code int, status int) {
+	c.Response().Status = status
+	e := jsonapi.MarshalPayload(c.Response(), NewErrorString(err, code, http.StatusUnprocessableEntity, nil))
 	if e != nil {
-		c.JSON(http.StatusUnprocessableEntity, e.Error())
+		c.JSON(status, e.Error())
 		return
 	}
-	c.JSON(http.StatusUnprocessableEntity, c.Response())
+	c.JSON(status, c.Response())
+}
+
+func errorMap(c echo.Context, err map[string]interface{}, code int, status int) {
+	c.Response().Status = status
+	e := jsonapi.MarshalPayload(c.Response(), NewErrorMap(err, code, status, nil))
+	if e != nil {
+		c.JSON(status, e.Error())
+		return
+	}
+	c.JSON(status, c.Response())
+}
+
+func errorError(c echo.Context, err error, code int, status int) {
+	c.Response().Status = status
+	e := jsonapi.MarshalPayload(c.Response(), NewError(err, code, status))
+	if e != nil {
+		c.JSON(status, e.Error())
+		return
+	}
+	c.JSON(status, c.Response())
 }

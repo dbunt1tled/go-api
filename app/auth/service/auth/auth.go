@@ -1,10 +1,10 @@
-package security
+package auth
 
 import (
-	"go_first/internal/config/env"
-	"go_first/internal/lib/common/jwt"
-	"go_first/internal/lib/common/model/security"
-	"go_first/internal/lib/common/model/user"
+	"go_echo/app/auth/model/token"
+	"go_echo/app/user/model/user"
+	"go_echo/internal/config/env"
+	"go_echo/internal/util/jwt"
 	"time"
 )
 
@@ -13,7 +13,7 @@ const (
 	RefreshTokenSubject = "refresh_token"
 )
 
-func GetAuthTokens(user user.User) (*security.Tokens, error) {
+func GetAuthTokens(user user.User) (*token.Tokens, error) {
 	accessToken, err := generateAccessToken(user)
 	if err != nil {
 		return nil, err
@@ -22,7 +22,7 @@ func GetAuthTokens(user user.User) (*security.Tokens, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &security.Tokens{
+	return &token.Tokens{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 	}, nil

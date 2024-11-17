@@ -12,7 +12,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func ShutDown(log *slog.Logger, httpServer *echo.Echo) chan bool {
+func ShutdownGraceful(log *slog.Logger, server *echo.Echo) chan bool {
 	var pending int32 = 0
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
@@ -21,7 +21,7 @@ func ShutDown(log *slog.Logger, httpServer *echo.Echo) chan bool {
 		sig := <-sigs
 		log.Warn("Signal received: " + sig.String())
 		signal.Reset(syscall.SIGINT, syscall.SIGTERM)
-		gracefulBye(httpServer, &pending, done, log)
+		gracefulBye(server, &pending, done, log)
 	}()
 	return done
 }
@@ -34,14 +34,17 @@ func gracefulBye(httpServer *echo.Echo, pending *int32, done chan bool, log *slo
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
 
-	httpServer.Shutdown(ctx)
+	err := httpServer.Shutdown(ctx)
+	if err != nil {
+		panic("Error shutdown: " + err.Error())
+	}
 	for {
-		pending_ := atomic.LoadInt32(pending)
-		if pending_ == 0 {
+		pendingRequests := atomic.LoadInt32(pending)
+		if pendingRequests == 0 {
 			break
 		}
 
-		log.Warn("waiting for", pending_, "pending requests to complete ...")
+		log.Warn("waiting for", pendingRequests, "pending requests to complete ...")
 		time.Sleep(1 * time.Second)
 	}
 }

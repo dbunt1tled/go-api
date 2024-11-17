@@ -10,19 +10,33 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func CustomHTTPErrorHandler(err error, c echo.Context) {
+func APIErrorHandler(err error, c echo.Context) {
+
 	log := config.GetLoggerInstance()
-	code := http.StatusInternalServerError
+	status := http.StatusInternalServerError
+	message := err.Error()
+	code := 0
+
 	var he *echo.HTTPError
 	if errors.As(err, &he) {
-		code = he.Code
+		status = he.Code
+		message = he.Error()
 	}
-	log.Error(err.Error())
-	e := jsonapi.MarshalPayload(c.Response(), jsonerror.NewError(err, code, code))
+
+	var exception *jsonerror.ErrException
+	if errors.As(err, &exception) {
+		status = exception.Status
+		message = exception.Error()
+		code = exception.Code
+	}
+
+	log.Warn(err.Error())
+	c.Response().Status = status
+	e := jsonapi.MarshalPayload(c.Response(), jsonerror.NewErrorString(message, code, status, nil))
 	if e != nil {
 		log.Error(e.Error())
-		c.JSON(code, e.Error())
+		c.JSON(status, e.Error())
 		return
 	}
-	c.JSON(code, c.Response())
+	c.JSON(status, c.Response())
 }

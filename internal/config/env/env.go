@@ -37,6 +37,7 @@ type JWT struct {
 	Algorithm       string        `env:"JWT_TOKEN_ALGORITHM" env-default:"HS256"`
 	AccessLifeTime  time.Duration `env:"TOKEN_ACCESS_LIFE_TIME_SECONDS" env-default:"3600s"`
 	RefreshLifeTime time.Duration `env:"TOKEN_REFRESH_LIFE_TIME_SECONDS" env-default:"7200s"`
+	SystemAPIKey    string        `env:"SYSTEM_API_KEY" env-required:"true"`
 }
 
 func MustLoadConfig() *Config {

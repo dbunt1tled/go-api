@@ -3,6 +3,7 @@ package router
 import (
 	"fmt"
 	"go_echo/internal/config/env"
+	apiServer "go_echo/internal/router/handler/server"
 	"go_echo/internal/router/mware"
 	"go_echo/internal/util/hash"
 	"go_echo/internal/util/rand"
@@ -18,6 +19,20 @@ import (
 
 func SetupRoutes(server *echo.Echo, locale *i18n.Localizer, bundle *i18n.Bundle) {
 	cfg := env.GetConfigInstance()
+	setGeneralMiddlewares(server, locale, bundle, cfg)
+	systemRouter := server.Group("/system")
+	systemRouter.Use(mware.SystemAuth)
+	systemRouter.GET("/server-stop", apiServer.ShutDown)
+
+	// group.GET("", h.HandlerShowUsers)
+	// group.GET("/details/:id", h.HandlerShowUserById)
+
+	server.GET("/", func(c echo.Context) error {
+		return c.String(http.StatusOK, "Hello, World!")
+	})
+}
+
+func setGeneralMiddlewares(server *echo.Echo, locale *i18n.Localizer, bundle *i18n.Bundle, cfg *env.Config) {
 	server.Use(middleware.Recover())
 	server.Use(middleware.Logger())
 	server.Use(middleware.Gzip())
@@ -32,7 +47,7 @@ func SetupRoutes(server *echo.Echo, locale *i18n.Localizer, bundle *i18n.Bundle)
 			} else {
 				u = ub.String()
 			}
-			r, e := rand.String(4)
+			r, e := rand.String(4) //nolint:mnd //small random part
 			if e != nil {
 				r = strconv.FormatInt(time.Now().Unix(), 10)
 			}
@@ -44,14 +59,6 @@ func SetupRoutes(server *echo.Echo, locale *i18n.Localizer, bundle *i18n.Bundle)
 		AllowMethods:     strings.Split(cfg.CORS.AccessControlAllowMethods, ","),
 		AllowHeaders:     strings.Split(cfg.CORS.AccessControlAllowHeaders, ","),
 		AllowCredentials: false,
-		MaxAge:           300,
+		MaxAge:           300, //nolint:mnd // Maximum value not ignored by any of major browsers
 	}))
-	// group := server.Group("/user")
-
-	// group.GET("", h.HandlerShowUsers)
-	// group.GET("/details/:id", h.HandlerShowUserById)
-
-	server.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello, World!")
-	})
 }

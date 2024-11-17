@@ -46,9 +46,9 @@ func main() {
 	httpServer := echo.New()
 	httpServer.HideBanner = true
 	httpServer.Debug = cfg.Debug
-	httpServer.HTTPErrorHandler = handler.CustomHTTPErrorHandler
+	httpServer.HTTPErrorHandler = handler.APIErrorHandler
 
-	done := graceful.ShutDown(log, httpServer)
+	done := graceful.ShutdownGraceful(log, httpServer)
 	router.SetupRoutes(httpServer, locale, bundle)
 	go func() {
 		log.Debug("Start listening on address: " + cfg.HTTPServer.Address)

@@ -1,12 +1,9 @@
-### Example user template template
-### Example user template
-
 # IntelliJ project files
 .idea
 *.iml
 out
 gen
-### Go template
+
 # If you prefer the allow list template instead of the deny list, see community template:
 # https://github.com/github/gitignore/blob/main/community/Golang/Go.AllowList.gitignore
 #
@@ -16,7 +13,7 @@ gen
 *.dll
 *.so
 *.dylib
-
+bin/*
 # Test binary, built with `go test -c`
 *.test
 
