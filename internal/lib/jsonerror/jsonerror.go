@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"go_echo/internal/config"
 	"go_echo/internal/config/env"
+	"go_echo/internal/util/helper"
 	"net/http"
 	"runtime"
 
-	"github.com/google/jsonapi"
 	"github.com/labstack/echo/v4"
 )
 
@@ -111,31 +111,13 @@ func ErrorUnprocessableEntityString(c echo.Context, err string, code int) {
 }
 
 func errorString(c echo.Context, err string, code int, status int) {
-	c.Response().Status = status
-	e := jsonapi.MarshalPayload(c.Response(), NewErrorString(err, code, http.StatusUnprocessableEntity, nil))
-	if e != nil {
-		c.JSON(status, e.Error())
-		return
-	}
-	c.JSON(status, c.Response())
+	helper.JSONAPIModel(c.Response(), NewErrorString(err, code, status, nil), status)
 }
 
 func errorMap(c echo.Context, err map[string]interface{}, code int, status int) {
-	c.Response().Status = status
-	e := jsonapi.MarshalPayload(c.Response(), NewErrorMap(err, code, status, nil))
-	if e != nil {
-		c.JSON(status, e.Error())
-		return
-	}
-	c.JSON(status, c.Response())
+	helper.JSONAPIModel(c.Response(), NewErrorMap(err, code, status, nil), status)
 }
 
 func errorError(c echo.Context, err error, code int, status int) {
-	c.Response().Status = status
-	e := jsonapi.MarshalPayload(c.Response(), NewError(err, code, status))
-	if e != nil {
-		c.JSON(status, e.Error())
-		return
-	}
-	c.JSON(status, c.Response())
+	helper.JSONAPIModel(c.Response(), NewError(err, code, status), status)
 }

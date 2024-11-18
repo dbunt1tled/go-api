@@ -5,6 +5,8 @@ import (
 	"reflect"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/google/jsonapi"
+	"github.com/labstack/echo/v4"
 )
 
 func isVarType(value interface{}, targetType reflect.Type) bool {
@@ -26,4 +28,14 @@ func ValidationErrorString(validationErrors validator.ValidationErrors) []string
 		// errors = append(errors, ?err.Translate(ut))
 	}
 	return errors
+}
+
+func JSONAPIModel(r *echo.Response, models interface{}, status int) error {
+	r.Header().Set(echo.HeaderContentType, jsonapi.MediaType)
+	r.WriteHeader(status)
+	e := jsonapi.MarshalPayload(r, models)
+	if e != nil {
+		panic(e.Error()) // TODO logging
+	}
+	return nil
 }

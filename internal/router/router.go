@@ -22,7 +22,7 @@ func SetupRoutes(server *echo.Echo, locale *i18n.Localizer, bundle *i18n.Bundle)
 	setGeneralMiddlewares(server, locale, bundle, cfg)
 	systemRouter := server.Group("/system")
 	systemRouter.Use(mware.SystemAuth)
-	systemRouter.GET("/server-stop", apiServer.ShutDown)
+	systemRouter.GET("/helm", apiServer.Helm)
 
 	// group.GET("", h.HandlerShowUsers)
 	// group.GET("/details/:id", h.HandlerShowUserById)
