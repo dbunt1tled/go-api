@@ -27,6 +27,10 @@ type Mysql struct {
 	db *sql.DB
 }
 
+func (m *Mysql) GetDB() *sql.DB {
+	return m.db
+}
+
 func Open() (*Mysql, error) {
 	cfg := env.GetConfigInstance()
 	db, err := sql.Open("mysql", cfg.DatabaseDSN)

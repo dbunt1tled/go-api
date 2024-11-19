@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"go_echo/app/user/service"
 	"go_echo/internal/config"
 	"go_echo/internal/config/env"
 	"go_echo/internal/lib/graceful"
@@ -8,6 +10,7 @@ import (
 	"go_echo/internal/lib/profiler"
 	"go_echo/internal/router"
 	"go_echo/internal/storage"
+	"go_echo/internal/util/builder"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -31,6 +34,16 @@ func main() {
 	router.SetupRoutes(httpServer, locale, bundle)
 
 	done := graceful.ShutdownGraceful(log, httpServer)
+	u, err := service.UserRepository{}.List([]builder.FilterCondition{
+		{Field: "id", Type: builder.In, Value: []interface{}{1, 2}},
+	}, []builder.SortOrder{
+		{Field: "id", Order: builder.Desc},
+	})
+	if err != nil {
+		log.Error(err.Error())
+	} else {
+		log.Debug(fmt.Sprintf("%+v\n", u))
+	}
 
 	go func() {
 		log.Debug("Start listening on address: " + cfg.HTTPServer.Address)

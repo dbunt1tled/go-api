@@ -1,6 +1,7 @@
 package user
 
 import (
+	"database/sql"
 	"go_echo/internal/util/type/timestamp"
 	"strings"
 )
@@ -13,7 +14,7 @@ type User struct {
 	PhoneNumber string              `json:"phoneNumber" jsonapi:"attr,phoneNumber"`
 	Password    string              `json:"password" jsonapi:"attr,password"`
 	Status      int                 `json:"status" jsonapi:"attr,status"`
-	ConfirmedAt timestamp.Timestamp `json:"confirmed_at" jsonapi:"attr,confirmedAt"`
+	ConfirmedAt sql.NullTime        `json:"confirmed_at" jsonapi:"attr,confirmedAt"`
 	CreatedAt   timestamp.Timestamp `json:"created_at" jsonapi:"attr,createdAt"`
 	UpdatedAt   timestamp.Timestamp `json:"updated_at" jsonapi:"attr,updatedAt"`
 }

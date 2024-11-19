@@ -110,14 +110,14 @@ func ErrorUnprocessableEntityString(c echo.Context, err string, code int) {
 	errorString(c, err, code, http.StatusUnprocessableEntity)
 }
 
-func errorString(c echo.Context, err string, code int, status int) {
-	helper.JSONAPIModel(c.Response(), NewErrorString(err, code, status, nil), status)
+func errorString(c echo.Context, err string, code int, status int) error {
+	return helper.JSONAPIModel(c.Response(), NewErrorString(err, code, status, nil), status)
 }
 
-func errorMap(c echo.Context, err map[string]interface{}, code int, status int) {
-	helper.JSONAPIModel(c.Response(), NewErrorMap(err, code, status, nil), status)
+func errorMap(c echo.Context, err map[string]interface{}, code int, status int) error {
+	return helper.JSONAPIModel(c.Response(), NewErrorMap(err, code, status, nil), status)
 }
 
-func errorError(c echo.Context, err error, code int, status int) {
-	helper.JSONAPIModel(c.Response(), NewError(err, code, status), status)
+func errorError(c echo.Context, err error, code int, status int) error {
+	return helper.JSONAPIModel(c.Response(), NewError(err, code, status), status)
 }

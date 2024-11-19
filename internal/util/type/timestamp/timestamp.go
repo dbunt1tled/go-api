@@ -30,3 +30,12 @@ func (t *Timestamp) UnmarshalJSON(data []byte) error {
 
 	return errors.New("timestamp: invalid format")
 }
+
+func (t *Timestamp) Scan(value any) error {
+	if _, ok := value.(time.Time); ok {
+		t.Time = value.(time.Time)
+		return nil
+	}
+
+	return errors.New("timestamp: invalid format")
+}
