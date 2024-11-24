@@ -1,8 +1,8 @@
 package profiler
 
 import (
-	"go_echo/internal/config"
 	"go_echo/internal/config/env"
+	"go_echo/internal/config/logger"
 	"net/http"
 	"runtime"
 	"time"
@@ -17,7 +17,7 @@ func SetProfiler() {
 		go func() {
 			err := http.ListenAndServe("localhost:6060", nil)
 			if err != nil {
-				log := config.GetLoggerInstance()
+				log := logger.GetLoggerInstance()
 				log.Error(err.Error())
 			}
 		}()

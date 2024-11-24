@@ -21,7 +21,7 @@ func authBearer(next echo.HandlerFunc) echo.HandlerFunc {
 		if isEmpty {
 			authToken, isEmpty = fromQueryParam(c)
 			if isEmpty {
-				return &jsonerror.ErrException{
+				return &jsonerror.ExceptionErr{
 					Inner:  errors.New("Unauthorized."),
 					Code:   40100001,
 					Status: http.StatusUnauthorized,
@@ -31,7 +31,7 @@ func authBearer(next echo.HandlerFunc) echo.HandlerFunc {
 
 		_, err := jwt.JWToken{}.Decode(authToken, true)
 		if err != nil {
-			return &jsonerror.ErrException{
+			return &jsonerror.ExceptionErr{
 				Inner:  errors.New("Unauthorized."),
 				Code:   40100002,
 				Status: http.StatusUnauthorized,
@@ -39,11 +39,11 @@ func authBearer(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 		//u, err := storage.GetUser(mysql.UserFilter{ID: int64(token["iss"].(float64))})
 		//if err != nil {
-		//	return &jsonerror.ErrException{Inner: errors.New("Unauthorized."), Code: 40100003, Status: http.StatusUnauthorized}
+		//	return &jsonerror.ExceptionErr{Inner: errors.New("Unauthorized."), Code: 40100003, Status: http.StatusUnauthorized}
 		//}
 		//
 		//if u.Status != user.StatusActive {
-		//	return &jsonerror.ErrException{Inner: errors.New("Unauthorized."), Code: 40100004, Status: http.StatusUnauthorized}
+		//	return &jsonerror.ExceptionErr{Inner: errors.New("Unauthorized."), Code: 40100004, Status: http.StatusUnauthorized}
 		//}
 
 		return next(c)

@@ -2,6 +2,7 @@ package router
 
 import (
 	"fmt"
+	"go_echo/app/auth/authhandle"
 	"go_echo/internal/config/env"
 	apiServer "go_echo/internal/router/handler/server"
 	"go_echo/internal/router/mware"
@@ -14,16 +15,15 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/nicksnyder/go-i18n/v2/i18n"
 )
 
-func SetupRoutes(server *echo.Echo, locale *i18n.Localizer, bundle *i18n.Bundle) {
+func SetupRoutes(server *echo.Echo) {
 	cfg := env.GetConfigInstance()
-	setGeneralMiddlewares(server, locale, bundle, cfg)
+	setGeneralMiddlewares(server, cfg)
 	systemRouter := server.Group("/system")
 	systemRouter.Use(mware.SystemAuth)
 	systemRouter.GET("/helm", apiServer.Helm)
-
+	authRoutes(server)
 	// group.GET("", h.HandlerShowUsers)
 	// group.GET("/details/:id", h.HandlerShowUserById)
 
@@ -32,12 +32,17 @@ func SetupRoutes(server *echo.Echo, locale *i18n.Localizer, bundle *i18n.Bundle)
 	})
 }
 
-func setGeneralMiddlewares(server *echo.Echo, locale *i18n.Localizer, bundle *i18n.Bundle, cfg *env.Config) {
+func authRoutes(server *echo.Echo) {
+	authRouter := server.Group("/auth")
+	authRouter.POST("/login", authhandle.Login)
+}
+
+func setGeneralMiddlewares(server *echo.Echo, cfg *env.Config) {
 	server.Use(middleware.Recover())
 	server.Use(middleware.Logger())
 	server.Use(middleware.Gzip())
 	server.Use(mware.Base)
-	server.Use(mware.Language(locale, bundle))
+	server.Use(mware.Language())
 	server.Use(middleware.RequestIDWithConfig(middleware.RequestIDConfig{
 		Generator: func() string {
 			var u string

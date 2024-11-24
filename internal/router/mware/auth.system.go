@@ -15,16 +15,16 @@ func SystemAuth(next echo.HandlerFunc) echo.HandlerFunc {
 
 		authToken, isEmpty := fromAuthSystemHeader(c)
 		if isEmpty {
-			return &jsonerror.ErrException{
-				Inner:  errors.New("unauthorized."),
+			return &jsonerror.ExceptionErr{
+				Inner:  errors.New("Unauthorized."),
 				Code:   40100005,
 				Status: http.StatusUnauthorized,
 			}
 		}
 		cfg := env.GetConfigInstance()
 		if authToken != cfg.JWT.SystemAPIKey {
-			return &jsonerror.ErrException{
-				Inner:  errors.New("unauthorized."),
+			return &jsonerror.ExceptionErr{
+				Inner:  errors.New("Unauthorized."),
 				Code:   40100006,
 				Status: http.StatusUnauthorized,
 			}

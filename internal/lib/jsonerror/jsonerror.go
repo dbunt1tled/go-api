@@ -3,8 +3,8 @@ package jsonerror
 import (
 	"errors"
 	"fmt"
-	"go_echo/internal/config"
 	"go_echo/internal/config/env"
+	error2 "go_echo/internal/config/error"
 	"go_echo/internal/util/helper"
 	"net/http"
 	"runtime"
@@ -30,7 +30,7 @@ type ErrorData struct {
 
 func NewError(err error, code int, status int) *APIError {
 	var stack *string
-	var e config.StackTracer
+	var e error2.StackTracer
 	stack = nil
 	if errors.As(err, &e) {
 		st := ""
@@ -72,42 +72,42 @@ func NewErrorMap(err map[string]interface{}, code int, status int, stack *string
 	}
 }
 
-func ErrorNotFound(c echo.Context, err error, code int) {
-	errorError(c, err, code, http.StatusNotFound)
+func ErrorNotFound(c echo.Context, err error, code int) error {
+	return errorError(c, err, code, http.StatusNotFound)
 }
-func ErrorInternal(c echo.Context, err error, code int) {
-	errorError(c, err, code, http.StatusInternalServerError)
+func ErrorInternal(c echo.Context, err error, code int) error {
+	return errorError(c, err, code, http.StatusInternalServerError)
 }
-func ErrorUnauthorized(c echo.Context, err error, code int) {
-	errorError(c, err, code, http.StatusUnauthorized)
+func ErrorUnauthorized(c echo.Context, err error, code int) error {
+	return errorError(c, err, code, http.StatusUnauthorized)
 }
-func ErrorUnprocessableEntity(c echo.Context, err error, code int) {
-	errorError(c, err, code, http.StatusUnprocessableEntity)
+func ErrorUnprocessableEntity(c echo.Context, err error, code int) error {
+	return errorError(c, err, code, http.StatusUnprocessableEntity)
 }
 
-func ErrorNotFoundMap(c echo.Context, err map[string]interface{}, code int) {
-	errorMap(c, err, code, http.StatusNotFound)
+func ErrorNotFoundMap(c echo.Context, err map[string]interface{}, code int) error {
+	return errorMap(c, err, code, http.StatusNotFound)
 }
-func ErrorInternalMap(c echo.Context, err map[string]interface{}, code int) {
-	errorMap(c, err, code, http.StatusInternalServerError)
+func ErrorInternalMap(c echo.Context, err map[string]interface{}, code int) error {
+	return errorMap(c, err, code, http.StatusInternalServerError)
 }
-func ErrorUnauthorizedMap(c echo.Context, err map[string]interface{}, code int) {
-	errorMap(c, err, code, http.StatusUnauthorized)
+func ErrorUnauthorizedMap(c echo.Context, err map[string]interface{}, code int) error {
+	return errorMap(c, err, code, http.StatusUnauthorized)
 }
-func ErrorUnprocessableEntityMap(c echo.Context, err map[string]interface{}, code int) {
-	errorMap(c, err, code, http.StatusUnprocessableEntity)
+func ErrorUnprocessableEntityMap(c echo.Context, err map[string]interface{}, code int) error {
+	return errorMap(c, err, code, http.StatusUnprocessableEntity)
 }
-func ErrorNotFoundString(c echo.Context, err string, code int) {
-	errorString(c, err, code, http.StatusNotFound)
+func ErrorNotFoundString(c echo.Context, err string, code int) error {
+	return errorString(c, err, code, http.StatusNotFound)
 }
-func ErrorInternalString(c echo.Context, err string, code int) {
-	errorString(c, err, code, http.StatusInternalServerError)
+func ErrorInternalString(c echo.Context, err string, code int) error {
+	return errorString(c, err, code, http.StatusInternalServerError)
 }
-func ErrorUnauthorizedString(c echo.Context, err string, code int) {
-	errorString(c, err, code, http.StatusUnauthorized)
+func ErrorUnauthorizedString(c echo.Context, err string, code int) error {
+	return errorString(c, err, code, http.StatusUnauthorized)
 }
-func ErrorUnprocessableEntityString(c echo.Context, err string, code int) {
-	errorString(c, err, code, http.StatusUnprocessableEntity)
+func ErrorUnprocessableEntityString(c echo.Context, err string, code int) error {
+	return errorString(c, err, code, http.StatusUnprocessableEntity)
 }
 
 func errorString(c echo.Context, err string, code int, status int) error {

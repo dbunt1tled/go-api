@@ -1,9 +1,9 @@
 package jsonerror
 
-type ErrException struct {
+type ExceptionErr struct {
 	Inner  error
 	Code   int
 	Status int
 }
 
-func (e *ErrException) Error() string { return e.Inner.Error() }
+func (e *ExceptionErr) Error() string { return e.Inner.Error() }

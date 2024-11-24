@@ -2,7 +2,7 @@ package handler
 
 import (
 	"errors"
-	"go_echo/internal/config"
+	"go_echo/internal/config/logger"
 	"go_echo/internal/lib/jsonerror"
 	"go_echo/internal/util/helper"
 	"net/http"
@@ -12,7 +12,7 @@ import (
 
 func APIErrorHandler(err error, c echo.Context) {
 
-	log := config.GetLoggerInstance()
+	log := logger.GetLoggerInstance()
 	status := http.StatusInternalServerError
 	message := err.Error()
 	code := 0
@@ -23,7 +23,7 @@ func APIErrorHandler(err error, c echo.Context) {
 		message = he.Error()
 	}
 
-	var exception *jsonerror.ErrException
+	var exception *jsonerror.ExceptionErr
 	if errors.As(err, &exception) {
 		status = exception.Status
 		message = exception.Error()
@@ -31,5 +31,8 @@ func APIErrorHandler(err error, c echo.Context) {
 	}
 
 	log.Warn(err.Error())
-	helper.JSONAPIModel(c.Response(), jsonerror.NewErrorString(message, code, status, nil), status)
+	err = helper.JSONAPIModel(c.Response(), jsonerror.NewErrorString(message, code, status, nil), status)
+	if err != nil {
+		log.Error(err.Error())
+	}
 }

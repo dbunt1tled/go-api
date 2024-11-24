@@ -1,4 +1,4 @@
-package config
+package logger
 
 import (
 	"go_echo/internal/lib/logger/handlers/pretty"
@@ -13,21 +13,21 @@ const (
 )
 
 var (
-	instance *slog.Logger //nolint:gochecknoglobals // singleton
-	once     sync.Once    //nolint:gochecknoglobals // singleton
+	logInstance *slog.Logger //nolint:gochecknoglobals // singleton
+	once        sync.Once    //nolint:gochecknoglobals // singleton
 )
 
 func InitLogger(env string, debug bool) *slog.Logger {
 	once.Do(func() {
-		instance = setupLogger(env, debug)
+		logInstance = setupLogger(env, debug)
 	})
 	return GetLoggerInstance()
 }
 func GetLoggerInstance() *slog.Logger {
-	if instance == nil {
+	if logInstance == nil {
 		panic("Singleton is not initialized. Call InitSingleton first.")
 	}
-	return instance
+	return logInstance
 }
 
 func setupLogger(env string, debug bool) *slog.Logger {

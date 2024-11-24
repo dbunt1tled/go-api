@@ -2,8 +2,8 @@ package storage
 
 import (
 	"database/sql"
-	"go_echo/internal/config"
 	"go_echo/internal/config/env"
+	"go_echo/internal/config/logger"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -49,7 +49,7 @@ func Open() (*Mysql, error) {
 
 func Close() {
 	db := GetInstance()
-	log := config.GetLoggerInstance()
+	log := logger.GetLoggerInstance()
 	err := db.db.Close()
 	if err != nil {
 		log.Error(errors.Wrap(err, "db close error").Error())
