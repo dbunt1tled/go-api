@@ -1,4 +1,4 @@
-package mware
+package middlewares
 
 import (
 	"go_echo/internal/config/locale"

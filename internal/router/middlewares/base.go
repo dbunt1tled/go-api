@@ -1,4 +1,4 @@
-package mware
+package middlewares
 
 import (
 	"github.com/labstack/echo/v4"
@@ -6,7 +6,9 @@ import (
 
 func Base(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		c.Response().Header().Set("Content-Type", "application/json")
+		if c.Response().Header().Get("Content-Type") == "" {
+			c.Response().Header().Set("Content-Type", "application/json")
+		}
 		return next(c)
 	}
 }

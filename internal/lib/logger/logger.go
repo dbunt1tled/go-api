@@ -1,15 +1,17 @@
 package logger
 
 import (
+	"errors"
 	"fmt"
-	error2 "go_echo/internal/config/error"
+	"go_echo/internal/config/app_error"
 	"log/slog"
 )
 
 func Error(err error) []slog.Attr {
-	if err, ok := err.(error2.StackTracer); ok {
+	var er app_error.StackTracer
+	if errors.As(err, &er) {
 		stack := ""
-		for _, f := range err.StackTrace() {
+		for _, f := range er.StackTrace() {
 			stack += fmt.Sprintf("%+s:%d\n", f, f)
 		}
 		return []slog.Attr{

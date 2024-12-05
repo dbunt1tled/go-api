@@ -1,9 +1,11 @@
-package mware
+package middlewares
 
 import (
-	_ "go_echo/app/user/model/user"
+	"go_echo/app/user/service"
+	"go_echo/internal/config/app_error"
 	"go_echo/internal/lib/jsonerror"
 	"go_echo/internal/util/jwt"
+	"go_echo/internal/util/type/user_status"
 	"net/http"
 	"strings"
 
@@ -13,7 +15,7 @@ import (
 
 const BearerSchema = "Bearer"
 
-func authBearer(next echo.HandlerFunc) echo.HandlerFunc {
+func AuthBearer(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		var authToken string
 		var isEmpty bool
@@ -22,29 +24,37 @@ func authBearer(next echo.HandlerFunc) echo.HandlerFunc {
 			authToken, isEmpty = fromQueryParam(c)
 			if isEmpty {
 				return &jsonerror.ExceptionErr{
-					Inner:  errors.New("Unauthorized."),
-					Code:   40100001,
+					Inner:  errors.New("unauthorized"),
+					Code:   app_error.Err401AuthEmptyTokenError,
 					Status: http.StatusUnauthorized,
 				}
 			}
 		}
 
-		_, err := jwt.JWToken{}.Decode(authToken, true)
+		token, err := jwt.JWToken{}.Decode(authToken, true)
 		if err != nil {
 			return &jsonerror.ExceptionErr{
-				Inner:  errors.New("Unauthorized."),
-				Code:   40100002,
+				Inner:  errors.New("unauthorized"),
+				Code:   app_error.Err401TokenError,
 				Status: http.StatusUnauthorized,
 			}
 		}
-		//u, err := storage.GetUser(mysql.UserFilter{ID: int64(token["iss"].(float64))})
-		//if err != nil {
-		//	return &jsonerror.ExceptionErr{Inner: errors.New("Unauthorized."), Code: 40100003, Status: http.StatusUnauthorized}
-		//}
-		//
-		//if u.Status != user.StatusActive {
-		//	return &jsonerror.ExceptionErr{Inner: errors.New("Unauthorized."), Code: 40100004, Status: http.StatusUnauthorized}
-		//}
+		u, err := service.UserRepository{}.ByID(int64(token["iss"].(float64))) //nolint:errcheck
+		if err != nil {
+			return &jsonerror.ExceptionErr{
+				Inner:  errors.New("unauthorized"),
+				Code:   app_error.Err401UserNotFoundError,
+				Status: http.StatusUnauthorized,
+			}
+		}
+
+		if u.Status != user_status.Active.Val() {
+			return &jsonerror.ExceptionErr{
+				Inner:  errors.New("unauthorized"),
+				Code:   app_error.Err401UserNotActiveError,
+				Status: http.StatusUnauthorized,
+			}
+		}
 
 		return next(c)
 	}

@@ -55,7 +55,7 @@ func HashArgon(password string) (string, error) {
 	return encodedHash, nil
 }
 
-func CompareArgon(password string, encodedHash string) (match bool, err error) {
+func CompareArgon(password string, encodedHash string) (bool, error) {
 	p, salt, hash, err := decodeHashArgon(encodedHash)
 	if err != nil {
 		return false, err
@@ -68,7 +68,12 @@ func CompareArgon(password string, encodedHash string) (match bool, err error) {
 	return false, nil
 }
 
-func decodeHashArgon(encodedHash string) (p *Params, salt []byte, hash []byte, err error) {
+func decodeHashArgon(encodedHash string) (*Params, []byte, []byte, error) {
+	var (
+		err  error
+		salt []byte
+		hash []byte
+	)
 	vals := strings.Split(encodedHash, "$")
 	if len(vals) != 6 { //nolint:mnd // number argon parameters
 		return nil, nil, nil, ErrInvalidHash
@@ -83,7 +88,7 @@ func decodeHashArgon(encodedHash string) (p *Params, salt []byte, hash []byte, e
 		return nil, nil, nil, ErrIncompatibleVersion
 	}
 
-	p = &Params{}
+	p = &Params{} // TODO check if is normal
 	_, err = fmt.Sscanf(vals[3], "m=%d,t=%d,p=%d", &p.memory, &p.iterations, &p.parallelism)
 	if err != nil {
 		return nil, nil, nil, err
@@ -93,13 +98,13 @@ func decodeHashArgon(encodedHash string) (p *Params, salt []byte, hash []byte, e
 	if err != nil {
 		return nil, nil, nil, err
 	}
-	p.saltLength = uint32(len(salt)) //nolint:gosec
+	p.saltLength = uint32(len(salt)) //nolint:gosec // salt length is fixed
 
 	hash, err = base64.RawStdEncoding.Strict().DecodeString(vals[5])
 	if err != nil {
 		return nil, nil, nil, err
 	}
-	p.keyLength = uint32(len(hash)) //nolint:gosec
+	p.keyLength = uint32(len(hash)) //nolint:gosec // hash length is fixed
 
 	return p, salt, hash, nil
 }
@@ -112,6 +117,6 @@ func UUIDVv4() (uuid.UUID, error) {
 	return uuid.NewRandom()
 }
 
-func xxHash64(s string) string {
+func XXHash64(s string) string {
 	return strconv.FormatUint(xxhash.Sum64String(s), 10)
 }

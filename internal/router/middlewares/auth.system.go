@@ -1,6 +1,7 @@
-package mware
+package middlewares
 
 import (
+	"go_echo/internal/config/app_error"
 	"go_echo/internal/config/env"
 	"go_echo/internal/lib/jsonerror"
 	"net/http"
@@ -16,16 +17,16 @@ func SystemAuth(next echo.HandlerFunc) echo.HandlerFunc {
 		authToken, isEmpty := fromAuthSystemHeader(c)
 		if isEmpty {
 			return &jsonerror.ExceptionErr{
-				Inner:  errors.New("Unauthorized."),
-				Code:   40100005,
+				Inner:  errors.New("unauthorized"),
+				Code:   app_error.Err401SystemEmptyTokenError,
 				Status: http.StatusUnauthorized,
 			}
 		}
 		cfg := env.GetConfigInstance()
 		if authToken != cfg.JWT.SystemAPIKey {
 			return &jsonerror.ExceptionErr{
-				Inner:  errors.New("Unauthorized."),
-				Code:   40100006,
+				Inner:  errors.New("unauthorized"),
+				Code:   app_error.Err401SystemTokenError,
 				Status: http.StatusUnauthorized,
 			}
 		}

@@ -2,25 +2,20 @@ package rand
 
 import (
 	"crypto/rand"
-	"fmt"
-	"math/big"
+	"encoding/base64"
 )
 
 func Bytes(n uint) ([]byte, error) {
 	b := make([]byte, n)
 	_, err := rand.Read(b)
-	// Note that err == nil only if we read len(b) bytes.
 	if err != nil {
 		return nil, err
 	}
-
 	return b, nil
 }
 
 func HexString(bytes []byte) string {
-	key := new(big.Int).SetBytes(bytes)
-	base16str := fmt.Sprintf("%X", key)
-	return base16str
+	return base64.StdEncoding.EncodeToString(bytes)
 }
 
 func String(length uint) (string, error) {

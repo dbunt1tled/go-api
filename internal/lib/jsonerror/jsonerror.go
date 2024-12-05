@@ -3,8 +3,8 @@ package jsonerror
 import (
 	"errors"
 	"fmt"
+	"go_echo/internal/config/app_error"
 	"go_echo/internal/config/env"
-	error2 "go_echo/internal/config/error"
 	"go_echo/internal/util/helper"
 	"net/http"
 	"runtime"
@@ -30,7 +30,7 @@ type ErrorData struct {
 
 func NewError(err error, code int, status int) *APIError {
 	var stack *string
-	var e error2.StackTracer
+	var e app_error.StackTracer
 	stack = nil
 	if errors.As(err, &e) {
 		st := ""

@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"go_echo/app/user/model/user"
 	"go_echo/internal/util/builder"
+	"go_echo/internal/util/type/user_status"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/pkg/errors"
@@ -16,7 +18,7 @@ const (
 type UserRepository struct {
 }
 
-func (r UserRepository) ByID(id int) (*user.User, error) {
+func (r UserRepository) ByID(id int64) (*user.User, error) {
 	smt, err := builder.GetDB().Prepare("SELECT * FROM users WHERE id = ? LIMIT 1")
 	if err != nil {
 		return nil, errors.Wrap(err, "byId user prepare error")
@@ -95,6 +97,73 @@ func (r UserRepository) List(filter []builder.FilterCondition, sorts []builder.S
 	return &users, nil
 }
 
+func (r UserRepository) ByIdentity(login string, password string) (*user.User, error) {
+	smt, err := builder.GetDB().Prepare(
+		"SELECT * FROM users WHERE (phone_number = ? OR email = ?) AND status = 1 LIMIT 1;",
+	)
+	if err != nil {
+		return nil, errors.Wrap(err, "byIdentity user prepare error")
+	}
+	res, err := smt.Query(login, login)
+	if err != nil {
+		return nil, errors.Wrap(err, "byIdentity user error")
+	}
+	defer res.Close()
+	if res.Next() {
+		return castUser(res)
+	}
+	return nil, errors.New("user not found")
+}
+
+func (r UserRepository) Create(
+	firstName string,
+	secondName string,
+	email string,
+	phoneNumber string,
+	password string,
+	status user_status.Status,
+	hash string,
+	roles []string,
+	confirmedAt sql.NullTime,
+) (*user.User, error) {
+
+	smt, err := builder.GetDB().Prepare(`
+		INSERT INTO users 
+			(first_name, second_name, email, phone_number, password, status, hash, roles, confirmed_at, updated_at, created_at) 
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+	`)
+	if err != nil {
+		return nil, errors.Wrap(err, "create user prepare error")
+	}
+	res, err := smt.Exec(
+		firstName,
+		secondName,
+		email,
+		phoneNumber,
+		password,
+		status,
+		hash,
+		roles,
+		confirmedAt,
+		time.Now(),
+		time.Now(),
+	)
+	if err != nil {
+		return nil, errors.Wrap(err, "create user error")
+	}
+
+	id, err := res.LastInsertId()
+	if err != nil {
+		return nil, errors.Wrap(err, "last insert id error")
+	}
+	u, err := r.ByID(id)
+	if err != nil {
+		return nil, errors.Wrap(err, "user not found")
+	}
+
+	return u, nil
+}
+
 func castUser(res *sql.Rows) (*user.User, error) {
 	u := user.User{}
 	err := res.Scan(
@@ -105,6 +174,8 @@ func castUser(res *sql.Rows) (*user.User, error) {
 		&u.PhoneNumber,
 		&u.Password,
 		&u.Status,
+		&u.Hash,
+		&u.Roles,
 		&u.ConfirmedAt,
 		&u.UpdatedAt,
 		&u.CreatedAt,

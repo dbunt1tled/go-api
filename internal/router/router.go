@@ -1,13 +1,11 @@
 package router
 
 import (
-	"fmt"
 	"go_echo/app/auth/authhandle"
 	"go_echo/internal/config/env"
 	apiServer "go_echo/internal/router/handler/server"
-	"go_echo/internal/router/mware"
+	"go_echo/internal/router/middlewares"
 	"go_echo/internal/util/hash"
-	"go_echo/internal/util/rand"
 	"net/http"
 	"strconv"
 	"strings"
@@ -21,13 +19,15 @@ func SetupRoutes(server *echo.Echo) {
 	cfg := env.GetConfigInstance()
 	setGeneralMiddlewares(server, cfg)
 	systemRouter := server.Group("/system")
-	systemRouter.Use(mware.SystemAuth)
+	systemRouter.Use(middlewares.SystemAuth)
 	systemRouter.GET("/helm", apiServer.Helm)
+	generalRoutes(server)
 	authRoutes(server)
-	// group.GET("", h.HandlerShowUsers)
-	// group.GET("/details/:id", h.HandlerShowUserById)
-
-	server.GET("/", func(c echo.Context) error {
+}
+func generalRoutes(server *echo.Echo) {
+	generalRouter := server.Group("/")
+	// generalRouter.Use(middlewares.AuthBearer)
+	generalRouter.GET("", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
 }
@@ -35,14 +35,14 @@ func SetupRoutes(server *echo.Echo) {
 func authRoutes(server *echo.Echo) {
 	authRouter := server.Group("/auth")
 	authRouter.POST("/login", authhandle.Login)
+	authRouter.POST("/register", authhandle.Register)
 }
 
 func setGeneralMiddlewares(server *echo.Echo, cfg *env.Config) {
 	server.Use(middleware.Recover())
-	server.Use(middleware.Logger())
 	server.Use(middleware.Gzip())
-	server.Use(mware.Base)
-	server.Use(mware.Language())
+	server.Use(middlewares.Base)
+	server.Use(middlewares.Language())
 	server.Use(middleware.RequestIDWithConfig(middleware.RequestIDConfig{
 		Generator: func() string {
 			var u string
@@ -52,13 +52,13 @@ func setGeneralMiddlewares(server *echo.Echo, cfg *env.Config) {
 			} else {
 				u = ub.String()
 			}
-			r, e := rand.String(4) //nolint:mnd //small random part
-			if e != nil {
-				r = strconv.FormatInt(time.Now().Unix(), 10)
-			}
-			return fmt.Sprintf("%s:%s", u, r)
+
+			return u
 		},
 	}))
+	if cfg.Debug {
+		server.Use(middleware.Logger())
+	}
 	server.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins:     strings.Split(cfg.CORS.AccessControlAllowOrigin, ","),
 		AllowMethods:     strings.Split(cfg.CORS.AccessControlAllowMethods, ","),
