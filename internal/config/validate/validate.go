@@ -17,7 +17,8 @@ func GetValidateInstance() *validator.Validate {
 
 func InitValidateInstance() *validator.Validate {
 	v := validator.New()
-	v.RegisterValidation("regex", rule.Regex)     //nolint:errcheck // ignore error
-	v.RegisterValidation("passwd", rule.Password) //nolint:errcheck // ignore error
+	_ = v.RegisterValidation("regex", rule.Regex)        //nolint:errcheck // ignore error
+	_ = v.RegisterValidation("passwd", rule.Password)    //nolint:errcheck // ignore error
+	_ = v.RegisterValidation("unique_db", rule.UniqueDB) //nolint:errcheck // ignore error
 	return v
 }

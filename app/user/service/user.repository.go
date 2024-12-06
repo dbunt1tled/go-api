@@ -7,7 +7,6 @@ import (
 	"go_echo/internal/util/type/user_status"
 	"time"
 
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/pkg/errors"
 )
 
@@ -23,6 +22,7 @@ func (r UserRepository) ByID(id int64) (*user.User, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "byId user prepare error")
 	}
+	defer smt.Close()
 	res, err := smt.Query(id)
 	if err != nil {
 		return nil, errors.Wrap(err, "byId user error")
@@ -52,6 +52,7 @@ func (r UserRepository) One(filter []builder.FilterCondition, sorts []builder.So
 	if err != nil {
 		return nil, errors.Wrap(err, "get user prepare error")
 	}
+	defer smt.Close()
 	res, err := smt.Query(args...)
 	if err != nil {
 		return nil, errors.Wrap(err, "get user error")
@@ -82,6 +83,7 @@ func (r UserRepository) List(filter []builder.FilterCondition, sorts []builder.S
 	if err != nil {
 		return nil, errors.Wrap(err, "list user prepare error")
 	}
+	defer smt.Close()
 	res, err = smt.Query(args...)
 	if err != nil {
 		return nil, errors.Wrap(err, "list user error")
@@ -104,6 +106,7 @@ func (r UserRepository) ByIdentity(login string, password string) (*user.User, e
 	if err != nil {
 		return nil, errors.Wrap(err, "byIdentity user prepare error")
 	}
+	defer smt.Close()
 	res, err := smt.Query(login, login)
 	if err != nil {
 		return nil, errors.Wrap(err, "byIdentity user error")
@@ -135,6 +138,7 @@ func (r UserRepository) Create(
 	if err != nil {
 		return nil, errors.Wrap(err, "create user prepare error")
 	}
+	defer smt.Close()
 	res, err := smt.Exec(
 		firstName,
 		secondName,

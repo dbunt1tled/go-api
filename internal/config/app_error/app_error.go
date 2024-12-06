@@ -17,6 +17,8 @@ const (
 	Err422SignupUserNotFoundError = 42200009
 	Err422SignupAuthTokensError   = 42200010
 
+	Err422HomeGeneralError = 42200011
+
 	Err401AuthEmptyTokenError   = 40100001
 	Err401TokenError            = 40100002
 	Err401UserNotFoundError     = 40100003

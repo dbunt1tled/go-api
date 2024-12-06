@@ -1,4 +1,4 @@
-package authhandle
+package auth_handler
 
 import (
 	"go_echo/app/auth/model/token"

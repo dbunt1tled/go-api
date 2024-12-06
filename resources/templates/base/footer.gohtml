@@ -1,0 +1,31 @@
+{{define "footer"}}
+    <tr>
+        <td colspan="2" style="padding:0 30px;">
+            <p style="margin:15px 0">
+            </p>
+            <div>Thank You,</div>
+            <div style="color:grey;font-style:italic">{{.AppName}} Team</div>
+            <p></p>
+        </td>
+    </tr>
+
+    <tr style="background:#0B4252; color:#fff">
+        <td style="text-align: left; padding:20px 30px 20px 30px;">
+            <p>App Year</p>
+        </td>
+        <td style="width:70%;text-align: left; padding:20px 30px 20px 30px;">
+            <p style="font-size:12px;margin:0">
+                <span style="opacity:0.5">This message was sent by</span>
+
+                <a style="color:#fff" href="{{.AppLink}}" target="_blank">
+                    {{.AppName}}
+                </a>
+            </p>
+        </td>
+    </tr>
+    </tbody>
+    </table>
+    </body>
+    </html>
+
+{{end}}

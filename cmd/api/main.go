@@ -4,6 +4,7 @@ import (
 	"go_echo/internal/config/env"
 	"go_echo/internal/config/locale"
 	"go_echo/internal/config/logger"
+	"go_echo/internal/config/mailer"
 	"go_echo/internal/config/validate"
 	"go_echo/internal/lib/graceful"
 	"go_echo/internal/lib/handler"
@@ -14,6 +15,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/pkg/errors"
+	"golang.org/x/text/language"
 )
 
 func main() {
@@ -25,12 +27,31 @@ func main() {
 	profiler.SetProfiler()
 	storage.GetInstance()
 	defer storage.Close()
+	mailer.GetMailInstance()
+	defer mailer.Close()
 	httpServer := echo.New()
 	httpServer.HideBanner = true
 	httpServer.Debug = cfg.Debug
 	httpServer.HTTPErrorHandler = handler.APIErrorHandler
 	router.SetupRoutes(httpServer)
 	done := graceful.ShutdownGraceful(log, httpServer)
+
+	println(language.English.String())
+
+	// m := mail.NewMsg()
+	// if err := m.From(cfg.Mail.AddressFrom); err != nil {
+	//
+	// }
+	// if err := m.To("d.balagov.bekey@gmail.com"); err != nil {
+	//
+	// }
+	// m.Subject("Why are you not using go-mail yet?")
+	// m.SetBodyString(mail.TypeTextPlain, "You won't need a sales pitch. It's FOSS.")
+	//
+	// // Your message-specific code here
+	// if err := client.DialAndSend(m); err != nil {
+	// 	panic("failed to send mail: " + err.Error())
+	// }
 
 	// u, err := service.UserRepository{}.List([]builder.FilterCondition{
 	// 	{Field: "id", Type: builder.In, Value: []interface{}{1, 2}},

@@ -2,7 +2,6 @@ package locale
 
 import (
 	"fmt"
-	"sync"
 
 	"github.com/BurntSushi/toml"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
@@ -12,7 +11,6 @@ import (
 var (
 	localeBundleInstance *i18n.Bundle    //nolint:gochecknoglobals // singleton
 	localizerInstance    *i18n.Localizer //nolint:gochecknoglobals // singleton
-	once                 sync.Once       //nolint:gochecknoglobals // singleton
 )
 
 func GetLocaleBundleInstance() *i18n.Bundle {

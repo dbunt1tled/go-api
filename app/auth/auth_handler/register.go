@@ -1,4 +1,4 @@
-package authhandle
+package auth_handler
 
 import (
 	"database/sql"
@@ -19,11 +19,11 @@ import (
 )
 
 type RegisterRequest struct {
-	FirstName       string `json:"FirstName" validate:"required"`
+	FirstName       string `json:"firstName" validate:"required"`
 	SecondName      string `json:"secondName" validate:"required"`
-	Email           string `json:"email" validate:"required, email"`
-	PhoneNumber     string `json:"phoneNumber" validate:"required, phone"`
-	Password        string `json:"password" validate:"required, passwd, eqfield=PasswordConfirm"`
+	Email           string `json:"email" validate:"required,email,unique_db=users#email"`
+	PhoneNumber     string `json:"phoneNumber" validate:"required,unique_db=users#phone_number"`
+	Password        string `json:"password" validate:"required,passwd,eqfield=PasswordConfirm"`
 	PasswordConfirm string `json:"passwordConfirm" validate:"required"`
 }
 

@@ -1,7 +1,8 @@
 package router
 
 import (
-	"go_echo/app/auth/authhandle"
+	"go_echo/app/auth/auth_handler"
+	"go_echo/app/general/general_handler"
 	"go_echo/internal/config/env"
 	apiServer "go_echo/internal/router/handler/server"
 	"go_echo/internal/router/middlewares"
@@ -21,6 +22,7 @@ func SetupRoutes(server *echo.Echo) {
 	systemRouter := server.Group("/system")
 	systemRouter.Use(middlewares.SystemAuth)
 	systemRouter.GET("/helm", apiServer.Helm)
+	server.Static("/static", "assets")
 	generalRoutes(server)
 	authRoutes(server)
 }
@@ -30,12 +32,13 @@ func generalRoutes(server *echo.Echo) {
 	generalRouter.GET("", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
+	generalRouter.GET("home", general_handler.Home)
 }
 
 func authRoutes(server *echo.Echo) {
 	authRouter := server.Group("/auth")
-	authRouter.POST("/login", authhandle.Login)
-	authRouter.POST("/register", authhandle.Register)
+	authRouter.POST("/login", auth_handler.Login)
+	authRouter.POST("/register", auth_handler.Register)
 }
 
 func setGeneralMiddlewares(server *echo.Echo, cfg *env.Config) {

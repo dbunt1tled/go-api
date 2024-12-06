@@ -10,6 +10,7 @@ import (
 
 type Config struct {
 	AppName     string `env:"APP_NAME" env-required:"true"`
+	AppURL      string `env:"APP_URL" env-default:"http://localhost"`
 	Env         string `env:"ENV" env-default:"dev"`
 	Debug       bool   `env:"DEBUG" env-default:"false"`
 	Profiling   bool   `env:"PROFILING" env-default:"false"`
@@ -17,7 +18,17 @@ type Config struct {
 	HTTPServer  HTTPServer
 	CORS        CORS
 	JWT         JWT
+	Mail        Mail
 }
+
+type Mail struct {
+	Host        string `env:"MAIL_HOST" env-required:"true"`
+	Port        int    `env:"MAIL_PORT" env-required:"true"`
+	Username    string `env:"MAIL_USERNAME" env-required:"true"`
+	Password    string `env:"MAIL_PASSWORD" env-required:"true"`
+	AddressFrom string `env:"MAIL_FROM_ADDRESS" env-required:"true"`
+}
+
 type HTTPServer struct {
 	Address     string        `env:"HTTP_SERVER_ADDRESS" env-default:"localhost:8080" env-required:"true"`
 	Timeout     time.Duration `env:"HTTP_SERVER_TIMEOUT" env-required:"true"`
