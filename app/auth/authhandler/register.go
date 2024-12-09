@@ -1,14 +1,13 @@
-package auth_handler
+package authhandler
 
 import (
-	"database/sql"
-	"go_echo/app/auth/model/token"
 	"go_echo/app/auth/service/auth"
 	"go_echo/app/user/model/user"
 	"go_echo/app/user/service"
 	"go_echo/internal/config/app_error"
 	"go_echo/internal/config/validate"
 	"go_echo/internal/lib/jsonerror"
+	"go_echo/internal/lib/mailservice"
 	"go_echo/internal/util/helper"
 	"go_echo/internal/util/type/user_status"
 	"net/http"
@@ -29,12 +28,11 @@ type RegisterRequest struct {
 
 func Register(c echo.Context) error {
 	var (
-		err    error
-		u      *user.User
-		req    RegisterRequest
-		tokens *token.Tokens
+		err  error
+		u    *user.User
+		req  RegisterRequest
+		code string
 	)
-
 	if err = c.Bind(&req); err != nil {
 		return jsonerror.ErrorUnprocessableEntity(
 			c,
@@ -54,26 +52,25 @@ func Register(c echo.Context) error {
 		}
 		return jsonerror.ErrorUnprocessableEntity(c, err, app_error.Err422SignupValidateError)
 	}
-
-	u, err = service.UserRepository{}.Create(
-		req.FirstName,
-		req.SecondName,
-		req.Email,
-		req.PhoneNumber,
-		req.Password,
-		user_status.Pending,
-		"",
-		[]string{},
-		sql.NullTime{},
-	)
+	status := user_status.Pending
+	u, err = service.UserRepository{}.Create(service.CreateUserParams{
+		FirstName:   &req.FirstName,
+		SecondName:  &req.SecondName,
+		Email:       &req.Email,
+		PhoneNumber: &req.PhoneNumber,
+		Password:    &req.Password,
+		Status:      &status,
+		Hash:        nil,
+		Roles:       nil,
+		ConfirmedAt: nil,
+	})
 	if err != nil {
 		return jsonerror.ErrorUnprocessableEntity(c, err, app_error.Err422SignupUserNotFoundError)
 	}
-
-	tokens, err = auth.GetAuthTokens(*u)
+	code, err = auth.GenerateConfirmToken(*u)
 	if err != nil {
 		return jsonerror.ErrorUnprocessableEntity(c, err, app_error.Err422SignupAuthTokensError)
 	}
-
-	return helper.JSONAPIModel(c.Response(), tokens, http.StatusOK)
+	mailservice.SendUserConfirmEmail(u, code)
+	return helper.JSONAPIModel(c.Response(), u, http.StatusOK)
 }

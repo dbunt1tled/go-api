@@ -11,9 +11,13 @@ type Roles []string
 
 func (c Roles) Value() (driver.Value, error) {
 	if len(c) == 0 {
-		return "[]", nil
+		return nil, nil
 	}
-	return json.Marshal(c) // return json marshalled value
+	j, err := json.Marshal(c)
+	if err != nil {
+		return nil, err
+	}
+	return driver.Value([]byte(j)), nil
 }
 
 // func (c *Roles) Scan(src interface{}) (err error) {
@@ -36,11 +40,19 @@ func (c Roles) Value() (driver.Value, error) {
 // }
 
 func (c *Roles) Scan(v interface{}) error {
+	var (
+		_rl Roles
+		err error
+	)
 	switch tv := v.(type) {
 	case []byte:
-		return json.Unmarshal(tv, &c) // unmarshal
+		err = json.Unmarshal(tv, &_rl)
 		// case []uint8:
-		// 	return json.Unmarshal([]byte(tv), &c) // can't remember the specifics, but this may be needed
+		// 	err = json.Unmarshal([]byte(tv), &_rl)
 	}
-	return errors.New("unsupported type")
+	if err != nil {
+		errors.Wrap(err, "Error roles")
+	}
+	*c = _rl
+	return nil
 }

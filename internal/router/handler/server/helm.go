@@ -3,10 +3,8 @@ package server
 import (
 	"go_echo/internal/util/helper"
 	"net/http"
-	_ "net/http"
 
 	"github.com/labstack/echo/v4"
-	_ "github.com/pkg/errors"
 )
 
 type HelmResponse struct {

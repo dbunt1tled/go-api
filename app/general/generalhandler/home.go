@@ -1,9 +1,10 @@
-package general_handler
+package generalhandler
 
 import (
 	"bytes"
 	"go_echo/internal/config/app_error"
 	"go_echo/internal/lib/jsonerror"
+	"go_echo/internal/lib/mailservice"
 	"go_echo/internal/util/helper"
 	"net/http"
 
@@ -14,7 +15,7 @@ import (
 func Home(c echo.Context) error {
 	var doc bytes.Buffer
 	t := helper.GetTemplate("auth/register.gohtml")
-	err := t.Execute(&doc, helper.MakeMailTemplateData(map[string]any{}))
+	err := t.Execute(&doc, mailservice.MakeMailTemplateData(map[string]any{}))
 	if err != nil {
 		return jsonerror.ErrorUnprocessableEntity(
 			c,

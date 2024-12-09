@@ -19,6 +19,13 @@ type Config struct {
 	CORS        CORS
 	JWT         JWT
 	Mail        Mail
+	Static      Static
+}
+
+type Static struct {
+	Enable    bool   `env:"HTTP_STATIC" env-default:"false"`
+	Directory string `env:"HTTP_STATIC_DIR" env-default:"HTTP_STATIC_DIR"`
+	URL       string `env:"HTTP_STATIC_URL" env-default:"HTTP_STATIC_URL"`
 }
 
 type Mail struct {
@@ -48,6 +55,7 @@ type JWT struct {
 	Algorithm       string        `env:"JWT_TOKEN_ALGORITHM" env-default:"HS256"`
 	AccessLifeTime  time.Duration `env:"TOKEN_ACCESS_LIFE_TIME_SECONDS" env-default:"3600s"`
 	RefreshLifeTime time.Duration `env:"TOKEN_REFRESH_LIFE_TIME_SECONDS" env-default:"7200s"`
+	ConfirmLifeTime time.Duration `env:"TOKEN_CONFIRM_LIFE_TIME_SECONDS" env-default:"7200s"`
 	SystemAPIKey    string        `env:"SYSTEM_API_KEY" env-required:"true"`
 }
 

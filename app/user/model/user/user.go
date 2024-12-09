@@ -8,12 +8,12 @@ import (
 )
 
 type User struct {
-	ID          int64               `json:"id" jsonapi:"primary,url"`
+	ID          int64               `json:"id" jsonapi:"primary,user"`
 	FirstName   string              `json:"firstName" jsonapi:"attr,firstName"`
 	SecondName  string              `json:"secondName" jsonapi:"attr,secondName"`
 	Email       string              `json:"email" jsonapi:"attr,email"`
 	PhoneNumber string              `json:"phoneNumber" jsonapi:"attr,phoneNumber"`
-	Password    string              `json:"password" jsonapi:"attr,password"`
+	Password    string              `json:"password"`
 	Status      int                 `json:"status" jsonapi:"attr,status"`
 	Hash        sql.NullString      `json:"hash" jsonapi:"attr,hash"`
 	Roles       roles.Roles         `json:"roles" jsonapi:"attr,roles"`

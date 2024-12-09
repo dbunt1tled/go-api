@@ -2,7 +2,6 @@ package helper
 
 import (
 	"encoding/json"
-	"go_echo/internal/config/env"
 	"go_echo/internal/config/locale"
 	"html/template"
 	"reflect"
@@ -13,7 +12,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	dynamicstruct "github.com/ompluscator/dynamic-struct"
-	"golang.org/x/text/language"
 )
 
 func isVarType(value interface{}, targetType reflect.Type) bool {
@@ -91,6 +89,13 @@ func Must[T any](t T, err error) T {
 	}
 	return t
 }
+
+func MustErr(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
+
 func MakeStruct(data map[string]any) interface{} {
 	sc := dynamicstruct.NewStruct()
 	for k, v := range data {
@@ -107,16 +112,4 @@ func MakeStruct(data map[string]any) interface{} {
 		panic(err)
 	}
 	return structType
-}
-
-func MakeMailTemplateData(data map[string]any) interface{} {
-	_, ok := data["Locale"]
-	if !ok {
-		data["Locale"] = language.English.String()
-	}
-	cfg := env.GetConfigInstance()
-	data["AppStaticLink"] = cfg.AppURL + "/static/images/"
-	data["AppLink"] = cfg.AppURL
-	data["AppName"] = cfg.AppName
-	return MakeStruct(data)
 }

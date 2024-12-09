@@ -11,6 +11,7 @@ import (
 const (
 	AccessTokenSubject  = "access_token"
 	RefreshTokenSubject = "refresh_token"
+	ConfirmTokenSubject = "confirm_token"
 )
 
 func GetAuthTokens(user user.User) (*token.Tokens, error) {
@@ -51,6 +52,22 @@ func generateRefreshToken(user user.User) (string, error) {
 		"sub": RefreshTokenSubject,
 		"iat": time.Now().Unix(),
 		"exp": time.Now().Add(cfg.JWT.RefreshLifeTime).Unix(),
+	}
+	token, err := jwt.JWToken{}.Encode(data)
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
+}
+
+func GenerateConfirmToken(user user.User) (string, error) {
+	cfg := env.GetConfigInstance()
+	data := map[string]interface{}{
+		"iss": user.ID,
+		"sub": ConfirmTokenSubject,
+		"iat": time.Now().Unix(),
+		"exp": time.Now().Add(cfg.JWT.ConfirmLifeTime).Unix(),
 	}
 	token, err := jwt.JWToken{}.Encode(data)
 	if err != nil {

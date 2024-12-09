@@ -1,12 +1,12 @@
 package router
 
 import (
-	"go_echo/app/auth/auth_handler"
-	"go_echo/app/general/general_handler"
+	"go_echo/app/auth/authhandler"
+	"go_echo/app/general/generalhandler"
 	"go_echo/internal/config/env"
 	apiServer "go_echo/internal/router/handler/server"
 	"go_echo/internal/router/middlewares"
-	"go_echo/internal/util/hash"
+	"go_echo/internal/util/hasher"
 	"net/http"
 	"strconv"
 	"strings"
@@ -22,7 +22,9 @@ func SetupRoutes(server *echo.Echo) {
 	systemRouter := server.Group("/system")
 	systemRouter.Use(middlewares.SystemAuth)
 	systemRouter.GET("/helm", apiServer.Helm)
-	server.Static("/static", "assets")
+	if cfg.Static.Enable {
+		server.Static("/"+cfg.Static.URL, cfg.Static.Directory)
+	}
 	generalRoutes(server)
 	authRoutes(server)
 }
@@ -32,13 +34,14 @@ func generalRoutes(server *echo.Echo) {
 	generalRouter.GET("", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
-	generalRouter.GET("home", general_handler.Home)
+	generalRouter.GET("home", generalhandler.Home)
 }
 
 func authRoutes(server *echo.Echo) {
 	authRouter := server.Group("/auth")
-	authRouter.POST("/login", auth_handler.Login)
-	authRouter.POST("/register", auth_handler.Register)
+	authRouter.POST("/login", authhandler.Login)
+	authRouter.POST("/register", authhandler.Register)
+	authRouter.GET("/confirm", authhandler.Confirm)
 }
 
 func setGeneralMiddlewares(server *echo.Echo, cfg *env.Config) {
@@ -49,7 +52,7 @@ func setGeneralMiddlewares(server *echo.Echo, cfg *env.Config) {
 	server.Use(middleware.RequestIDWithConfig(middleware.RequestIDConfig{
 		Generator: func() string {
 			var u string
-			ub, e := hash.UUIDVv7()
+			ub, e := hasher.UUIDVv7()
 			if e != nil {
 				u = strconv.FormatInt(time.Now().UnixMicro(), 10)
 			} else {

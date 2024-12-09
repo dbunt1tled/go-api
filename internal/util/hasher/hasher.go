@@ -1,4 +1,4 @@
-package hash
+package hasher
 
 import (
 	"crypto/subtle"
