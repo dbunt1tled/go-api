@@ -20,6 +20,15 @@ type Config struct {
 	JWT         JWT
 	Mail        Mail
 	Static      Static
+	RabbitMQ    RabbitMQ
+}
+
+type RabbitMQ struct {
+	Host     string `env:"RABBITMQ_HOST" env-required:"true"`
+	Port     int    `env:"RABBITMQ_PORT" env-required:"true"`
+	User     string `env:"RABBITMQ_USER" env-required:"true"`
+	Password string `env:"RABBITMQ_PASSWORD" env-required:"true"`
+	Vhost    string `env:"RABBITMQ_VHOST" env-required:"true"`
 }
 
 type Static struct {

@@ -9,6 +9,7 @@ import (
 	"go_echo/internal/config/validate"
 	"go_echo/internal/lib/handler"
 	"go_echo/internal/lib/profiler"
+	"go_echo/internal/rmq"
 	"go_echo/internal/router"
 	"go_echo/internal/storage"
 	"net/http"
@@ -31,6 +32,9 @@ func main() {
 	defer storage.Close()
 	mailer.GetMailInstance()
 	defer mailer.Close()
+	// (import|study_anal|sub_system)
+	var rc rmq.RabbitClient
+	rc.Publish("test-queue", "{\"Page\":1,\"Fruits\":[\"apple\",\"peach\",\"pear\"]}")
 	httpServer := echo.New()
 	httpServer.HideBanner = true
 	httpServer.Debug = cfg.Debug
