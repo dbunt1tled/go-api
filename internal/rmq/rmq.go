@@ -18,7 +18,7 @@ type RabbitClient struct {
 	recCh   *amqp091.Channel
 }
 
-func (rcl *RabbitClient) Publish(queueName string, body string) {
+func (rcl *RabbitClient) Publish(exchangeName string, queueName string, body string) {
 	log := logger.GetLoggerInstance()
 	r := false
 	for {
@@ -28,28 +28,16 @@ func (rcl *RabbitClient) Publish(queueName string, body string) {
 				break
 			}
 		}
-		q, err := rcl.sendCh.QueueDeclare(
+
+		err := rcl.sendCh.Publish(
+			exchangeName,
 			queueName,
-			true,
-			false,
-			false,
-			false,
-			amqp091.Table{"x-queue-mode": "lazy"},
-		)
-		if err != nil {
-			log.Error(fmt.Sprintf("Failed to declare queue %s: %s. Trying resend...", queueName, err.Error()))
-			r = true
-			continue
-		}
-		err = rcl.sendCh.Publish(
-			"",
-			q.Name,
-			false,
-			false,
+			false, // mandatory - we don't care if there is no queue
+			false, // immediate - we don't care if there is no consumer on the queue
 			amqp091.Publishing{
 				MessageId:    helper.Must(hasher.UUIDVv7()).String(),
-				DeliveryMode: amqp091.Persistent,
-				ContentType:  "text/plain",
+				DeliveryMode: amqp091.Persistent, // save on disk and restore on restart
+				ContentType:  "application/json",
 				Body:         []byte(body),
 			})
 		if err != nil {
@@ -61,7 +49,12 @@ func (rcl *RabbitClient) Publish(queueName string, body string) {
 	}
 }
 
-func (rcl *RabbitClient) Consume(queueName string, f func(string) error) {
+func (rcl *RabbitClient) Consume(
+	exchangeName string,
+	queueName string,
+	f func(d amqp091.Delivery) error,
+	concurrency int,
+) {
 	log := logger.GetLoggerInstance()
 	for {
 		for {
@@ -73,10 +66,10 @@ func (rcl *RabbitClient) Consume(queueName string, f func(string) error) {
 		log.Info(fmt.Sprintf("Consumer %s connected to RabbitMQ", queueName))
 		q, err := rcl.recCh.QueueDeclare(
 			queueName,
-			true,
-			false,
-			false,
-			false,
+			true,  // durable -queue stored after server restart
+			false, // delete when unused
+			false, // exclusive - only one consumer and deleted when queue is empty
+			false, // no-wait - don't wait for queue to be declared if true - fast but you don't know if it has error
 			amqp091.Table{"x-queue-mode": "lazy"},
 		)
 		if err != nil {
@@ -84,6 +77,41 @@ func (rcl *RabbitClient) Consume(queueName string, f func(string) error) {
 			time.Sleep(time.Second * 1)
 			continue
 		}
+
+		err = rcl.recCh.ExchangeDeclare(
+			exchangeName,
+			"direct", // тип обменника
+			true,     // durable
+			false,    // autoDelete
+			false,    // internal
+			false,    // noWait
+			nil,      // args
+		)
+		if err != nil {
+			log.Error(fmt.Sprintf("Failed to declare exchange %s: %s. Trying reconnect...", queueName, err.Error()))
+			time.Sleep(time.Second * 1)
+			continue
+		}
+
+		err = rcl.recCh.QueueBind(
+			queueName,
+			queueName, // routing key - key in method Publish
+			exchangeName,
+			false,
+			nil,
+		)
+		if err != nil {
+			log.Error(fmt.Sprintf("Failed to bind queue to exchange %s: %s. Trying reconnect...", queueName, err.Error()))
+			time.Sleep(time.Second * 1)
+			continue
+		}
+		err = rcl.recCh.Qos(concurrency, 0, false)
+		if err != nil {
+			log.Error(fmt.Sprintf("Failed to set QoS for queue %s: %s. Trying reconnect...", queueName, err.Error()))
+			time.Sleep(time.Second * 1)
+			continue
+		}
+
 		conClose := rcl.recCon.NotifyClose(make(chan *amqp091.Error))
 		conBlocked := rcl.recCon.NotifyBlocked(make(chan amqp091.Blocking))
 		chClose := rcl.recCh.NotifyClose(make(chan *amqp091.Error))
@@ -108,36 +136,45 @@ func (rcl *RabbitClient) Consume(queueName string, f func(string) error) {
 			}
 			select {
 			case <-conClose:
-				log.Error(fmt.Sprintf("Consumer %s (queue %s) connection closed", queueName, q.Name))
+				log.Error(fmt.Sprintf("Consumer %s (queue %s) connection closed", exchangeName, q.Name))
 				shouldStop = true
 				break
 			case <-conBlocked:
-				log.Error(fmt.Sprintf("Consumer %s (queue %s) connection blocked", queueName, q.Name))
+				log.Error(fmt.Sprintf("Consumer %s (queue %s) connection blocked", exchangeName, q.Name))
 				shouldStop = true
 				break
 			case <-chClose:
-				log.Error(fmt.Sprintf("Consumer %s (queue %s) channel closed", queueName, q.Name))
+				log.Error(fmt.Sprintf("Consumer %s (queue %s) channel closed", exchangeName, q.Name))
 				shouldStop = true
 				break
 			case d := <-msgs:
-				log.Info(fmt.Sprintf("Consumer %s (queue %s) received message: %s", queueName, q.Name, d.Body))
-				err = f(string(d.Body))
-				if err != nil {
-					log.Error(fmt.Sprintf(
-						"Consumer %s (queue %s) failed to process message(%s): %s",
-						queueName,
-						q.Name,
-						d.Body,
-						err.Error(),
-					))
-					_ = d.Ack(false)
-					break
-				}
-				_ = d.Ack(true)
+				go func() {
+					worker(d, f, exchangeName, q.Name)
+				}()
 			}
 		}
 	}
 }
+
+func worker(msg amqp091.Delivery, f func(d amqp091.Delivery) error, exchangeName string, queueName string) {
+	var err error
+	log := logger.GetLoggerInstance()
+	log.Info(fmt.Sprintf("Consumer %s (queue %s) processing message (%s): %s", exchangeName, queueName, msg.MessageId, msg.Body))
+	if err = f(msg); err == nil {
+		err = msg.Ack(false)
+		if err != nil {
+			log.Info(fmt.Sprintf("Consumer %s (queue %s) Error Ack: %s", exchangeName, queueName, err.Error()))
+		}
+	} else {
+		m := err.Error()
+		err = msg.Nack(false, true)
+		if err != nil {
+			log.Info(fmt.Sprintf("Consumer %s (queue %s) Error Nack %s after handler error: %s", exchangeName, queueName, err.Error(), m))
+		}
+		log.Info(fmt.Sprintf("Consumer %s (queue %s) Error Handler: %s", exchangeName, queueName, m))
+	}
+}
+
 func (rcl *RabbitClient) connect(isRec bool, reconect bool) (*amqp091.Connection, error) {
 	if reconect {
 		if isRec {

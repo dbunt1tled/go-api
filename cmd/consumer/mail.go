@@ -9,6 +9,9 @@ import (
 	"go_echo/internal/lib/profiler"
 	"go_echo/internal/rmq"
 	"go_echo/internal/storage"
+	"time"
+
+	"github.com/rabbitmq/amqp091-go"
 )
 
 func main() {
@@ -21,10 +24,11 @@ func main() {
 	defer storage.Close()
 
 	var rc rmq.RabbitClient
-	f := func(msg string) error {
-		fmt.Println(msg)
+	f := func(d amqp091.Delivery) error {
+		time.Sleep(time.Second * 20)
+		fmt.Println(d.Body)
 		return nil
 	}
-	rc.Consume("test-queue", f)
+	rc.Consume("bb", "aaaa", f, 6)
 	rc.Close()
 }

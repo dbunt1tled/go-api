@@ -34,7 +34,7 @@ func main() {
 	defer mailer.Close()
 	// (import|study_anal|sub_system)
 	var rc rmq.RabbitClient
-	rc.Publish("test-queue", "{\"Page\":1,\"Fruits\":[\"apple\",\"peach\",\"pear\"]}")
+	rc.Publish("bb", "aaaa", "{\"Page\":1,\"Fruits\":[\"apple\",\"peach\",\"pear\"]}")
 	httpServer := echo.New()
 	httpServer.HideBanner = true
 	httpServer.Debug = cfg.Debug
