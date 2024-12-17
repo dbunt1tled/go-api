@@ -1,5 +1,7 @@
 -- +goose Up
 -- +goose StatementBegin
+SELECT 'up SQL query';
+-- +goose StatementEnd
 create table users
 (
     id           bigint unsigned auto_increment primary key,
@@ -17,9 +19,9 @@ create table users
     constraint users_email_uniq unique (email),
     constraint uses_phone_number_uniq unique (phone_number)
 );
--- +goose StatementEnd
 
 -- +goose Down
 -- +goose StatementBegin
-DROP TABLE users;
+SELECT 'down SQL query';
 -- +goose StatementEnd
+DROP TABLE users;
