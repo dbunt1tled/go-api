@@ -2,15 +2,37 @@ package mailservice
 
 import (
 	"bytes"
+	"encoding/json"
 	"go_echo/app/user/model/user"
 	"go_echo/internal/config/env"
 	"go_echo/internal/config/mailer"
+	"go_echo/internal/rmq"
 	"go_echo/internal/util/helper"
 	"time"
 
 	"github.com/wneessen/go-mail"
 	"golang.org/x/text/language"
 )
+
+const (
+	ConfirmSubject = "confirm"
+)
+
+type MailJobMessage struct {
+	UserID  int    `json:"userId"`
+	Subject string `json:"subject"`
+	Token   string `json:"token,omitempty"`
+}
+
+func SendUserConfirm(userID int64, token string) {
+	job := MailJobMessage{
+		UserID:  int(userID),
+		Subject: ConfirmSubject,
+		Token:   token,
+	}
+	rc := rmq.GetRMQInstance(rmq.MailExchange)
+	rc.Publish(rmq.MailExchange, rmq.MailQueue, string(helper.Must(json.Marshal(&job))))
+}
 
 func SendUserConfirmEmail(user *user.User, token string) {
 	data := MakeMailTemplateData(map[string]any{

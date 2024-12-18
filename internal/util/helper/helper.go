@@ -2,9 +2,14 @@ package helper
 
 import (
 	"encoding/json"
+	"fmt"
 	"go_echo/internal/config/locale"
 	"html/template"
 	"reflect"
+	"regexp"
+	"runtime"
+	"strings"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/google/jsonapi"
@@ -112,4 +117,29 @@ func MakeStruct(data map[string]any) interface{} {
 		panic(err)
 	}
 	return structType
+}
+
+func RuntimeStatistics(startTime time.Time, showName bool) string {
+	pc, _, _, _ := runtime.Caller(1)
+	name := ""
+	if showName {
+		funcObj := runtime.FuncForPC(pc)
+		runtimeFunc := regexp.MustCompile(`^.*\.(.*)$`)
+		name = runtimeFunc.ReplaceAllString(funcObj.Name(), "$1")
+	}
+	return strings.TrimSpace(fmt.Sprintf(
+		"%s processed %s (%s)",
+		name,
+		time.Since(startTime).Round(time.Second).String(),
+		MemoryUsage(),
+	))
+}
+func MemoryUsage() string {
+	var memStats runtime.MemStats
+	runtime.ReadMemStats(&memStats)
+	return fmt.Sprintf(
+		"TotalAlloc: %v MB, Sys: %v MB",
+		memStats.TotalAlloc/1024/1024, //nolint:mnd // Convert to MB
+		memStats.Sys/1024/1024,        //nolint:mnd // Convert to MB
+	)
 }

@@ -11,11 +11,36 @@ import (
 	"github.com/rabbitmq/amqp091-go"
 )
 
+const (
+	MailExchange = "mail-go-exchange"
+	MailQueue    = "mail-go-queue"
+)
+
+var (
+	rabbitMQInstance map[string]*RabbitClient //nolint:gochecknoglobals // singleton
+)
+
 type RabbitClient struct {
 	sendCon *amqp091.Connection
 	recCon  *amqp091.Connection
 	sendCh  *amqp091.Channel
 	recCh   *amqp091.Channel
+}
+
+func GetRMQInstance(exchange string) *RabbitClient {
+	var (
+		val *RabbitClient
+		ok  bool
+	)
+	if rabbitMQInstance == nil {
+		rabbitMQInstance = make(map[string]*RabbitClient)
+	}
+	if val, ok = rabbitMQInstance[exchange]; !ok {
+		val = &RabbitClient{}
+		rabbitMQInstance[exchange] = val
+	}
+
+	return val
 }
 
 func (rcl *RabbitClient) Publish(exchangeName string, queueName string, body string) {
@@ -148,6 +173,7 @@ func (rcl *RabbitClient) Consume(
 				shouldStop = true
 				break
 			case d := <-msgs:
+				time.Sleep(time.Millisecond * 100)
 				go func() {
 					worker(d, f, exchangeName, q.Name)
 				}()
@@ -158,8 +184,15 @@ func (rcl *RabbitClient) Consume(
 
 func worker(msg amqp091.Delivery, f func(d amqp091.Delivery) error, exchangeName string, queueName string) {
 	var err error
+	startTime := time.Now()
 	log := logger.GetLoggerInstance()
-	log.Info(fmt.Sprintf("Consumer %s (queue %s) processing message (%s): %s", exchangeName, queueName, msg.MessageId, msg.Body))
+	log.Info(fmt.Sprintf(
+		"Consumer %s (queue %s) START processing message (%s): %s",
+		exchangeName,
+		queueName,
+		msg.MessageId,
+		msg.Body,
+	))
 	if err = f(msg); err == nil {
 		err = msg.Ack(false)
 		if err != nil {
@@ -169,10 +202,24 @@ func worker(msg amqp091.Delivery, f func(d amqp091.Delivery) error, exchangeName
 		m := err.Error()
 		err = msg.Nack(false, true)
 		if err != nil {
-			log.Info(fmt.Sprintf("Consumer %s (queue %s) Error Nack %s after handler error: %s", exchangeName, queueName, err.Error(), m))
+			log.Info(fmt.Sprintf(
+				"Consumer %s (queue %s) Error Nack %s after handler error: %s",
+				exchangeName,
+				queueName,
+				err.Error(),
+				m,
+			))
 		}
 		log.Info(fmt.Sprintf("Consumer %s (queue %s) Error Handler: %s", exchangeName, queueName, m))
 	}
+	log.Info(fmt.Sprintf(
+		"Consumer %s (queue %s) FINISH processing message (%s): %s --- %s",
+		exchangeName,
+		queueName,
+		msg.MessageId,
+		msg.Body,
+		helper.RuntimeStatistics(startTime, false),
+	))
 }
 
 func (rcl *RabbitClient) connect(isRec bool, reconect bool) (*amqp091.Connection, error) {

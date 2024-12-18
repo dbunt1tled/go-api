@@ -71,6 +71,6 @@ func Register(c echo.Context) error {
 	if err != nil {
 		return jsonerror.ErrorUnprocessableEntity(c, err, app_error.Err422SignupAuthTokensError)
 	}
-	mailservice.SendUserConfirmEmail(u, code)
+	mailservice.SendUserConfirm(u.ID, code)
 	return helper.JSONAPIModel(c.Response(), u, http.StatusOK)
 }
