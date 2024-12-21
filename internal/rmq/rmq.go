@@ -43,7 +43,7 @@ func GetRMQInstance(exchange string) *RabbitClient {
 	return val
 }
 
-func (rcl *RabbitClient) Publish(exchangeName string, queueName string, body string) {
+func (rcl *RabbitClient) Publish(exchangeName string, queueName string, action string, body string) {
 	log := logger.GetLoggerInstance()
 	r := false
 	for {
@@ -63,6 +63,7 @@ func (rcl *RabbitClient) Publish(exchangeName string, queueName string, body str
 				MessageId:    helper.Must(hasher.UUIDVv7()).String(),
 				DeliveryMode: amqp091.Persistent, // save on disk and restore on restart
 				ContentType:  "application/json",
+				Type:         action,
 				Body:         []byte(body),
 			})
 		if err != nil {

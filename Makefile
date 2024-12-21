@@ -6,6 +6,12 @@ build_api:
 	@go build -o bin/api cmd/api/main.go
 build_opt_api:
 	@go build -ldflags "-s -w"  -o bin/api cmd/api/main.go
+run_mail:
+	@go run cmd/consumer/mail.go
+build_mail:
+	@go build -o bin/api cmd/consumer/mail.go
+build_opt_mail:
+	@go build -ldflags "-s -w"  -o bin/api cmd/consumer/mail.go
 gen_proto:
 	@protoc --proto_path=proto proto/*.proto  --go-grpc_out=../ --go_out=../
 gen_clean:

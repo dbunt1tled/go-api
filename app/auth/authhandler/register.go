@@ -2,12 +2,12 @@ package authhandler
 
 import (
 	"go_echo/app/auth/service/auth"
+	"go_echo/app/jobs/rmqmail/handlers"
 	"go_echo/app/user/model/user"
 	"go_echo/app/user/service"
 	"go_echo/internal/config/app_error"
 	"go_echo/internal/config/validate"
 	"go_echo/internal/lib/jsonerror"
-	"go_echo/internal/lib/mailservice"
 	"go_echo/internal/util/helper"
 	"go_echo/internal/util/type/user_status"
 	"net/http"
@@ -71,6 +71,6 @@ func Register(c echo.Context) error {
 	if err != nil {
 		return jsonerror.ErrorUnprocessableEntity(c, err, app_error.Err422SignupAuthTokensError)
 	}
-	mailservice.SendUserConfirm(u.ID, code)
+	handlers.UserConfirmationEmail{}.Send(u.ID, code)
 	return helper.JSONAPIModel(c.Response(), u, http.StatusOK)
 }
