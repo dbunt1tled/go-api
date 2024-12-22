@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"go_echo/app/centrifugo/param"
+	"go_echo/app/centrifugo/server"
 	"go_echo/app/user/model/user"
 	"go_echo/app/user/service"
 	"go_echo/internal/config/logger"
@@ -86,6 +87,54 @@ func (s *Server) Refresh(ctx context.Context, request *proxyproto.RefreshRequest
 }
 
 func (s *Server) Subscribe(ctx context.Context, request *proxyproto.SubscribeRequest) (*proxyproto.SubscribeResponse, error) {
+	var (
+		provider *server.ChannelProvider
+		err      error
+		userId   int64
+	)
+	log := logger.GetLoggerInstance()
+	providerResolver := server.GetChannelProviderResolver()
+	channel := request.GetChannel()
+	userId, err = strconv.ParseInt(request.GetUser(), 10, 64)
+	if err != nil {
+		log.ErrorContext(ctx, "Centrifugo Subscribe error parse user id",
+			"request_data", request,
+			"error", err,
+		)
+		return &proxyproto.SubscribeResponse{
+			Error: &proxyproto.Error{
+				Code:    ErrInvalidSubScribeRequest,
+				Message: "invalid request",
+			},
+		}, nil
+	}
+
+	provider, err = (*providerResolver).Resolve((*providerResolver).GetChannelName(channel))
+	if err != nil {
+		log.ErrorContext(ctx, "Centrifugo Subscribe error resolve provider",
+			"request_data", request,
+			"error", err,
+		)
+		return &proxyproto.SubscribeResponse{
+			Error: &proxyproto.Error{
+				Code:    ErrInvalidSubscribeChannelProvider,
+				Message: "invalid channel provider",
+			},
+		}, nil
+	}
+	err = (*provider).Subscribe(channel, userId)
+	if err != nil {
+		log.ErrorContext(ctx, "Centrifugo Subscribe error subscribe channel",
+			"request_data", request,
+			"error", err,
+		)
+		return &proxyproto.SubscribeResponse{
+			Error: &proxyproto.Error{
+				Code:    ErrInvalidSubscribeChannel,
+				Message: "invalid channel",
+			},
+		}, nil
+	}
 
 	return &proxyproto.SubscribeResponse{}, nil
 }

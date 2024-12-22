@@ -143,3 +143,11 @@ func MemoryUsage() string {
 		memStats.Sys/1024/1024,        //nolint:mnd // Convert to MB
 	)
 }
+
+func SubStr(stack string, needle string) string {
+	index := strings.Index(stack, needle)
+	if index != -1 {
+		return stack[:index]
+	}
+	return stack
+}

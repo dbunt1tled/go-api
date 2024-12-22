@@ -12,7 +12,7 @@ func GetInstance() *gocent.Client {
 	if instance == nil {
 		cfg := env.GetConfigInstance()
 		instance = gocent.New(gocent.Config{
-			Addr: cfg.Centrifugo.ApiUrl + "/api",
+			Addr: cfg.Centrifugo.APIURL + "/api",
 			Key:  cfg.Centrifugo.APIKey,
 		})
 	}
