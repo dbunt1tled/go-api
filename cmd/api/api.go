@@ -5,7 +5,6 @@ import (
 	"go_echo/internal/config/env"
 	"go_echo/internal/config/locale"
 	"go_echo/internal/config/logger"
-	"go_echo/internal/config/mailer"
 	"go_echo/internal/config/validate"
 	"go_echo/internal/lib/handler"
 	"go_echo/internal/lib/profiler"
@@ -29,8 +28,6 @@ func main() {
 	profiler.SetProfiler()
 	storage.GetInstance()
 	defer storage.Close()
-	mailer.GetMailInstance()
-	defer mailer.Close()
 	httpServer := echo.New()
 	httpServer.HideBanner = true
 	httpServer.Debug = cfg.Debug
@@ -41,7 +38,7 @@ func main() {
 	go func() {
 		log.Debug("Start listening on address: " + cfg.HTTPServer.Address)
 		if err := httpServer.Start(cfg.HTTPServer.Address); err != nil && !errors.Is(err, http.ErrServerClosed) { //nolint:lll,govet
-			log.Error("shutting down the server")
+			log.Error("shutting down the server" + err.Error())
 		}
 	}()
 	<-ctx.Done()

@@ -1,11 +1,11 @@
 package middlewares
 
 import (
+	"go_echo/app/user/model/user"
 	"go_echo/app/user/service"
 	"go_echo/internal/config/app_error"
 	"go_echo/internal/lib/jsonerror"
 	"go_echo/internal/util/jwt"
-	"go_echo/internal/util/type/user_status"
 	"net/http"
 	"strings"
 
@@ -48,7 +48,7 @@ func AuthBearer(next echo.HandlerFunc) echo.HandlerFunc {
 			}
 		}
 
-		if u.Status != user_status.Active.Val() {
+		if u.Status != user.Active {
 			return &jsonerror.ExceptionErr{
 				Inner:  errors.New("unauthorized"),
 				Code:   app_error.Err401UserNotActiveError,

@@ -14,7 +14,7 @@ type User struct {
 	Email       string              `json:"email" jsonapi:"attr,email"`
 	PhoneNumber string              `json:"phoneNumber" jsonapi:"attr,phoneNumber"`
 	Password    string              `json:"password"`
-	Status      int                 `json:"status" jsonapi:"attr,status"`
+	Status      Status              `json:"status" jsonapi:"attr,status"`
 	Hash        sql.NullString      `json:"hash" jsonapi:"attr,hash"`
 	Roles       roles.Roles         `json:"roles" jsonapi:"attr,roles"`
 	ConfirmedAt sql.NullTime        `json:"confirmed_at" jsonapi:"attr,confirmedAt"`

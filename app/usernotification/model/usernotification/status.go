@@ -1,4 +1,4 @@
-package user_status
+package usernotification
 
 import (
 	"database/sql/driver"
@@ -10,19 +10,16 @@ import (
 type Status int
 
 const (
-	Active  Status = 1
-	Delete  Status = 2
-	Pending Status = 3
+	New  Status = 1
+	Read Status = 2
 )
 
 func (s *Status) String() string {
 	switch *s {
-	case Active:
-		return "Active"
-	case Delete:
-		return "Inactive"
-	case Pending:
-		return "Pending"
+	case New:
+		return "New"
+	case Read:
+		return "Read"
 	default:
 		panic(fmt.Errorf("unknown user status: %d", s))
 	}
@@ -34,12 +31,10 @@ func (s Status) Val() int {
 
 func FromStatus(s Status) int {
 	switch s {
-	case Active:
-		return 1 //nolint:mnd // Active //nolint:nolintlint
-	case Delete:
-		return 2 //nolint:mnd // Delete //nolint:nolintlint
-	case Pending:
-		return 3 //nolint:mnd // Pending //nolint:nolintlint
+	case New:
+		return 1 //nolint:nolintlint
+	case Read:
+		return 2 //nolint:nolintlint
 	default:
 		panic(fmt.Errorf("unknown user status: %d", s))
 	}
@@ -48,11 +43,9 @@ func FromStatus(s Status) int {
 func FromInt(value int) (Status, error) {
 	switch value {
 	case 1:
-		return Active, nil
+		return New, nil
 	case 2:
-		return Delete, nil
-	case 3:
-		return Pending, nil
+		return Read, nil
 	default:
 		panic(fmt.Errorf("unknown user status: %d", value))
 	}
@@ -75,12 +68,10 @@ func (s *Status) Scan(value interface{}) error {
 
 func (s *Status) Value() (driver.Value, error) {
 	switch *s {
-	case Active:
-		return 1, nil
-	case Delete:
-		return 2, nil
-	case Pending:
-		return 3, nil
+	case New:
+		return 1, nil //nolint:nolintlint
+	case Read:
+		return 2, nil //nolint:nolintlint
 	default:
 		return nil, errors.New("invalid status value")
 	}

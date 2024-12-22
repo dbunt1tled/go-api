@@ -9,7 +9,6 @@ import (
 	"go_echo/internal/config/validate"
 	"go_echo/internal/lib/jsonerror"
 	"go_echo/internal/util/helper"
-	"go_echo/internal/util/type/user_status"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
@@ -52,7 +51,7 @@ func Register(c echo.Context) error {
 		}
 		return jsonerror.ErrorUnprocessableEntity(c, err, app_error.Err422SignupValidateError)
 	}
-	status := user_status.Pending
+	status := user.Pending
 	u, err = service.UserRepository{}.Create(service.CreateUserParams{
 		FirstName:   &req.FirstName,
 		SecondName:  &req.SecondName,

@@ -21,6 +21,13 @@ type Config struct {
 	Mail        Mail
 	Static      Static
 	RabbitMQ    RabbitMQ
+	Centrifugo  Centrifugo
+}
+
+type Centrifugo struct {
+	ServerURL string `env:"SERVER_CENTRIFUGO_URL" env-default:"localhost:5000"`
+	ApiUrl    string `env:"CENTRIFUGO_API_URL" env-default:"http://127.0.0.1:8000"`
+	APIKey    string `env:"CENTRIFUGO_API_KEY" env-required:"true"`
 }
 
 type RabbitMQ struct {

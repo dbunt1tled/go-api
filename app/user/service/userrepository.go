@@ -8,7 +8,6 @@ import (
 	"go_echo/internal/util/hasher"
 	"go_echo/internal/util/helper"
 	"go_echo/internal/util/type/roles"
-	"go_echo/internal/util/type/user_status"
 	"strings"
 	"time"
 
@@ -28,7 +27,7 @@ type UpdateUserParams struct {
 	Email       *string
 	PhoneNumber *string
 	Password    *string
-	Status      *user_status.Status
+	Status      *user.Status
 	Hash        *string
 	Roles       *roles.Roles
 	ConfirmedAt *time.Time
@@ -40,7 +39,7 @@ type CreateUserParams struct {
 	Email       *string
 	PhoneNumber *string
 	Password    *string
-	Status      *user_status.Status
+	Status      *user.Status
 	Hash        *string
 	Roles       *roles.Roles
 	ConfirmedAt *time.Time
@@ -292,6 +291,9 @@ func (r UserRepository) Update(id int64, params UpdateUserParams) (*user.User, e
 	if len(setClauses) == 0 {
 		return helper.Must(r.ByID(id)), nil
 	}
+
+	setClauses = append(setClauses, "updated_at = ?")
+	args = append(args, time.Now())
 
 	args = append(args, id)
 	query := fmt.Sprintf("UPDATE users SET %s WHERE id = ?", strings.Join(setClauses, ", "))

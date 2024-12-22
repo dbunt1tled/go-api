@@ -9,7 +9,6 @@ import (
 	"go_echo/internal/lib/jsonerror"
 	"go_echo/internal/util/helper"
 	"go_echo/internal/util/jwt"
-	"go_echo/internal/util/type/user_status"
 	"net/http"
 	"time"
 
@@ -59,11 +58,11 @@ func Confirm(c echo.Context) error {
 		return jsonerror.ErrorUnprocessableEntity(c, err, app_error.Err422ConfirmUserError)
 	}
 
-	if u.Status != user_status.Pending.Val() {
+	if u.Status != user.Pending {
 		return jsonerror.ErrorUnprocessableEntityString(c, "Users already confirmed your account", app_error.Err422ConfirmUserStatusError)
 	}
 
-	status := user_status.Active
+	status := user.Active
 	date := time.Now()
 	u, err = service.UserRepository{}.Update(u.ID, service.UpdateUserParams{
 		Status:      &status,
