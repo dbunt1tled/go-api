@@ -56,7 +56,7 @@ func (s *Server) Connect(
 			},
 		}, nil
 	}
-	u, err = service.UserRepository{}.ByID(int64(token["iss"].(float64))) //nolint:errcheck
+	u, err = service.UserRepository{}.ByID(int64(token["iss"].(float64))) //nolint:nolintlint,errcheck
 	if err != nil || u.Status != user.Active {
 
 		log.ErrorContext(ctx, "Centrifugo Connect error find user by id",
@@ -79,11 +79,6 @@ func (s *Server) Connect(
 			ExpireAt: int64(token["exp"].(float64)),
 		},
 	}, nil
-}
-
-func (s *Server) Refresh(ctx context.Context, request *proxyproto.RefreshRequest) (*proxyproto.RefreshResponse, error) {
-
-	return &proxyproto.RefreshResponse{}, nil
 }
 
 func (s *Server) Subscribe(ctx context.Context, request *proxyproto.SubscribeRequest) (*proxyproto.SubscribeResponse, error) {
@@ -139,41 +134,123 @@ func (s *Server) Subscribe(ctx context.Context, request *proxyproto.SubscribeReq
 	return &proxyproto.SubscribeResponse{}, nil
 }
 
-func (s *Server) Publish(ctx context.Context, request *proxyproto.PublishRequest) (*proxyproto.PublishResponse, error) {
+func (s *Server) Publish(
+	ctx context.Context,
+	request *proxyproto.PublishRequest,
+) (*proxyproto.PublishResponse, error) {
 
-	// log.Println(string(request.Data))
-	return &proxyproto.PublishResponse{}, nil
+	var (
+		provider *server.ChannelProvider
+		err      error
+		userId   int64
+		dt       *[]byte
+	)
+	log := logger.GetLoggerInstance()
+	providerResolver := server.GetChannelProviderResolver()
+	data := request.GetData()
+	channel := request.GetChannel()
+	userId, err = strconv.ParseInt(request.GetUser(), 10, 64)
+	if err != nil {
+		log.ErrorContext(ctx, "Centrifugo Publish error parse user id",
+			"request_data", request,
+			"error", err,
+		)
+		return &proxyproto.PublishResponse{
+			Error: &proxyproto.Error{
+				Code:    ErrInvalidPublishRequest,
+				Message: "invalid request",
+			},
+		}, nil
+	}
+
+	provider, err = (*providerResolver).Resolve((*providerResolver).GetChannelName(channel))
+	if err != nil {
+		log.ErrorContext(ctx, "Centrifugo Publish error resolve provider",
+			"request_data", request,
+			"error", err,
+		)
+		return &proxyproto.PublishResponse{
+			Error: &proxyproto.Error{
+				Code:    ErrInvalidPublishChannelProvider,
+				Message: "invalid channel provider",
+			},
+		}, nil
+	}
+	dt, err = (*provider).Publish(channel, userId, data)
+	if err != nil {
+		log.ErrorContext(ctx, "Centrifugo Publish error publish channel",
+			"request_data", request,
+			"error", err,
+		)
+		return &proxyproto.PublishResponse{
+			Error: &proxyproto.Error{
+				Code:    ErrInvalidPublishChannelData,
+				Message: "invalid channel",
+			},
+		}, nil
+	}
+	return &proxyproto.PublishResponse{
+		Result: &proxyproto.PublishResult{
+			SkipHistory: true,
+			Data:        *dt,
+		},
+	}, nil
 }
 
-func (s *Server) RPC(ctx context.Context, request *proxyproto.RPCRequest) (*proxyproto.RPCResponse, error) {
+func (s *Server) Refresh(
+	ctx context.Context,
+	request *proxyproto.RefreshRequest,
+) (*proxyproto.RefreshResponse, error) {
+
+	return &proxyproto.RefreshResponse{}, nil
+}
+
+func (s *Server) RPC(
+	ctx context.Context,
+	request *proxyproto.RPCRequest,
+) (*proxyproto.RPCResponse, error) {
 
 	return &proxyproto.RPCResponse{}, nil
 }
 
-func (s *Server) SubRefresh(context.Context, *proxyproto.SubRefreshRequest) (*proxyproto.SubRefreshResponse, error) {
+func (s *Server) SubRefresh(
+	context.Context,
+	*proxyproto.SubRefreshRequest,
+) (*proxyproto.SubRefreshResponse, error) {
 
 	return &proxyproto.SubRefreshResponse{}, nil
 }
 
-func (s *Server) SubscribeUnidirectional(*proxyproto.SubscribeRequest, grpc.ServerStreamingServer[proxyproto.StreamSubscribeResponse]) error {
+func (s *Server) SubscribeUnidirectional(
+	*proxyproto.SubscribeRequest,
+	grpc.ServerStreamingServer[proxyproto.StreamSubscribeResponse],
+) error {
 
 	return nil
 }
 
-func (s *Server) SubscribeBidirectional(grpc.BidiStreamingServer[proxyproto.StreamSubscribeRequest, proxyproto.StreamSubscribeResponse]) error {
+func (s *Server) SubscribeBidirectional(
+	grpc.BidiStreamingServer[proxyproto.StreamSubscribeRequest, proxyproto.StreamSubscribeResponse],
+) error {
 
 	return nil
 }
 
-func (s *Server) NotifyCacheEmpty(context.Context, *proxyproto.NotifyCacheEmptyRequest) (*proxyproto.NotifyCacheEmptyResponse, error) {
+func (s *Server) NotifyCacheEmpty(
+	context.Context,
+	*proxyproto.NotifyCacheEmptyRequest,
+) (*proxyproto.NotifyCacheEmptyResponse, error) {
 
 	return &proxyproto.NotifyCacheEmptyResponse{}, nil
 }
-func (s *Server) NotifyChannelState(context.Context, *proxyproto.NotifyChannelStateRequest) (*proxyproto.NotifyChannelStateResponse, error) {
+func (s *Server) NotifyChannelState(
+	context.Context,
+	*proxyproto.NotifyChannelStateRequest,
+) (*proxyproto.NotifyChannelStateResponse, error) {
 
 	return &proxyproto.NotifyChannelStateResponse{}, nil
 }
 
 func (s *Server) mustEmbedServer() {
-	panic("implement me")
+	panic("mustEmbedServer implement me")
 }

@@ -8,7 +8,7 @@ import (
 
 type ChannelProvider interface {
 	Subscribe(channel string, userID int64) error
-	Publish(channel string, userID int64, data []byte)
+	Publish(channel string, userID int64, data []byte) (*[]byte, error)
 }
 
 type ChannelProviderResolver struct {

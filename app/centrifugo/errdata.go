@@ -7,4 +7,7 @@ const (
 	ErrInvalidSubScribeRequest         = 4
 	ErrInvalidSubscribeChannelProvider = 5
 	ErrInvalidSubscribeChannel         = 6
+	ErrInvalidPublishRequest           = 7
+	ErrInvalidPublishChannelProvider   = 8
+	ErrInvalidPublishChannelData       = 9
 )

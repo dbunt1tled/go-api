@@ -18,6 +18,6 @@ func (u *UserProvider) Subscribe(channel string, userID int64) error {
 	return nil
 }
 
-func (u *UserProvider) Publish(channel string, userID int64, data []byte) {
-	// publish data to channel
+func (u *UserProvider) Publish(channel string, userID int64, data []byte) (*[]byte, error) {
+	return nil, nil
 }
