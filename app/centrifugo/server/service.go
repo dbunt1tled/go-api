@@ -18,7 +18,7 @@ type ChannelProviderResolver struct {
 var instance *ChannelProviderResolver //nolint:gochecknoglobals // singleton
 
 func GetChannelProviderResolver() *ChannelProviderResolver {
-	if instance != nil {
+	if instance == nil {
 		r := ChannelProviderResolver{
 			providers: make(map[string]*ChannelProvider),
 		}

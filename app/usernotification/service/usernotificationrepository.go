@@ -23,7 +23,7 @@ type UserNotificationRepository struct {
 
 type UserNotificationParams struct {
 	Data   *json.JsonField
-	UserId *int64
+	UserID *int64
 	Status *user.Status
 }
 
@@ -44,7 +44,10 @@ func (r UserNotificationRepository) ByID(id int64) (*usernotification.UserNotifi
 	return nil, errors.New("user not found")
 }
 
-func (r UserNotificationRepository) One(filter []builder.FilterCondition, sorts []builder.SortOrder) (*usernotification.UserNotification, error) {
+func (r UserNotificationRepository) One(
+	filter []builder.FilterCondition,
+	sorts []builder.SortOrder,
+) (*usernotification.UserNotification, error) {
 	var _validFields = map[string]bool{
 		"id":     true,
 		"userId": true,
@@ -72,7 +75,10 @@ func (r UserNotificationRepository) One(filter []builder.FilterCondition, sorts 
 	}
 	return nil, errors.New("user not found")
 }
-func (r UserNotificationRepository) List(filter []builder.FilterCondition, sorts []builder.SortOrder) (*[]usernotification.UserNotification, error) {
+func (r UserNotificationRepository) List(
+	filter []builder.FilterCondition,
+	sorts []builder.SortOrder,
+) (*[]usernotification.UserNotification, error) {
 	var _validFields = map[string]bool{
 		"id":     true,
 		"userId": true,
@@ -114,10 +120,10 @@ func (r UserNotificationRepository) Create(params UserNotificationParams) (*user
 		args    []interface{}
 	)
 
-	if params.UserId != nil {
+	if params.UserID != nil {
 		columns = append(columns, "user_id")
 		values = append(values, "?")
-		args = append(args, *params.UserId)
+		args = append(args, *params.UserID)
 	}
 
 	if params.Data != nil {
@@ -126,10 +132,12 @@ func (r UserNotificationRepository) Create(params UserNotificationParams) (*user
 		args = append(args, *params.Data)
 	}
 
+	columns = append(columns, "status")
+	values = append(values, "?")
 	if params.Status != nil {
-		columns = append(columns, "status")
-		values = append(values, "?")
 		args = append(args, *params.Status)
+	} else {
+		args = append(args, usernotification.New)
 	}
 
 	if len(columns) == 0 {
@@ -146,7 +154,7 @@ func (r UserNotificationRepository) Create(params UserNotificationParams) (*user
 
 	smt, err := builder.GetDB().Prepare(
 		fmt.Sprintf(
-			"INSERT INTO users (%s) VALUES (%s)",
+			"INSERT INTO user_notifications (%s) VALUES (%s)",
 			strings.Join(columns, ", "),
 			strings.Join(values, ", ")))
 	if err != nil {
@@ -160,16 +168,19 @@ func (r UserNotificationRepository) Create(params UserNotificationParams) (*user
 	return helper.Must(r.ByID(helper.Must(res.LastInsertId()))), nil
 }
 
-func (r UserNotificationRepository) Update(id int64, params UserNotificationParams) (*usernotification.UserNotification, error) {
+func (r UserNotificationRepository) Update(
+	id int64,
+	params UserNotificationParams,
+) (*usernotification.UserNotification, error) {
 
 	var (
 		setClauses []string
 		args       []interface{}
 	)
 
-	if params.UserId != nil {
+	if params.UserID != nil {
 		setClauses = append(setClauses, "user_id = ?")
-		args = append(args, *params.UserId)
+		args = append(args, *params.UserID)
 	}
 
 	if params.Data != nil {

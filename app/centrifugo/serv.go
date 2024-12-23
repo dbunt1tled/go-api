@@ -72,10 +72,28 @@ func (s *Server) Connect(
 		}, nil
 	}
 	userId := strconv.FormatInt(u.ID, 10)
+	data := map[string]interface{}{
+		"channels": []string{"user:#" + userId, "read:#" + userId},
+		"user":     u.FirstName + " " + u.SecondName,
+	}
+	dataBytes, err := json.Marshal(data)
+	if err != nil {
+		log.ErrorContext(ctx, "Centrifugo Connect error marshal data",
+			"request_data", request.GetData(),
+			"error", err,
+			"user", u,
+		)
+		return &proxyproto.ConnectResponse{
+			Error: &proxyproto.Error{
+				Code:    ErrInvalidData,
+				Message: "invalid data",
+			},
+		}, nil
+	}
 	return &proxyproto.ConnectResponse{
 		Result: &proxyproto.ConnectResult{
 			User:     userId,
-			Data:     []byte(`{"user_id":` + userId + `"channel": ["user:#` + userId + `", "read:#` + userId + `"]}`),
+			Data:     dataBytes,
 			ExpireAt: int64(token["exp"].(float64)),
 		},
 	}, nil
@@ -88,6 +106,7 @@ func (s *Server) Subscribe(ctx context.Context, request *proxyproto.SubscribeReq
 		userId   int64
 	)
 	log := logger.GetLoggerInstance()
+	log.Info("Centrifugo Subscribe request" + request.GetToken())
 	providerResolver := server.GetChannelProviderResolver()
 	channel := request.GetChannel()
 	userId, err = strconv.ParseInt(request.GetUser(), 10, 64)
@@ -104,7 +123,7 @@ func (s *Server) Subscribe(ctx context.Context, request *proxyproto.SubscribeReq
 		}, nil
 	}
 
-	provider, err = (*providerResolver).Resolve((*providerResolver).GetChannelName(channel))
+	provider, err = providerResolver.Resolve(providerResolver.GetChannelName(channel))
 	if err != nil {
 		log.ErrorContext(ctx, "Centrifugo Subscribe error resolve provider",
 			"request_data", request,
@@ -189,6 +208,13 @@ func (s *Server) Publish(
 			},
 		}, nil
 	}
+	if dt == nil {
+		return &proxyproto.PublishResponse{
+			Result: &proxyproto.PublishResult{
+				SkipHistory: true,
+			},
+		}, nil
+	}
 	return &proxyproto.PublishResponse{
 		Result: &proxyproto.PublishResult{
 			SkipHistory: true,
@@ -198,16 +224,16 @@ func (s *Server) Publish(
 }
 
 func (s *Server) Refresh(
-	ctx context.Context,
-	request *proxyproto.RefreshRequest,
+	context.Context,
+	*proxyproto.RefreshRequest,
 ) (*proxyproto.RefreshResponse, error) {
 
 	return &proxyproto.RefreshResponse{}, nil
 }
 
 func (s *Server) RPC(
-	ctx context.Context,
-	request *proxyproto.RPCRequest,
+	context.Context,
+	*proxyproto.RPCRequest,
 ) (*proxyproto.RPCResponse, error) {
 
 	return &proxyproto.RPCResponse{}, nil

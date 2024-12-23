@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"go_echo/internal/config/locale"
+	jf "go_echo/internal/util/type/json"
 	"html/template"
 	"reflect"
 	"regexp"
@@ -150,4 +151,29 @@ func SubStr(stack string, needle string) string {
 		return stack[:index]
 	}
 	return stack
+}
+
+func StructToMap(obj interface{}) (map[string]interface{}, error) {
+	newMap := make(map[string]interface{})
+	data, err := json.Marshal(obj)
+	if err != nil {
+		return nil, err
+	}
+	err = json.Unmarshal(data, &newMap)
+	return newMap, err
+}
+func StructToJsonField(obj interface{}) (jf.JsonField, error) {
+	m, err := StructToMap(obj)
+	if err != nil {
+		return nil, err
+	}
+	return m, err
+}
+
+func MapToByte(obj map[string]interface{}) ([]byte, error) {
+	data, err := json.Marshal(obj)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
 }

@@ -4,10 +4,11 @@ const (
 	ErrInvalidConnectRequest           = 1
 	ErrInvalidAccessToken              = 2
 	ErrInvalidUser                     = 3
-	ErrInvalidSubScribeRequest         = 4
-	ErrInvalidSubscribeChannelProvider = 5
-	ErrInvalidSubscribeChannel         = 6
-	ErrInvalidPublishRequest           = 7
-	ErrInvalidPublishChannelProvider   = 8
-	ErrInvalidPublishChannelData       = 9
+	ErrInvalidData                     = 4
+	ErrInvalidSubScribeRequest         = 5
+	ErrInvalidSubscribeChannelProvider = 6
+	ErrInvalidSubscribeChannel         = 7
+	ErrInvalidPublishRequest           = 8
+	ErrInvalidPublishChannelProvider   = 9
+	ErrInvalidPublishChannelData       = 10
 )

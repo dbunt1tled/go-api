@@ -53,13 +53,17 @@ func Confirm(c echo.Context) error {
 	if err != nil || token["sub"] != auth.ConfirmTokenSubject {
 		return jsonerror.ErrorUnprocessableEntity(c, err, app_error.Err422ConfirmTokenError)
 	}
-	u, err = service.UserRepository{}.ByID(int64(token["iss"].(float64))) //nolint:errcheck
+	u, err = service.UserRepository{}.ByID(int64(token["iss"].(float64))) //nolint:nolintlint,errcheck
 	if err != nil {
 		return jsonerror.ErrorUnprocessableEntity(c, err, app_error.Err422ConfirmUserError)
 	}
 
 	if u.Status != user.Pending {
-		return jsonerror.ErrorUnprocessableEntityString(c, "Users already confirmed your account", app_error.Err422ConfirmUserStatusError)
+		return jsonerror.ErrorUnprocessableEntityString(
+			c,
+			"Users already confirmed your account",
+			app_error.Err422ConfirmUserStatusError,
+		)
 	}
 
 	status := user.Active
