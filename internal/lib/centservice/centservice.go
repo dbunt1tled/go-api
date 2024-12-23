@@ -37,6 +37,9 @@ func SendUserNotification(message UserNotification) (gocent.PublishResult, error
 		return gocent.PublishResult{}, errors.Wrap(err, "Error save User Notification message")
 	}
 	d, err = json.Marshal(un)
+	if err != nil {
+		return gocent.PublishResult{}, errors.Wrap(err, "Error marshal User Notification message")
+	}
 	publish, err := cent.Publish(ctx, "user:#"+strconv.FormatInt(message.UserID, 10), d)
 	if err != nil {
 		return gocent.PublishResult{}, errors.Wrap(err, "Error publish User Notification message")
