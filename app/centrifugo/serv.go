@@ -9,6 +9,7 @@ import (
 	"go_echo/app/user/service"
 	"go_echo/internal/config/logger"
 	proxyproto "go_echo/internal/grpc"
+	"go_echo/internal/util/helper"
 	"go_echo/internal/util/jwt"
 	"strconv"
 
@@ -106,7 +107,6 @@ func (s *Server) Subscribe(ctx context.Context, request *proxyproto.SubscribeReq
 		userId   int64
 	)
 	log := logger.GetLoggerInstance()
-	log.Info("Centrifugo Subscribe request" + request.GetToken())
 	providerResolver := server.GetChannelProviderResolver()
 	channel := request.GetChannel()
 	userId, err = strconv.ParseInt(request.GetUser(), 10, 64)
@@ -123,7 +123,7 @@ func (s *Server) Subscribe(ctx context.Context, request *proxyproto.SubscribeReq
 		}, nil
 	}
 
-	provider, err = providerResolver.Resolve(providerResolver.GetChannelName(channel))
+	provider, err = providerResolver.Resolve(helper.SubStr(channel, ":"))
 	if err != nil {
 		log.ErrorContext(ctx, "Centrifugo Subscribe error resolve provider",
 			"request_data", request,
@@ -182,7 +182,7 @@ func (s *Server) Publish(
 		}, nil
 	}
 
-	provider, err = (*providerResolver).Resolve((*providerResolver).GetChannelName(channel))
+	provider, err = providerResolver.Resolve(helper.SubStr(channel, ":"))
 	if err != nil {
 		log.ErrorContext(ctx, "Centrifugo Publish error resolve provider",
 			"request_data", request,

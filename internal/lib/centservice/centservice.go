@@ -20,8 +20,9 @@ type UserNotification struct {
 
 func SendUserNotification(message UserNotification) (gocent.PublishResult, error) {
 	var (
-		un *usernotification.UserNotification
-		d  []byte
+		un      *usernotification.UserNotification
+		d       []byte
+		publish gocent.PublishResult
 	)
 	cent := cntrfgclient.GetInstance()
 	ctx := context.Background()
@@ -40,7 +41,7 @@ func SendUserNotification(message UserNotification) (gocent.PublishResult, error
 	if err != nil {
 		return gocent.PublishResult{}, errors.Wrap(err, "Error marshal User Notification message")
 	}
-	publish, err := cent.Publish(ctx, "user:#"+strconv.FormatInt(message.UserID, 10), d)
+	publish, err = cent.Publish(ctx, "user:#"+strconv.FormatInt(message.UserID, 10), d)
 	if err != nil {
 		return gocent.PublishResult{}, errors.Wrap(err, "Error publish User Notification message")
 	}

@@ -6,14 +6,14 @@ import (
 	"github.com/pkg/errors"
 )
 
-const channelName = "user:#"
+const channelUserName = "user:#"
 
 type UserProvider struct {
 }
 
 func (u *UserProvider) Subscribe(channel string, userID int64) error {
-	if channel != (channelName + strconv.FormatInt(userID, 10)) {
-		return errors.New("invalid channel")
+	if channel != (channelUserName + strconv.FormatInt(userID, 10)) {
+		return errors.New("invalid user channel")
 	}
 	return nil
 }

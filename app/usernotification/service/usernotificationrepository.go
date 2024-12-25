@@ -3,7 +3,6 @@ package service
 import (
 	"database/sql"
 	"fmt"
-	"go_echo/app/user/model/user"
 	"go_echo/app/usernotification/model/usernotification"
 	"go_echo/internal/util/builder"
 	"go_echo/internal/util/helper"
@@ -24,7 +23,7 @@ type UserNotificationRepository struct {
 type UserNotificationParams struct {
 	Data   *json.JsonField
 	UserID *int64
-	Status *user.Status
+	Status *usernotification.Status
 }
 
 func (r UserNotificationRepository) ByID(id int64) (*usernotification.UserNotification, error) {
@@ -87,7 +86,7 @@ func (r UserNotificationRepository) List(
 	var u *usernotification.UserNotification
 	var res *sql.Rows
 	var err error
-	if err := builder.ValidateFilter(filter, _validFields); err != nil {
+	if err = builder.ValidateFilter(filter, _validFields); err != nil {
 		return nil, err
 	}
 
@@ -169,8 +168,7 @@ func (r UserNotificationRepository) Create(params UserNotificationParams) (*user
 }
 
 func (r UserNotificationRepository) Update(
-	id int64,
-	params UserNotificationParams,
+	id int64, params UserNotificationParams,
 ) (*usernotification.UserNotification, error) {
 
 	var (

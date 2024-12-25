@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"go_echo/internal/config/env"
 	"go_echo/internal/config/locale"
 	"go_echo/internal/config/logger"
@@ -17,8 +18,13 @@ func main() {
 		Message: "Your account has been confirmed",
 	})
 	if err != nil {
-		log.Error("Error send user notification: ", err)
+		log.Error("Error send user notification: " + err.Error())
 		return
 	}
-	log.Info("User notification sent: ", u)
+	d, err := json.Marshal(u)
+	if err != nil {
+		log.Error("Error marshal user notification: " + err.Error())
+		return
+	}
+	log.Info("User notification sent: " + string(d))
 }

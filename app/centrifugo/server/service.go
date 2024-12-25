@@ -23,6 +23,8 @@ func GetChannelProviderResolver() *ChannelProviderResolver {
 			providers: make(map[string]*ChannelProvider),
 		}
 		r.RegisterProvider("user", &provider.UserProvider{})
+		r.RegisterProvider("read", &provider.ReadProvider{})
+
 		instance = &r
 	}
 
@@ -41,6 +43,6 @@ func (r *ChannelProviderResolver) Resolve(channelName string) (*ChannelProvider,
 	return pdr, nil
 }
 
-func (r *ChannelProviderResolver) GetChannelName(channel string) string {
+func GetChannelName(channel string) string {
 	return helper.SubStr(channel, ":")
 }
