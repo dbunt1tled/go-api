@@ -3,6 +3,7 @@ package router
 import (
 	"go_echo/app/auth/authhandler"
 	"go_echo/app/general/generalhandler"
+	"go_echo/app/usernotification/usernotificationhandler"
 	"go_echo/internal/config/env"
 	apiServer "go_echo/internal/router/handler/server"
 	"go_echo/internal/router/middlewares"
@@ -27,6 +28,7 @@ func SetupRoutes(server *echo.Echo) {
 	}
 	generalRoutes(server)
 	authRoutes(server)
+	UserNotificationRoutes(server)
 }
 func generalRoutes(server *echo.Echo) {
 	generalRouter := server.Group("/")
@@ -42,6 +44,12 @@ func authRoutes(server *echo.Echo) {
 	authRouter.POST("/login", authhandler.Login)
 	authRouter.POST("/register", authhandler.Register)
 	authRouter.GET("/confirm", authhandler.Confirm)
+}
+
+func UserNotificationRoutes(server *echo.Echo) {
+	userNotificationsRouter := server.Group("/notifications")
+	userNotificationsRouter.Use(middlewares.AuthBearer)
+	userNotificationsRouter.GET("", usernotificationhandler.UserNotificationList)
 }
 
 func setGeneralMiddlewares(server *echo.Echo, cfg *env.Config) {

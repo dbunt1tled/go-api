@@ -7,7 +7,7 @@ import (
 
 type UserNotification struct {
 	ID        int64               `json:"id" jsonapi:"primary,userNotification"`
-	UserId    int64               `json:"userId" jsonapi:"attr,userId"`
+	UserID    int64               `json:"userId" jsonapi:"attr,userId"`
 	Data      json.JsonField      `json:"data" jsonapi:"attr,data"`
 	Status    Status              `json:"status" jsonapi:"attr,status"`
 	CreatedAt timestamp.Timestamp `json:"created_at" jsonapi:"attr,createdAt"`

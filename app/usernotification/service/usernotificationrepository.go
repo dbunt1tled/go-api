@@ -44,8 +44,8 @@ func (r UserNotificationRepository) ByID(id int64) (*usernotification.UserNotifi
 }
 
 func (r UserNotificationRepository) One(
-	filter []builder.FilterCondition,
-	sorts []builder.SortOrder,
+	filter *[]builder.FilterCondition,
+	sorts *[]builder.SortOrder,
 ) (*usernotification.UserNotification, error) {
 	var _validFields = map[string]bool{
 		"id":     true,
@@ -53,8 +53,10 @@ func (r UserNotificationRepository) One(
 		"status": true,
 	}
 
-	if err := builder.ValidateFilter(filter, _validFields); err != nil {
-		return nil, err
+	if filter != nil && len(*filter) > 0 {
+		if err := builder.ValidateFilter(*filter, _validFields); err != nil {
+			return nil, err
+		}
 	}
 
 	query, args := builder.BuildSQLQuery(UserNotificationTableName, filter, sorts, true)
@@ -75,23 +77,24 @@ func (r UserNotificationRepository) One(
 	return nil, errors.New("user not found")
 }
 func (r UserNotificationRepository) List(
-	filter []builder.FilterCondition,
-	sorts []builder.SortOrder,
-) (*[]usernotification.UserNotification, error) {
+	filter *[]builder.FilterCondition,
+	sorts *[]builder.SortOrder,
+) ([]*usernotification.UserNotification, error) {
 	var _validFields = map[string]bool{
-		"id":     true,
-		"userId": true,
-		"status": true,
+		"id":      true,
+		"user_id": true,
+		"status":  true,
 	}
 	var u *usernotification.UserNotification
 	var res *sql.Rows
 	var err error
-	if err = builder.ValidateFilter(filter, _validFields); err != nil {
-		return nil, err
+	if filter != nil && len(*filter) > 0 {
+		if err = builder.ValidateFilter(*filter, _validFields); err != nil {
+			return nil, err
+		}
 	}
-
 	query, args := builder.BuildSQLQuery(UserNotificationTableName, filter, sorts, false)
-	userNotifications := make([]usernotification.UserNotification, 0)
+	userNotifications := make([]*usernotification.UserNotification, 0)
 	smt, err := builder.GetDB().Prepare(query)
 	if err != nil {
 		return nil, errors.Wrap(err, "list user prepare error")
@@ -107,9 +110,9 @@ func (r UserNotificationRepository) List(
 		if err != nil {
 			return nil, errors.Wrap(err, "list user cast error")
 		}
-		userNotifications = append(userNotifications, *u)
+		userNotifications = append(userNotifications, u)
 	}
-	return &userNotifications, nil
+	return userNotifications, nil
 }
 
 func (r UserNotificationRepository) Create(params UserNotificationParams) (*usernotification.UserNotification, error) {
@@ -218,7 +221,7 @@ func castUserNotification(res *sql.Rows) (*usernotification.UserNotification, er
 	u := usernotification.UserNotification{}
 	err := res.Scan(
 		&u.ID,
-		&u.UserId,
+		&u.UserID,
 		&u.Data,
 		&u.Status,
 		&u.UpdatedAt,

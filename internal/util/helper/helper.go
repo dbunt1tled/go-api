@@ -62,12 +62,26 @@ func ValidationErrorString(validationErrors validator.ValidationErrors) map[stri
 	return errors
 }
 
-func JSONAPIModel(r *echo.Response, models interface{}, status int) error {
+func JSONAPIModel[T interface{} | map[string]interface{}](r *echo.Response, models T, status int) error {
 	r.Header().Set(echo.HeaderContentType, jsonapi.MediaType)
 	r.WriteHeader(status)
-	e := jsonapi.MarshalPayload(r, models)
+	// e := jsonapi.MarshalPayload(r, models)
+	//
+	// if e != nil {
+	// 	panic(e.Error()) // TODO logging
+	// }
+
+	p, e := jsonapi.Marshal(models)
 	if e != nil {
-		panic(e.Error()) // TODO logging
+		return e
+	}
+	payload, _ := p.(*jsonapi.ManyPayload)
+	payload.Meta = &jsonapi.Meta{
+		"total": len(payload.Data),
+	}
+	e = json.NewEncoder(r).Encode(payload)
+	if e != nil {
+		return e
 	}
 	return nil
 }
@@ -176,4 +190,16 @@ func MapToByte(obj map[string]interface{}) ([]byte, error) {
 		return nil, err
 	}
 	return data, nil
+}
+
+func GetVarValue(v any) any {
+	val := reflect.ValueOf(v)
+
+	if val.Kind() == reflect.Ptr {
+		if val.IsNil() {
+			return nil
+		}
+		return val.Elem().Interface()
+	}
+	return v
 }

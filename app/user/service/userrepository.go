@@ -62,7 +62,7 @@ func (r UserRepository) ByID(id int64) (*user.User, error) {
 	return nil, errors.New("user not found")
 }
 
-func (r UserRepository) One(filter []builder.FilterCondition, sorts []builder.SortOrder) (*user.User, error) {
+func (r UserRepository) One(filter *[]builder.FilterCondition, sorts *[]builder.SortOrder) (*user.User, error) {
 	var _validFields = map[string]bool{
 		"id":     true,
 		"phone":  true,
@@ -70,8 +70,10 @@ func (r UserRepository) One(filter []builder.FilterCondition, sorts []builder.So
 		"status": true,
 	}
 
-	if err := builder.ValidateFilter(filter, _validFields); err != nil {
-		return nil, err
+	if filter != nil && len(*filter) > 0 {
+		if err := builder.ValidateFilter(*filter, _validFields); err != nil {
+			return nil, err
+		}
 	}
 
 	query, args := builder.BuildSQLQuery(UserTableName, filter, sorts, true)
@@ -91,7 +93,7 @@ func (r UserRepository) One(filter []builder.FilterCondition, sorts []builder.So
 	}
 	return nil, errors.New("user not found")
 }
-func (r UserRepository) List(filter []builder.FilterCondition, sorts []builder.SortOrder) (*[]user.User, error) {
+func (r UserRepository) List(filter *[]builder.FilterCondition, sorts *[]builder.SortOrder) ([]*user.User, error) {
 	var _validFields = map[string]bool{
 		"id":     true,
 		"phone":  true,
@@ -101,12 +103,14 @@ func (r UserRepository) List(filter []builder.FilterCondition, sorts []builder.S
 	var u *user.User
 	var res *sql.Rows
 	var err error
-	if err := builder.ValidateFilter(filter, _validFields); err != nil {
-		return nil, err
+	if filter != nil && len(*filter) > 0 {
+		if err = builder.ValidateFilter(*filter, _validFields); err != nil {
+			return nil, err
+		}
 	}
 
 	query, args := builder.BuildSQLQuery(UserTableName, filter, sorts, false)
-	users := make([]user.User, 0)
+	users := make([]*user.User, 0)
 	smt, err := builder.GetDB().Prepare(query)
 	if err != nil {
 		return nil, errors.Wrap(err, "list user prepare error")
@@ -122,9 +126,9 @@ func (r UserRepository) List(filter []builder.FilterCondition, sorts []builder.S
 		if err != nil {
 			return nil, errors.Wrap(err, "list user cast error")
 		}
-		users = append(users, *u)
+		users = append(users, u)
 	}
-	return &users, nil
+	return users, nil
 }
 
 func (r UserRepository) ByIdentity(login string, password string) (*user.User, error) {

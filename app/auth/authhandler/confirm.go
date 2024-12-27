@@ -18,7 +18,7 @@ import (
 )
 
 type ConfirmRequest struct {
-	Token string `query:"token" json:"token" validate:"required"`
+	Token string `query:"token" json:"token" validate:"required,jwt"`
 }
 
 func Confirm(c echo.Context) error {
