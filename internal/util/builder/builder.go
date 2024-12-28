@@ -315,9 +315,12 @@ func Paginator[T any](
 	rowsChan := make(chan []*T, 1)
 	countChan := make(chan int)
 	errChan := make(chan error, 2)
+	rStop := false
+	cStop := false
+	eStop := false
 
 	wg.Add(2) //nolint:nolintlint,mnd 2 requests list and count
-	fCount := func(filter *[]page.FilterCondition, wg *sync.WaitGroup) {
+	fCount := func(filter *[]page.FilterCondition, wg *sync.WaitGroup, countChan chan int) {
 		defer wg.Done()
 		c, err := Count(table, filter)
 		if err != nil {
@@ -333,7 +336,7 @@ func Paginator[T any](
 		sorts *[]page.SortOrder,
 		paginator *page.Pagination,
 		wg *sync.WaitGroup,
-
+		rowsChan chan []*T,
 	) {
 		defer wg.Done()
 		res, err := List(table, filter, sorts, mapper, paginator)
@@ -346,22 +349,39 @@ func Paginator[T any](
 		close(rowsChan)
 	}
 
-	go fCount(filter, &wg)
-	go fList(filter, sorts, paginator, &wg)
+	go fCount(filter, &wg, countChan)
+	go fList(filter, sorts, paginator, &wg, rowsChan)
 
 	go func() {
 		wg.Wait()
 		close(errChan)
 	}()
 
-	for i := 0; i < 2; i++ {
+	for {
+		if (rStop && cStop) || eStop {
+			break
+		}
 		select {
 		case r := <-rowsChan:
+			if rStop {
+				break
+			}
 			rows = r
+			rStop = true
 		case c := <-countChan:
+			if cStop {
+				break
+			}
 			count = c
+			cStop = true
 		case e := <-errChan:
-			receivedErrors = append(receivedErrors, e)
+			if eStop {
+				break
+			}
+			if e != nil {
+				receivedErrors = append(receivedErrors, e)
+				eStop = true
+			}
 		}
 	}
 	if len(receivedErrors) > 0 {
