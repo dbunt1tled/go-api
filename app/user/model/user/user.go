@@ -1,7 +1,7 @@
 package user
 
 import (
-	"database/sql"
+	"go_echo/internal/util/type/dbtype"
 	"go_echo/internal/util/type/roles"
 	"go_echo/internal/util/type/timestamp"
 	"strings"
@@ -15,9 +15,9 @@ type User struct {
 	PhoneNumber string              `json:"phoneNumber" jsonapi:"attr,phoneNumber"`
 	Password    string              `json:"password"`
 	Status      Status              `json:"status" jsonapi:"attr,status"`
-	Hash        sql.NullString      `json:"hash" jsonapi:"attr,hash"`
+	Hash        dbtype.NilString    `json:"hash" jsonapi:"attr,hash"`
 	Roles       roles.Roles         `json:"roles" jsonapi:"attr,roles"`
-	ConfirmedAt sql.NullTime        `json:"confirmed_at" jsonapi:"attr,confirmedAt"`
+	ConfirmedAt dbtype.NilTime      `json:"confirmed_at" jsonapi:"attr,confirmedAt"`
 	CreatedAt   timestamp.Timestamp `json:"created_at" jsonapi:"attr,createdAt"`
 	UpdatedAt   timestamp.Timestamp `json:"updated_at" jsonapi:"attr,updatedAt"`
 }
