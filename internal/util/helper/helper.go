@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"go_echo/internal/config/locale"
+	"go_echo/internal/util/builder/page"
+	"go_echo/internal/util/type/checker"
 	jf "go_echo/internal/util/type/json"
 	"html/template"
 	"reflect"
@@ -19,18 +21,6 @@ import (
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	dynamicstruct "github.com/ompluscator/dynamic-struct"
 )
-
-func isVarType(value interface{}, targetType reflect.Type) bool {
-	return reflect.TypeOf(value) == targetType
-}
-
-func IsSliceVarOfType(slice interface{}, elemType reflect.Type) bool {
-	t := reflect.TypeOf(slice)
-	if t.Kind() != reflect.Slice {
-		return false
-	}
-	return t.Elem() == elemType
-}
 
 func ValidationErrorString(validationErrors validator.ValidationErrors) map[string]interface{} {
 	var fName string
@@ -62,26 +52,37 @@ func ValidationErrorString(validationErrors validator.ValidationErrors) map[stri
 	return errors
 }
 
-func JSONAPIModel[T interface{} | map[string]interface{}](r *echo.Response, models T, status int) error {
+func JSONAPIModel[
+	T interface{} |
+		*map[string]interface{} |
+		[]*map[string]interface{} |
+		page.Paginate[map[string]interface{}],
+](r *echo.Response, models T, status int) error {
 	r.Header().Set(echo.HeaderContentType, jsonapi.MediaType)
 	r.WriteHeader(status)
-	// e := jsonapi.MarshalPayload(r, models)
-	//
-	// if e != nil {
-	// 	panic(e.Error()) // TODO logging
-	// }
-
-	p, e := jsonapi.Marshal(models)
-	if e != nil {
-		return e
+	pg := checker.VarToPaginate(models)
+	if pg != nil {
+		m := (*pg).GetModels()
+		p, e := jsonapi.Marshal(m)
+		if e != nil {
+			return e
+		}
+		payload, _ := p.(*jsonapi.ManyPayload)
+		payload.Meta = &jsonapi.Meta{
+			"total":       (*pg).GetTotal(),
+			"perPage":     (*pg).GetPerPage(),
+			"currentPage": (*pg).GetCurrentPage(),
+			"totalPages":  (*pg).GetTotalPages(),
+		}
+		e = json.NewEncoder(r).Encode(payload)
+		if e != nil {
+			return e
+		}
+		return nil
 	}
-	payload, _ := p.(*jsonapi.ManyPayload)
-	payload.Meta = &jsonapi.Meta{
-		"total": len(payload.Data),
-	}
-	e = json.NewEncoder(r).Encode(payload)
+	e := jsonapi.MarshalPayload(r, models)
 	if e != nil {
-		return e
+		panic(e.Error()) // TODO logging
 	}
 	return nil
 }
@@ -176,7 +177,7 @@ func StructToMap(obj interface{}) (map[string]interface{}, error) {
 	err = json.Unmarshal(data, &newMap)
 	return newMap, err
 }
-func StructToJsonField(obj interface{}) (jf.JsonField, error) {
+func StructToJSONField(obj interface{}) (jf.JsonField, error) {
 	m, err := StructToMap(obj)
 	if err != nil {
 		return nil, err

@@ -9,6 +9,7 @@ import (
 	"go_echo/internal/dto"
 	"go_echo/internal/lib/jsonerror"
 	"go_echo/internal/util/builder"
+	"go_echo/internal/util/builder/page"
 	"go_echo/internal/util/helper"
 	"net/http"
 
@@ -25,10 +26,12 @@ type UserNotificationRequest struct {
 func UserNotificationList(c echo.Context) error {
 	var (
 		err error
-		un  []*usernotification.UserNotification
+		u   *user.User
+		p   page.Paginate[usernotification.UserNotification]
 		req UserNotificationRequest
 	)
-	
+
+	u = c.Get("user").(*user.User) //nolint:errcheck //auth middleware
 	if err = c.Bind(&req); err != nil {
 		return jsonerror.ErrorUnprocessableEntity(
 			c,
@@ -49,10 +52,16 @@ func UserNotificationList(c echo.Context) error {
 		return jsonerror.ErrorUnprocessableEntity(c, err, app_error.Err422UserNotificationValidateError)
 	}
 
-	un, err = service.UserNotificationRepository{}.List(&[]builder.FilterCondition{
-		builder.Eq("user_id", c.Get("user").(*user.User).ID),
+	p, err = service.UserNotificationRepository{}.Paginator(&[]page.FilterCondition{
+		builder.Eq("user_id", u.ID),
 		builder.Eq("status", helper.GetVarValue(req.Status)),
-	}, builder.GetSortOrder(req.Pagination.Sort))
+	},
+		builder.GetSortOrder(req.Pagination.Sort),
+		builder.GetPagination(req.Pagination),
+	)
+	if err != nil {
+		return jsonerror.ErrorUnprocessableEntity(c, err, app_error.Err422UserNotificationQueryError)
+	}
 
-	return helper.JSONAPIModel(c.Response(), un, http.StatusOK)
+	return helper.JSONAPIModel(c.Response(), p, http.StatusOK)
 }

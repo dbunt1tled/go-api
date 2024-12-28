@@ -31,6 +31,7 @@ const (
 	Err422UserNotificationValidateMapError  = 42200020
 	Err422UserNotificationValidateRuleError = 42200021
 	Err422UserNotificationValidateError     = 42200022
+	Err422UserNotificationQueryError        = 42200023
 
 	Err401AuthEmptyTokenError   = 40100001
 	Err401TokenError            = 40100002

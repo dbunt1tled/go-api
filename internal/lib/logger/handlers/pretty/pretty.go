@@ -3,7 +3,7 @@ package pretty
 import (
 	"context"
 	"encoding/json"
-	"go_echo/internal/util/helper"
+	"go_echo/internal/util/type/checker"
 	"io"
 	stdLog "log"
 	"log/slog"
@@ -52,7 +52,7 @@ func (h *PrettyHandler) Handle(_ context.Context, r slog.Record) error {
 
 	r.Attrs(func(a slog.Attr) bool {
 		field := a.Value.Any()
-		if r.NumAttrs() == 1 && a.Key == "!BADKEY" && helper.IsSliceVarOfType(field, reflect.TypeOf(slog.Attr{})) {
+		if r.NumAttrs() == 1 && a.Key == "!BADKEY" && checker.IsSliceVarOfType(field, reflect.TypeOf(slog.Attr{})) {
 			slice := reflect.ValueOf(field)
 			fields = make(map[string]interface{}, slice.Len())
 			for _, item := range slice.Interface().([]slog.Attr) {

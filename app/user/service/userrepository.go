@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"go_echo/app/user/model/user"
 	"go_echo/internal/util/builder"
+	"go_echo/internal/util/builder/page"
 	"go_echo/internal/util/hasher"
 	"go_echo/internal/util/helper"
 	"go_echo/internal/util/type/roles"
@@ -46,23 +47,27 @@ type CreateUserParams struct {
 }
 
 func (r UserRepository) ByID(id int64) (*user.User, error) {
-	smt, err := builder.GetDB().Prepare("SELECT * FROM users WHERE id = ? LIMIT 1")
-	if err != nil {
-		return nil, errors.Wrap(err, "byId user prepare error")
-	}
-	defer smt.Close()
-	res, err := smt.Query(id)
-	if err != nil {
-		return nil, errors.Wrap(err, "byId user error")
-	}
-	defer res.Close()
-	if res.Next() {
-		return castUser(res)
-	}
-	return nil, errors.New("user not found")
+	return builder.ByID[user.User](
+		UserTableName,
+		id,
+		castUser,
+	)
+}
+func (r UserRepository) Paginator(
+	filter *[]page.FilterCondition,
+	sorts *[]page.SortOrder,
+	paginator *page.Pagination,
+) (page.Paginate[user.User], error) {
+	return builder.Paginator[user.User](
+		UserTableName,
+		filter,
+		sorts,
+		paginator,
+		castUser,
+	)
 }
 
-func (r UserRepository) One(filter *[]builder.FilterCondition, sorts *[]builder.SortOrder) (*user.User, error) {
+func (r UserRepository) One(filter *[]page.FilterCondition, sorts *[]page.SortOrder) (*user.User, error) {
 	var _validFields = map[string]bool{
 		"id":     true,
 		"phone":  true,
@@ -76,32 +81,18 @@ func (r UserRepository) One(filter *[]builder.FilterCondition, sorts *[]builder.
 		}
 	}
 
-	query, args := builder.BuildSQLQuery(UserTableName, filter, sorts, true)
-
-	smt, err := builder.GetDB().Prepare(query)
-	if err != nil {
-		return nil, errors.Wrap(err, "get user prepare error")
-	}
-	defer smt.Close()
-	res, err := smt.Query(args...)
-	if err != nil {
-		return nil, errors.Wrap(err, "get user error")
-	}
-	defer res.Close()
-	if res.Next() {
-		return castUser(res)
-	}
-	return nil, errors.New("user not found")
+	return builder.One(UserTableName, filter, sorts, castUser)
 }
-func (r UserRepository) List(filter *[]builder.FilterCondition, sorts *[]builder.SortOrder) ([]*user.User, error) {
+func (r UserRepository) List(
+	filter *[]page.FilterCondition,
+	sorts *[]page.SortOrder,
+) ([]*user.User, error) {
 	var _validFields = map[string]bool{
 		"id":     true,
 		"phone":  true,
 		"email":  true,
 		"status": true,
 	}
-	var u *user.User
-	var res *sql.Rows
 	var err error
 	if filter != nil && len(*filter) > 0 {
 		if err = builder.ValidateFilter(*filter, _validFields); err != nil {
@@ -109,26 +100,7 @@ func (r UserRepository) List(filter *[]builder.FilterCondition, sorts *[]builder
 		}
 	}
 
-	query, args := builder.BuildSQLQuery(UserTableName, filter, sorts, false)
-	users := make([]*user.User, 0)
-	smt, err := builder.GetDB().Prepare(query)
-	if err != nil {
-		return nil, errors.Wrap(err, "list user prepare error")
-	}
-	defer smt.Close()
-	res, err = smt.Query(args...)
-	if err != nil {
-		return nil, errors.Wrap(err, "list user error")
-	}
-	defer res.Close()
-	for res.Next() {
-		u, err = castUser(res)
-		if err != nil {
-			return nil, errors.Wrap(err, "list user cast error")
-		}
-		users = append(users, u)
-	}
-	return users, nil
+	return builder.List(UserTableName, filter, sorts, castUser, nil)
 }
 
 func (r UserRepository) ByIdentity(login string, password string) (*user.User, error) {
