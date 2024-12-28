@@ -3,7 +3,6 @@ package helper
 import (
 	"encoding/json"
 	"fmt"
-	"go_echo/internal/config/locale"
 	"go_echo/internal/util/builder/page"
 	"go_echo/internal/util/type/checker"
 	jf "go_echo/internal/util/type/json"
@@ -22,9 +21,12 @@ import (
 	dynamicstruct "github.com/ompluscator/dynamic-struct"
 )
 
-func ValidationErrorString(validationErrors validator.ValidationErrors) map[string]interface{} {
+func ValidationErrorString(
+	ctx echo.Context,
+	validationErrors validator.ValidationErrors,
+) map[string]interface{} {
 	var fName string
-	localizer := locale.GetLocalizerInstance()
+	localizer := ctx.Get("localizer").(*i18n.Localizer)
 	errors := make(map[string]interface{})
 	defaultMessage := localizer.MustLocalize(&i18n.LocalizeConfig{
 		MessageID: "default_validation_message",

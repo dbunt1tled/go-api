@@ -42,7 +42,7 @@ func Confirm(c echo.Context) error {
 		if errors.As(err, &e) {
 			return jsonerror.ErrorUnprocessableEntityMap(
 				c,
-				helper.ValidationErrorString(e),
+				helper.ValidationErrorString(c, e),
 				app_error.Err422ConfirmValidateRuleError,
 			)
 		}
