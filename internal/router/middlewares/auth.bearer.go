@@ -5,6 +5,7 @@ import (
 	"go_echo/app/user/service"
 	"go_echo/internal/config/app_error"
 	"go_echo/internal/lib/jsonerror"
+	"go_echo/internal/util/jwt"
 	"net/http"
 	"strings"
 
@@ -16,29 +17,29 @@ const BearerSchema = "Bearer"
 
 func AuthBearer(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		// var authToken string
-		// var isEmpty bool
-		// authToken, isEmpty = fromAuthHeader(c)
-		// if isEmpty {
-		// 	authToken, isEmpty = fromQueryParam(c)
-		// 	if isEmpty {
-		// 		return &jsonerror.ExceptionErr{
-		// 			Inner:  errors.New("unauthorized"),
-		// 			Code:   app_error.Err401AuthEmptyTokenError,
-		// 			Status: http.StatusUnauthorized,
-		// 		}
-		// 	}
-		// }
-		//
-		// token, err := jwt.JWToken{}.Decode(authToken, true)
-		// if err != nil {
-		// 	return &jsonerror.ExceptionErr{
-		// 		Inner:  errors.New("unauthorized"),
-		// 		Code:   app_error.Err401TokenError,
-		// 		Status: http.StatusUnauthorized,
-		// 	}
-		// }
-		u, err := service.UserRepository{}.ByID(3) //nolint:nolintlint,errcheck
+		var authToken string
+		var isEmpty bool
+		authToken, isEmpty = fromAuthHeader(c)
+		if isEmpty {
+			authToken, isEmpty = fromQueryParam(c)
+			if isEmpty {
+				return &jsonerror.ExceptionErr{
+					Inner:  errors.New("unauthorized"),
+					Code:   app_error.Err401AuthEmptyTokenError,
+					Status: http.StatusUnauthorized,
+				}
+			}
+		}
+
+		token, err := jwt.JWToken{}.Decode(authToken, true)
+		if err != nil {
+			return &jsonerror.ExceptionErr{
+				Inner:  errors.New("unauthorized"),
+				Code:   app_error.Err401TokenError,
+				Status: http.StatusUnauthorized,
+			}
+		}
+		u, err := service.UserRepository{}.ByID(int64(token["iss"].(float64))) //nolint:nolintlint,errcheck
 		if err != nil {
 			return &jsonerror.ExceptionErr{
 				Inner:  errors.New("unauthorized"),
