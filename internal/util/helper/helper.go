@@ -3,7 +3,8 @@ package helper
 import (
 	"encoding/json"
 	"fmt"
-	"go_echo/internal/config/locale"
+	"go_echo/internal/util/builder/page"
+	"go_echo/internal/util/type/checker"
 	jf "go_echo/internal/util/type/json"
 	"html/template"
 	"reflect"
@@ -20,21 +21,12 @@ import (
 	dynamicstruct "github.com/ompluscator/dynamic-struct"
 )
 
-func isVarType(value interface{}, targetType reflect.Type) bool {
-	return reflect.TypeOf(value) == targetType
-}
-
-func IsSliceVarOfType(slice interface{}, elemType reflect.Type) bool {
-	t := reflect.TypeOf(slice)
-	if t.Kind() != reflect.Slice {
-		return false
-	}
-	return t.Elem() == elemType
-}
-
-func ValidationErrorString(validationErrors validator.ValidationErrors) map[string]interface{} {
+func ValidationErrorString(
+	ctx echo.Context,
+	validationErrors validator.ValidationErrors,
+) map[string]interface{} {
 	var fName string
-	localizer := locale.GetLocalizerInstance()
+	localizer := ctx.Get("localizer").(*i18n.Localizer)
 	errors := make(map[string]interface{})
 	defaultMessage := localizer.MustLocalize(&i18n.LocalizeConfig{
 		MessageID: "default_validation_message",
@@ -62,9 +54,34 @@ func ValidationErrorString(validationErrors validator.ValidationErrors) map[stri
 	return errors
 }
 
-func JSONAPIModel(r *echo.Response, models interface{}, status int) error {
+func JSONAPIModel[
+	T interface{} |
+		*map[string]interface{} |
+		[]*map[string]interface{} |
+		page.Paginate[map[string]interface{}],
+](r *echo.Response, models T, status int) error {
 	r.Header().Set(echo.HeaderContentType, jsonapi.MediaType)
 	r.WriteHeader(status)
+	pg := checker.VarToPaginate(models)
+	if pg != nil {
+		m := (*pg).GetModels()
+		p, e := jsonapi.Marshal(m)
+		if e != nil {
+			return e
+		}
+		payload, _ := p.(*jsonapi.ManyPayload)
+		payload.Meta = &jsonapi.Meta{
+			"total":       (*pg).GetTotal(),
+			"perPage":     (*pg).GetPerPage(),
+			"currentPage": (*pg).GetCurrentPage(),
+			"totalPages":  (*pg).GetTotalPages(),
+		}
+		e = json.NewEncoder(r).Encode(payload)
+		if e != nil {
+			return e
+		}
+		return nil
+	}
 	e := jsonapi.MarshalPayload(r, models)
 	if e != nil {
 		panic(e.Error()) // TODO logging
@@ -79,6 +96,13 @@ func AssignFromSlice[T any](slice []T, vars ...*T) {
 			v.Elem().Set(reflect.ValueOf(slice[i]))
 		}
 	}
+}
+
+func GetLocalizer(c echo.Context) *i18n.Localizer {
+	if localizer, ok := c.Get("localizer").(*i18n.Localizer); ok {
+		return localizer
+	}
+	return nil
 }
 
 func GetTemplate(templ string) *template.Template {
@@ -162,7 +186,7 @@ func StructToMap(obj interface{}) (map[string]interface{}, error) {
 	err = json.Unmarshal(data, &newMap)
 	return newMap, err
 }
-func StructToJsonField(obj interface{}) (jf.JsonField, error) {
+func StructToJSONField(obj interface{}) (jf.JsonField, error) {
 	m, err := StructToMap(obj)
 	if err != nil {
 		return nil, err
@@ -176,4 +200,16 @@ func MapToByte(obj map[string]interface{}) ([]byte, error) {
 		return nil, err
 	}
 	return data, nil
+}
+
+func GetVarValue(v any) any {
+	val := reflect.ValueOf(v)
+
+	if val.Kind() == reflect.Ptr {
+		if val.IsNil() {
+			return nil
+		}
+		return val.Elem().Interface()
+	}
+	return v
 }

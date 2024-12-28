@@ -28,6 +28,11 @@ const (
 
 	Err422HomeGeneralError = 42200019
 
+	Err422UserNotificationValidateMapError  = 42200020
+	Err422UserNotificationValidateRuleError = 42200021
+	Err422UserNotificationValidateError     = 42200022
+	Err422UserNotificationQueryError        = 42200023
+
 	Err401AuthEmptyTokenError   = 40100001
 	Err401TokenError            = 40100002
 	Err401UserNotFoundError     = 40100003

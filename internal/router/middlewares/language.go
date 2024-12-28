@@ -4,6 +4,7 @@ import (
 	"go_echo/internal/config/locale"
 
 	"github.com/labstack/echo/v4"
+	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"golang.org/x/text/language"
 )
 
@@ -23,7 +24,8 @@ func Language() echo.MiddlewareFunc {
 					l = language.English
 				}
 			}
-			locale.InitLocalizerInstance(l, l)
+			localizerInstance := i18n.NewLocalizer(locale.GetLocaleBundleInstance(), l.String(), l.String())
+			c.Set("localizer", localizerInstance)
 
 			return next(c)
 		}

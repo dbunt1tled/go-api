@@ -18,7 +18,7 @@ import (
 )
 
 type ConfirmRequest struct {
-	Token string `query:"token" json:"token" validate:"required"`
+	Token string `query:"token" json:"token" validate:"required,jwt"`
 }
 
 func Confirm(c echo.Context) error {
@@ -42,7 +42,7 @@ func Confirm(c echo.Context) error {
 		if errors.As(err, &e) {
 			return jsonerror.ErrorUnprocessableEntityMap(
 				c,
-				helper.ValidationErrorString(e),
+				helper.ValidationErrorString(c, e),
 				app_error.Err422ConfirmValidateRuleError,
 			)
 		}

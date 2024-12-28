@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"go_echo/app/usernotification/model/usernotification"
 	"go_echo/internal/util/builder"
+	"go_echo/internal/util/builder/page"
 	"go_echo/internal/util/helper"
 	"go_echo/internal/util/type/json"
 	"strings"
@@ -27,89 +28,81 @@ type UserNotificationParams struct {
 }
 
 func (r UserNotificationRepository) ByID(id int64) (*usernotification.UserNotification, error) {
-	smt, err := builder.GetDB().Prepare("SELECT * FROM user_notifications WHERE id = ? LIMIT 1")
-	if err != nil {
-		return nil, errors.Wrap(err, "byId user prepare error")
-	}
-	defer smt.Close()
-	res, err := smt.Query(id)
-	if err != nil {
-		return nil, errors.Wrap(err, "byId user error")
-	}
-	defer res.Close()
-	if res.Next() {
-		return castUserNotification(res)
-	}
-	return nil, errors.New("user not found")
+	return builder.ByID[usernotification.UserNotification](
+		UserNotificationTableName,
+		id,
+		castUserNotification,
+	)
+}
+
+func (r UserNotificationRepository) Paginator(
+	filter *[]page.FilterCondition,
+	sorts *[]page.SortOrder,
+	paginator *page.Pagination,
+) (page.Paginate[usernotification.UserNotification], error) {
+	return builder.Paginator[usernotification.UserNotification](
+		UserNotificationTableName,
+		filter,
+		sorts,
+		paginator,
+		castUserNotification,
+	)
 }
 
 func (r UserNotificationRepository) One(
-	filter []builder.FilterCondition,
-	sorts []builder.SortOrder,
+	filter *[]page.FilterCondition,
+	sorts *[]page.SortOrder,
 ) (*usernotification.UserNotification, error) {
 	var _validFields = map[string]bool{
-		"id":     true,
-		"userId": true,
-		"status": true,
+		"id":      true,
+		"user_id": true,
+		"status":  true,
 	}
 
-	if err := builder.ValidateFilter(filter, _validFields); err != nil {
-		return nil, err
-	}
-
-	query, args := builder.BuildSQLQuery(UserNotificationTableName, filter, sorts, true)
-
-	smt, err := builder.GetDB().Prepare(query)
-	if err != nil {
-		return nil, errors.Wrap(err, "get user prepare error")
-	}
-	defer smt.Close()
-	res, err := smt.Query(args...)
-	if err != nil {
-		return nil, errors.Wrap(err, "get user error")
-	}
-	defer res.Close()
-	if res.Next() {
-		return castUserNotification(res)
-	}
-	return nil, errors.New("user not found")
-}
-func (r UserNotificationRepository) List(
-	filter []builder.FilterCondition,
-	sorts []builder.SortOrder,
-) (*[]usernotification.UserNotification, error) {
-	var _validFields = map[string]bool{
-		"id":     true,
-		"userId": true,
-		"status": true,
-	}
-	var u *usernotification.UserNotification
-	var res *sql.Rows
-	var err error
-	if err = builder.ValidateFilter(filter, _validFields); err != nil {
-		return nil, err
-	}
-
-	query, args := builder.BuildSQLQuery(UserNotificationTableName, filter, sorts, false)
-	userNotifications := make([]usernotification.UserNotification, 0)
-	smt, err := builder.GetDB().Prepare(query)
-	if err != nil {
-		return nil, errors.Wrap(err, "list user prepare error")
-	}
-	defer smt.Close()
-	res, err = smt.Query(args...)
-	if err != nil {
-		return nil, errors.Wrap(err, "list user error")
-	}
-	defer res.Close()
-	for res.Next() {
-		u, err = castUserNotification(res)
-		if err != nil {
-			return nil, errors.Wrap(err, "list user cast error")
+	if filter != nil && len(*filter) > 0 {
+		if err := builder.ValidateFilter(*filter, _validFields); err != nil {
+			return nil, err
 		}
-		userNotifications = append(userNotifications, *u)
 	}
-	return &userNotifications, nil
+
+	return builder.One(UserNotificationTableName, filter, sorts, castUserNotification)
+}
+
+func (r UserNotificationRepository) List(
+	filter *[]page.FilterCondition,
+	sorts *[]page.SortOrder,
+) ([]*usernotification.UserNotification, error) {
+	var _validFields = map[string]bool{
+		"id":      true,
+		"user_id": true,
+		"status":  true,
+	}
+	var err error
+	if filter != nil && len(*filter) > 0 {
+		if err = builder.ValidateFilter(*filter, _validFields); err != nil {
+			return nil, err
+		}
+	}
+	return builder.List(UserNotificationTableName, filter, sorts, castUserNotification, nil)
+}
+
+func (r UserNotificationRepository) Count(
+	filter *[]page.FilterCondition,
+) (int, error) {
+	var _validFields = map[string]bool{
+		"id":      true,
+		"user_id": true,
+		"status":  true,
+	}
+	var (
+		err error
+	)
+	if filter != nil && len(*filter) > 0 {
+		if err = builder.ValidateFilter(*filter, _validFields); err != nil {
+			return 0, err
+		}
+	}
+	return builder.Count(UserNotificationTableName, filter)
 }
 
 func (r UserNotificationRepository) Create(params UserNotificationParams) (*usernotification.UserNotification, error) {
@@ -215,14 +208,14 @@ func (r UserNotificationRepository) Update(
 }
 
 func castUserNotification(res *sql.Rows) (*usernotification.UserNotification, error) {
-	u := usernotification.UserNotification{}
+	un := usernotification.UserNotification{}
 	err := res.Scan(
-		&u.ID,
-		&u.UserId,
-		&u.Data,
-		&u.Status,
-		&u.UpdatedAt,
-		&u.CreatedAt,
+		&un.ID,
+		&un.UserID,
+		&un.Data,
+		&un.Status,
+		&un.UpdatedAt,
+		&un.CreatedAt,
 	)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -231,5 +224,5 @@ func castUserNotification(res *sql.Rows) (*usernotification.UserNotification, er
 		return nil, errors.Wrap(err, "user notification get by id error")
 	}
 
-	return &u, nil
+	return &un, nil
 }

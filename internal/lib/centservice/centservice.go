@@ -27,7 +27,7 @@ func SendUserNotification(message UserNotification) (gocent.PublishResult, error
 	cent := cntrfgclient.GetInstance()
 	ctx := context.Background()
 
-	dt, err := helper.StructToJsonField(message)
+	dt, err := helper.StructToJSONField(message)
 	if err != nil {
 		return gocent.PublishResult{}, errors.Wrap(err, "Error convert User Notification message to map")
 	}
