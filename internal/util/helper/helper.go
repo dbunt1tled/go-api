@@ -96,6 +96,13 @@ func AssignFromSlice[T any](slice []T, vars ...*T) {
 	}
 }
 
+func GetLocalizer(c echo.Context) *i18n.Localizer {
+	if localizer, ok := c.Get("localizer").(*i18n.Localizer); ok {
+		return localizer
+	}
+	return nil
+}
+
 func GetTemplate(templ string) *template.Template {
 	basePath := "./resources/templates/"
 	return Must(template.New(templ).ParseFiles([]string{
