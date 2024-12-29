@@ -12,7 +12,7 @@ type Config struct {
 	AppName     string `env:"APP_NAME" env-required:"true"`
 	AppURL      string `env:"APP_URL" env-default:"http://localhost"`
 	Env         string `env:"ENV" env-default:"dev"`
-	Debug       bool   `env:"DEBUG" env-default:"false"`
+	Debug       Debug
 	Profiling   bool   `env:"PROFILING" env-default:"false"`
 	DatabaseDSN string `env:"DATABASE_DSN" env-required:"true"`
 	HTTPServer  HTTPServer
@@ -22,6 +22,13 @@ type Config struct {
 	Static      Static
 	RabbitMQ    RabbitMQ
 	Centrifugo  Centrifugo
+}
+
+type Debug struct {
+	Debug        bool `env:"DEBUG" env-default:"false"`
+	DebugRequest bool `env:"DEBUG_REQUEST" env-default:"false"`
+	DebugBody    bool `env:"DEBUG_BODY" env-default:"false"`
+	Profiling    bool `env:"PROFILING" env-default:"false"`
 }
 
 type Centrifugo struct {

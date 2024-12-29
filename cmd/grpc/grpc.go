@@ -22,7 +22,7 @@ import (
 func main() {
 	cfg := env.GetConfigInstance()
 	locale.GetLocaleBundleInstance()
-	logger.InitLogger(cfg.Env, cfg.Debug)
+	logger.InitLogger(cfg.Env, cfg.Debug.Debug)
 	log := logger.GetLoggerInstance()
 	validate.GetValidateInstance()
 	profiler.SetProfiler()

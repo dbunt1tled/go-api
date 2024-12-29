@@ -61,10 +61,6 @@ func UserNotificationRoutes(server *echo.Echo) {
 }
 
 func setGeneralMiddlewares(server *echo.Echo, cfg *env.Config) {
-	server.Use(middleware.Recover())
-	server.Use(middleware.Gzip())
-	server.Use(middlewares.Base)
-	server.Use(middlewares.Language())
 	server.Use(middleware.RequestIDWithConfig(middleware.RequestIDConfig{
 		Generator: func() string {
 			var u string
@@ -78,9 +74,12 @@ func setGeneralMiddlewares(server *echo.Echo, cfg *env.Config) {
 			return u
 		},
 	}))
-	if cfg.Debug {
-		server.Use(middleware.Logger())
-	}
+	server.Use(middleware.Recover())
+	server.Use(middleware.Gzip())
+
+	server.Use(middlewares.Base)
+	server.Use(middlewares.Language())
+	server.Use(middlewares.LogRequest)
 	server.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins:     strings.Split(cfg.CORS.AccessControlAllowOrigin, ","),
 		AllowMethods:     strings.Split(cfg.CORS.AccessControlAllowMethods, ","),

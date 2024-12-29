@@ -53,7 +53,7 @@ func NewErrorMap(err map[string]interface{}, code int, status int, stack *string
 	pc, _, line, _ := runtime.Caller(2)
 	details := runtime.FuncForPC(pc)
 	var source Source
-	if (cfg.Debug) && details != nil {
+	if (cfg.Debug.Debug) && details != nil {
 		if stack != nil {
 			source = Source{Pointer: *stack}
 		} else {

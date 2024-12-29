@@ -22,7 +22,7 @@ import (
 func main() {
 	cfg := env.GetConfigInstance()
 	locale.GetLocaleBundleInstance()
-	logger.InitLogger(cfg.Env, cfg.Debug)
+	logger.InitLogger(cfg.Env, cfg.Debug.Debug)
 	log := logger.GetLoggerInstance()
 	validate.GetValidateInstance()
 	profiler.SetProfiler()
@@ -30,7 +30,7 @@ func main() {
 	defer storage.Close()
 	httpServer := echo.New()
 	httpServer.HideBanner = true
-	httpServer.Debug = cfg.Debug
+	httpServer.Debug = cfg.Debug.Debug
 	httpServer.HTTPErrorHandler = handler.APIErrorHandler
 	router.SetupRoutes(httpServer)
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
