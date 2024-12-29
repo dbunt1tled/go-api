@@ -10,6 +10,7 @@ import (
 	"go_echo/internal/lib/profiler"
 	"go_echo/internal/router"
 	"go_echo/internal/storage"
+	"go_echo/internal/util/sanitizer"
 	"net/http"
 	"os"
 	"os/signal"
@@ -25,6 +26,7 @@ func main() {
 	logger.InitLogger(cfg.Env, cfg.Debug.Debug)
 	log := logger.GetLoggerInstance()
 	validate.GetValidateInstance()
+	sanitizer.GetSanitizerInstance()
 	profiler.SetProfiler()
 	storage.GetInstance()
 	defer storage.Close()

@@ -76,7 +76,6 @@ func setGeneralMiddlewares(server *echo.Echo, cfg *env.Config) {
 	}))
 	server.Use(middleware.Recover())
 	server.Use(middleware.Gzip())
-
 	server.Use(middlewares.Base)
 	server.Use(middlewares.Language())
 	server.Use(middlewares.LogRequest)

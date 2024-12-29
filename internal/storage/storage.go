@@ -10,6 +10,13 @@ import (
 	"github.com/pkg/errors"
 )
 
+const (
+	maxOpenConns    = 60
+	connMaxLifetime = 2
+	maxIdleConns    = 30
+	connMaxIdleTime = 20
+)
+
 var instance *Mysql //nolint:gochecknoglobals // singleton
 
 func GetInstance() *Mysql {
@@ -37,9 +44,10 @@ func Open() (*Mysql, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "db open error")
 	}
-	db.SetConnMaxLifetime(time.Minute * 3) //nolint:mnd // TODO need to choose the optimal value
-	db.SetMaxOpenConns(100)                //nolint:mnd // TODO need to choose the optimal value
-	db.SetMaxIdleConns(25)                 //nolint:mnd // TODO need to choose the optimal value
+	db.SetConnMaxLifetime(time.Minute * connMaxLifetime)
+	db.SetConnMaxIdleTime(time.Minute * connMaxIdleTime)
+	db.SetMaxOpenConns(maxOpenConns)
+	db.SetMaxIdleConns(maxIdleConns)
 	err = db.Ping()
 	if err != nil {
 		return nil, errors.Wrap(err, "db ping error")

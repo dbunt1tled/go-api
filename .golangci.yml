@@ -12,6 +12,15 @@ run:
   # Default: 1m
   timeout: 3m
 
+#  skip-dirs:
+#    - vendor/
+#    -
+#  skip-files:
+#    - "_easyjson.go"
+#    - ".pb.go"
+#    - ".svc.go"
+
+  modules-download-mode: readonly
 
 # This file contains only configs which differ from defaults.
 # All possible options can be found here https://github.com/golangci/golangci-lint/blob/master/.golangci.reference.yml

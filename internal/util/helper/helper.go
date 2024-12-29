@@ -1,6 +1,7 @@
 package helper
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"go_echo/internal/util/builder/page"
@@ -212,4 +213,21 @@ func GetVarValue(v any) any {
 		return val.Elem().Interface()
 	}
 	return v
+}
+
+func RequestID(c echo.Context) string {
+	id := c.Request().Header.Get(echo.HeaderXRequestID)
+	if id == "" {
+		id = c.Response().Header().Get(echo.HeaderXRequestID)
+	}
+	return id
+}
+
+func AnyToBytesBuffer(i interface{}) (*bytes.Buffer, error) {
+	buf := new(bytes.Buffer)
+	err := json.NewEncoder(buf).Encode(i)
+	if err != nil {
+		return buf, err
+	}
+	return buf, nil
 }

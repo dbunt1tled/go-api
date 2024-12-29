@@ -2,7 +2,7 @@ package middlewares
 
 import (
 	"go_echo/internal/config/env"
-	"go_echo/internal/config/logger"
+	"go_echo/internal/util/helper"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -10,7 +10,6 @@ import (
 
 func LogRequest(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		log := logger.GetLoggerInstance()
 		cfg := env.GetConfigInstance()
 		if !cfg.Debug.Debug {
 			return next(c)
@@ -19,12 +18,23 @@ func LogRequest(next echo.HandlerFunc) echo.HandlerFunc {
 			loggerMiddleware := middleware.Logger()
 			if cfg.Debug.DebugBody {
 				bodyDumpMiddleware := middleware.BodyDump(func(c echo.Context, reqBody, resBody []byte) {
-					id := c.Request().Header.Get(echo.HeaderXRequestID)
-					if id == "" {
-						id = c.Response().Header().Get(echo.HeaderXRequestID)
+					rqB := string(reqBody)
+					rsB := string(resBody)
+					if rqB == "" {
+						rqB = "null"
 					}
-					log.Info("Request(" + id + "):" + string(reqBody))
-					log.Info("Response(" + id + "):" + string(resBody))
+					if rsB == "" {
+						rsB = "null"
+					}
+					id := helper.RequestID(c)
+					m := `{"info":"RequestDump","id":"` +
+						id + `","request":` +
+						rqB + `,"response":` +
+						rsB + `}`
+					_, err := c.Logger().Output().Write([]byte(m))
+					if err != nil {
+						return
+					}
 				})
 
 				return bodyDumpMiddleware(loggerMiddleware(next))(c)
