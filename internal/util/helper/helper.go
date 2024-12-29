@@ -231,3 +231,10 @@ func AnyToBytesBuffer(i interface{}) (*bytes.Buffer, error) {
 	}
 	return buf, nil
 }
+
+func IfThenElse[T any](condition bool, ifTrue T, ifFalse T) T {
+	if condition {
+		return ifTrue
+	}
+	return ifFalse
+}

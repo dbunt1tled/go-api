@@ -21,7 +21,15 @@ type Config struct {
 	Mail        Mail
 	Static      Static
 	RabbitMQ    RabbitMQ
+	Redis       Redis
 	Centrifugo  Centrifugo
+}
+
+type Redis struct {
+	Host     string `env:"REDIS_HOST" env-default:"127.0.0.1"`
+	Port     string `env:"REDIS_PORT" env-default:"6379"`
+	Password string `env:"REDIS_PASSWORD" env-default:""`
+	DB       int    `env:"REDIS_DB" env-default:"0"`
 }
 
 type Debug struct {

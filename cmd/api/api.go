@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"go_echo/internal/cache"
 	"go_echo/internal/config/env"
 	"go_echo/internal/config/locale"
 	"go_echo/internal/config/logger"
@@ -30,6 +31,8 @@ func main() {
 	profiler.SetProfiler()
 	storage.GetInstance()
 	defer storage.Close()
+	cache.GetRedisCache()
+	defer cache.GetRedisCache().Close()
 	httpServer := echo.New()
 	httpServer.HideBanner = true
 	httpServer.Debug = cfg.Debug.Debug
@@ -39,16 +42,16 @@ func main() {
 	defer stop()
 	go func() {
 		log.Debug("Start listening on address: " + cfg.HTTPServer.Address)
-		if err := httpServer.Start(cfg.HTTPServer.Address); err != nil && !errors.Is(err, http.ErrServerClosed) { //nolint:lll,govet
+		if err := httpServer.Start(cfg.HTTPServer.Address); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Error("shutting down the server" + err.Error())
 		}
 	}()
 	<-ctx.Done()
 	log.Warn("quit: shutting down ...")
 	defer log.Warn("quit: shutdown completed")
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second) //nolint:mnd // 10 seconds timeout
 	defer cancel()
 	if err := httpServer.Shutdown(ctx); err != nil {
-		httpServer.Logger.Fatal(err)
+		log.ErrorContext(ctx, "error shutting down the server", err)
 	}
 }
