@@ -31,7 +31,7 @@ func (r UserNotificationRepository) ByID(id int64) (*usernotification.UserNotifi
 	return builder.ByID[usernotification.UserNotification](
 		UserNotificationTableName,
 		id,
-		castUserNotification,
+		castUserNotificationRow,
 	)
 }
 
@@ -45,7 +45,7 @@ func (r UserNotificationRepository) Paginator(
 		filter,
 		sorts,
 		paginator,
-		castUserNotification,
+		castUserNotificationRows,
 	)
 }
 
@@ -65,7 +65,7 @@ func (r UserNotificationRepository) One(
 		}
 	}
 
-	return builder.One(UserNotificationTableName, filter, sorts, castUserNotification)
+	return builder.One(UserNotificationTableName, filter, sorts, castUserNotificationRow)
 }
 
 func (r UserNotificationRepository) List(
@@ -83,7 +83,7 @@ func (r UserNotificationRepository) List(
 			return nil, err
 		}
 	}
-	return builder.List(UserNotificationTableName, filter, sorts, castUserNotification, nil)
+	return builder.List(UserNotificationTableName, filter, sorts, castUserNotificationRows, nil)
 }
 
 func (r UserNotificationRepository) Count(
@@ -207,22 +207,12 @@ func (r UserNotificationRepository) Update(
 	return helper.Must(r.ByID(id)), nil
 }
 
-func castUserNotification(res *sql.Rows) (*usernotification.UserNotification, error) {
+func castUserNotificationRow(row *sql.Row) (*usernotification.UserNotification, error) {
 	un := usernotification.UserNotification{}
-	err := res.Scan(
-		&un.ID,
-		&un.UserID,
-		&un.Data,
-		&un.Status,
-		&un.UpdatedAt,
-		&un.CreatedAt,
-	)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, errors.New("user notification not found")
-		}
-		return nil, errors.Wrap(err, "user notification get by id error")
-	}
+	return builder.ScanStructRow(un, row)
+}
 
-	return &un, nil
+func castUserNotificationRows(rows *sql.Rows) (*usernotification.UserNotification, error) {
+	un := usernotification.UserNotification{}
+	return builder.ScanStructRows(un, rows)
 }

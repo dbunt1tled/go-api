@@ -50,7 +50,7 @@ func (r UserRepository) ByID(id int64) (*user.User, error) {
 	return builder.ByID[user.User](
 		UserTableName,
 		id,
-		castUser,
+		castUserRow,
 	)
 }
 func (r UserRepository) Paginator(
@@ -63,7 +63,7 @@ func (r UserRepository) Paginator(
 		filter,
 		sorts,
 		paginator,
-		castUser,
+		castUserRows,
 	)
 }
 
@@ -81,7 +81,7 @@ func (r UserRepository) One(filter *[]page.FilterCondition, sorts *[]page.SortOr
 		}
 	}
 
-	return builder.One(UserTableName, filter, sorts, castUser)
+	return builder.One(UserTableName, filter, sorts, castUserRow)
 }
 func (r UserRepository) List(
 	filter *[]page.FilterCondition,
@@ -100,26 +100,16 @@ func (r UserRepository) List(
 		}
 	}
 
-	return builder.List(UserTableName, filter, sorts, castUser, nil)
+	return builder.List(UserTableName, filter, sorts, castUserRows, nil)
 }
 
-func (r UserRepository) ByIdentity(login string, password string) (*user.User, error) {
-	smt, err := builder.GetDB().Prepare(
+func (r UserRepository) ByIdentity(login string) (*user.User, error) {
+	res := builder.GetDB().QueryRow(
 		"SELECT * FROM users WHERE (phone_number = ? OR email = ?) AND status = 1 LIMIT 1;",
+		login,
+		login,
 	)
-	if err != nil {
-		return nil, errors.Wrap(err, "byIdentity user prepare error")
-	}
-	defer smt.Close()
-	res, err := smt.Query(login, login)
-	if err != nil {
-		return nil, errors.Wrap(err, "byIdentity user error")
-	}
-	defer res.Close()
-	if res.Next() {
-		return castUser(res)
-	}
-	return nil, errors.New("user not found")
+	return castUserRow(res)
 }
 
 //nolint:funlen
@@ -287,28 +277,12 @@ func (r UserRepository) Update(id int64, params UpdateUserParams) (*user.User, e
 	return helper.Must(r.ByID(id)), nil
 }
 
-func castUser(res *sql.Rows) (*user.User, error) {
+func castUserRow(row *sql.Row) (*user.User, error) {
 	u := user.User{}
-	err := res.Scan(
-		&u.ID,
-		&u.FirstName,
-		&u.SecondName,
-		&u.Email,
-		&u.PhoneNumber,
-		&u.Password,
-		&u.Status,
-		&u.Hash,
-		&u.Roles,
-		&u.ConfirmedAt,
-		&u.UpdatedAt,
-		&u.CreatedAt,
-	)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, errors.New("user not found")
-		}
-		return nil, errors.Wrap(err, "user get by id error")
-	}
+	return builder.ScanStructRow(u, row)
+}
 
-	return &u, nil
+func castUserRows(rows *sql.Rows) (*user.User, error) {
+	u := user.User{}
+	return builder.ScanStructRows(u, rows)
 }

@@ -7,6 +7,7 @@ import (
 	"go_echo/internal/storage"
 	"go_echo/internal/util/builder/page"
 	"math"
+	"reflect"
 	"strconv"
 	"strings"
 	"sync"
@@ -178,54 +179,28 @@ func Count(table string, filter *[]page.FilterCondition) (int, error) {
 	var (
 		cnt int
 		err error
-		res *sql.Rows
+		res *sql.Row
 	)
 	query, args := BuildSQLQuery(table, filter, nil, 1, 0, true)
-	smt, err := GetDB().Prepare(query)
+	res = GetDB().QueryRow(query, args...)
+	err = res.Scan(&cnt)
 	if err != nil {
-		return 0, errors.Wrap(err, table+" count prepare error")
+		return 0, errors.Wrap(err, table+" count cast error")
 	}
-	defer smt.Close()
-	res, err = smt.Query(args...)
-	if err != nil {
-		return 0, errors.Wrap(err, table+" count error")
-	}
-	defer res.Close()
-	for res.Next() {
-		err = res.Scan(
-			&cnt,
-		)
-		if err != nil {
-			return 0, errors.Wrap(err, table+" count cast error")
-		}
-		return cnt, nil
-	}
-	return 0, nil
+	return cnt, nil
 }
 
 func ByID[T any](
 	table string,
 	id int64,
-	mapper func(res *sql.Rows) (*T, error),
+	mapper func(res *sql.Row) (*T, error),
 ) (*T, error) {
 	qb := strings.Builder{}
 	qb.WriteString("SELECT * FROM ")
 	qb.WriteString(table)
 	qb.WriteString(" WHERE id = ? LIMIT 1")
-	smt, err := GetDB().Prepare(qb.String())
-	if err != nil {
-		return nil, errors.Wrap(err, table+" byId prepare error")
-	}
-	defer smt.Close()
-	res, err := smt.Query(id)
-	if err != nil {
-		return nil, errors.Wrap(err, table+"byId error")
-	}
-	defer res.Close()
-	if res.Next() {
-		return mapper(res)
-	}
-	return nil, errors.New("user not found")
+	res := GetDB().QueryRow(qb.String(), id)
+	return mapper(res)
 }
 
 func List[T any](
@@ -273,29 +248,14 @@ func One[T any](
 	table string,
 	filter *[]page.FilterCondition,
 	sorts *[]page.SortOrder,
-	mapper func(res *sql.Rows) (*T, error),
+	mapper func(res *sql.Row) (*T, error),
 ) (*T, error) {
 	var (
-		res *sql.Rows
-		smt *sql.Stmt
-		err error
+		res *sql.Row
 	)
 	query, args := BuildSQLQuery(table, filter, sorts, 1, 0, false)
-
-	smt, err = GetDB().Prepare(query)
-	if err != nil {
-		return nil, errors.Wrap(err, table+" one prepare error")
-	}
-	defer smt.Close()
-	res, err = smt.Query(args...)
-	if err != nil {
-		return nil, errors.Wrap(err, table+" one error")
-	}
-	defer res.Close()
-	if res.Next() {
-		return mapper(res)
-	}
-	return nil, errors.New(table + " not found")
+	res = GetDB().QueryRow(query, args...)
+	return mapper(res)
 }
 
 func Paginator[T any](
@@ -400,4 +360,42 @@ func Paginator[T any](
 	}
 
 	return result, nil
+}
+
+func ScanStructRows[T any](st T, rows *sql.Rows) (*T, error) {
+	s := reflect.ValueOf(&st).Elem()
+	numCols := s.NumField()
+	columns := make([]interface{}, numCols)
+	for i := 0; i < numCols; i++ {
+		field := s.Field(i)
+		columns[i] = field.Addr().Interface()
+	}
+
+	err := rows.Scan(columns...)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, errors.New("user not found")
+		}
+		return nil, err
+	}
+	return &st, nil
+}
+
+func ScanStructRow[T any](st T, rows *sql.Row) (*T, error) {
+	s := reflect.ValueOf(&st).Elem()
+	numCols := s.NumField()
+	columns := make([]interface{}, numCols)
+	for i := 0; i < numCols; i++ {
+		field := s.Field(i)
+		columns[i] = field.Addr().Interface()
+	}
+
+	err := rows.Scan(columns...)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, errors.New("user not found")
+		}
+		return nil, err
+	}
+	return &st, nil
 }

@@ -8,6 +8,7 @@ import (
 	"go_echo/internal/config/app_error"
 	"go_echo/internal/config/validate"
 	"go_echo/internal/lib/jsonerror"
+	"go_echo/internal/util/hasher"
 	"go_echo/internal/util/helper"
 	"net/http"
 
@@ -24,6 +25,7 @@ type LoginRequest struct {
 func Login(c echo.Context) error {
 	var (
 		err    error
+		ok     bool
 		u      *user.User
 		req    LoginRequest
 		tokens *token.Tokens
@@ -49,10 +51,23 @@ func Login(c echo.Context) error {
 		return jsonerror.ErrorUnprocessableEntity(c, err, app_error.Err422LoginValidateError)
 	}
 
-	u, err = service.UserRepository{}.ByIdentity(req.Login, req.Password)
+	u, err = service.UserRepository{}.ByIdentity(req.Login)
 	if err != nil {
 		return jsonerror.ErrorUnprocessableEntity(c, err, app_error.Err422LoginUserNotFoundError)
 	}
+
+	ok, err = hasher.CompareArgon(req.Password, u.Password)
+	if (err != nil) || (!ok) {
+		if err != nil {
+			return jsonerror.ErrorUnprocessableEntity(c, err, app_error.Err422LoginComparePasswordError)
+		}
+		return jsonerror.ErrorUnprocessableEntity(
+			c,
+			errors.New("Invalid credentials"),
+			app_error.Err422LoginInvalidPasswordError,
+		)
+	}
+	req.Password = u.Password
 
 	tokens, err = auth.GetAuthTokens(*u)
 	if err != nil {

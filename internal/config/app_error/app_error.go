@@ -5,11 +5,13 @@ import (
 )
 
 const (
-	Err422LoginValidateMapError  = 42200001
-	Err422LoginValidateRuleError = 42200002
-	Err422LoginValidateError     = 42200003
-	Err422LoginUserNotFoundError = 42200004
-	Err422LoginAuthTokensError   = 42200005
+	Err422LoginValidateMapError     = 42200001
+	Err422LoginValidateRuleError    = 42200002
+	Err422LoginValidateError        = 42200003
+	Err422LoginUserNotFoundError    = 42200004
+	Err422LoginAuthTokensError      = 42200005
+	Err422LoginComparePasswordError = 42200024
+	Err422LoginInvalidPasswordError = 42200025
 
 	Err422SignupValidateMapError  = 42200006
 	Err422SignupValidateRuleError = 42200007
