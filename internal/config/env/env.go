@@ -3,6 +3,7 @@ package env
 import (
 	"log"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/ilyakaznacheev/cleanenv"
@@ -108,11 +109,14 @@ func MustLoadConfig() *Config {
 	return &cfg
 }
 
-var instance *Config //nolint:gochecknoglobals // singleton
+var (
+	instance *Config   //nolint:gochecknoglobals // singleton
+	m        sync.Once //nolint:gochecknoglobals // singleton
+)
 
 func GetConfigInstance() *Config {
-	if instance == nil {
+	m.Do(func() {
 		instance = MustLoadConfig()
-	}
+	})
 	return instance
 }

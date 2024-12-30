@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"go_echo/internal/config/env"
+	"sync"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -14,7 +15,10 @@ type RedisCache struct {
 	rdb *redis.Client
 }
 
-var redisCache *RedisCache //nolint:gochecknoglobals // singleton
+var (
+	redisCache *RedisCache //nolint:gochecknoglobals // singleton
+	m          sync.Once   //nolint:gochecknoglobals // singleton
+)
 
 func GetRedisCache() *RedisCache {
 	if redisCache == nil {

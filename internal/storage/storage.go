@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"go_echo/internal/config/env"
 	"go_echo/internal/config/logger"
+	"sync"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -17,16 +18,19 @@ const (
 	connMaxIdleTime = 20
 )
 
-var instance *Mysql //nolint:gochecknoglobals // singleton
+var (
+	instance *Mysql    //nolint:gochecknoglobals // singleton
+	m        sync.Once //nolint:gochecknoglobals // singleton
+)
 
 func GetInstance() *Mysql {
-	if instance == nil {
+	m.Do(func() {
 		var err error
 		instance, err = Open()
 		if err != nil {
 			panic(err)
 		}
-	}
+	})
 	return instance
 }
 

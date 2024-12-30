@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"go_echo/app/centrifugo/server/provider"
 	"go_echo/internal/util/helper"
+	"sync"
 )
 
 type ChannelProvider interface {
@@ -15,10 +16,13 @@ type ChannelProviderResolver struct {
 	providers map[string]*ChannelProvider
 }
 
-var instance *ChannelProviderResolver //nolint:gochecknoglobals // singleton
+var (
+	instance *ChannelProviderResolver //nolint:gochecknoglobals // singleton
+	m        sync.Once                //nolint:gochecknoglobals // singleton
+)
 
 func GetChannelProviderResolver() *ChannelProviderResolver {
-	if instance == nil {
+	m.Do(func() {
 		r := ChannelProviderResolver{
 			providers: make(map[string]*ChannelProvider),
 		}
@@ -26,7 +30,7 @@ func GetChannelProviderResolver() *ChannelProviderResolver {
 		r.RegisterProvider("read", &provider.ReadProvider{})
 
 		instance = &r
-	}
+	})
 
 	return instance
 }

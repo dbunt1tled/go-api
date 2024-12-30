@@ -14,11 +14,11 @@ const (
 
 var (
 	logInstance *slog.Logger //nolint:gochecknoglobals // singleton
-	once        sync.Once    //nolint:gochecknoglobals // singleton
+	m           sync.Once    //nolint:gochecknoglobals // singleton
 )
 
 func InitLogger(env string, debug bool) *slog.Logger {
-	once.Do(func() {
+	m.Do(func() {
 		logInstance = setupLogger(env, debug)
 	})
 	return GetLoggerInstance()

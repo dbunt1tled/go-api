@@ -2,14 +2,18 @@ package mailer
 
 import (
 	"go_echo/internal/config/env"
+	"sync"
 
 	"github.com/wneessen/go-mail"
 )
 
-var mailInstance *mail.Client //nolint:gochecknoglobals // singleton
+var (
+	mailInstance *mail.Client //nolint:gochecknoglobals // singleton
+	m            sync.Once    //nolint:gochecknoglobals // singleton
+)
 
 func GetMailInstance() *mail.Client {
-	if mailInstance == nil {
+	m.Do(func() {
 		var err error
 		cfg := env.GetConfigInstance()
 		mailInstance, err = mail.NewClient(
@@ -23,7 +27,7 @@ func GetMailInstance() *mail.Client {
 		if err != nil {
 			panic("failed to create mail client: " + err.Error())
 		}
-	}
+	})
 	return mailInstance
 }
 

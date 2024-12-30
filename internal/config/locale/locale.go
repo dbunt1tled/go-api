@@ -12,7 +12,7 @@ import (
 var (
 	localeBundleInstance *i18n.Bundle    //nolint:gochecknoglobals // singleton
 	localizerInstance    *i18n.Localizer //nolint:gochecknoglobals // singleton
-	m                    sync.Mutex
+	m                    sync.Once       //nolint:gochecknoglobals // singleton
 )
 
 func GetLocaleBundleInstance() *i18n.Bundle {
@@ -23,7 +23,10 @@ func GetLocaleBundleInstance() *i18n.Bundle {
 }
 
 func InitLocalizerInstance(locale language.Tag, accept language.Tag) *i18n.Localizer {
-	localizerInstance = i18n.NewLocalizer(GetLocaleBundleInstance(), locale.String(), accept.String())
+	m.Do(func() {
+		localizerInstance = i18n.NewLocalizer(GetLocaleBundleInstance(), locale.String(), accept.String())
+	})
+
 	return GetLocalizerInstance()
 }
 

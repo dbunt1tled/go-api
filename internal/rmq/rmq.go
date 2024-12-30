@@ -6,6 +6,7 @@ import (
 	"go_echo/internal/config/logger"
 	"go_echo/internal/util/hasher"
 	"go_echo/internal/util/helper"
+	"sync"
 	"time"
 
 	"github.com/rabbitmq/amqp091-go"
@@ -18,6 +19,7 @@ const (
 
 var (
 	rabbitMQInstance map[string]*RabbitClient //nolint:gochecknoglobals // singleton
+	m                sync.Once                //nolint:gochecknoglobals // singleton
 )
 
 type RabbitClient struct {
@@ -32,9 +34,9 @@ func GetRMQInstance(exchange string) *RabbitClient {
 		val *RabbitClient
 		ok  bool
 	)
-	if rabbitMQInstance == nil {
+	m.Do(func() {
 		rabbitMQInstance = make(map[string]*RabbitClient)
-	}
+	})
 	if val, ok = rabbitMQInstance[exchange]; !ok {
 		val = &RabbitClient{}
 		rabbitMQInstance[exchange] = val

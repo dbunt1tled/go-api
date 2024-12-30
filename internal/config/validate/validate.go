@@ -2,16 +2,20 @@ package validate
 
 import (
 	"go_echo/internal/lib/rule"
+	"sync"
 
 	"github.com/go-playground/validator/v10"
 )
 
-var validInstance *validator.Validate //nolint:gochecknoglobals // singleton
+var (
+	validInstance *validator.Validate //nolint:gochecknoglobals // singleton
+	m             sync.Once           //nolint:gochecknoglobals // singleton
+)
 
 func GetValidateInstance() *validator.Validate {
-	if validInstance == nil {
+	m.Do(func() {
 		validInstance = InitValidateInstance()
-	}
+	})
 	return validInstance
 }
 
