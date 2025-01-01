@@ -10,6 +10,7 @@ import (
 
 type Mapper struct {
 	Fields        map[string]interface{}
+	MappedFields  map[string]int
 	Values        []interface{}
 	DynamicValues map[int]string
 	DateFormat    string
@@ -19,6 +20,7 @@ type Mapper struct {
 func NewMapper(fields map[string]interface{}, dateFormat string, dynamicFields []string) *Mapper {
 	return &Mapper{
 		Fields:        transformFields(fields),
+		MappedFields:  map[string]int{},
 		Values:        []interface{}{},
 		DynamicValues: map[int]string{},
 		DateFormat:    dateFormat,
@@ -26,17 +28,13 @@ func NewMapper(fields map[string]interface{}, dateFormat string, dynamicFields [
 	}
 }
 
-func (m *Mapper) SetColumns(values []interface{}) bool {
+func (m *Mapper) SetColumns(values []string) bool {
 	status := false
-	for i, value := range values {
-		strValue, ok := value.(string)
-		if !ok {
-			continue
-		}
+	for i, strValue := range values {
 		strValue = strings.ToLower(strValue)
 
 		if fieldName, found := m.Fields[strValue]; found {
-			m.Fields[fieldName.(string)] = i
+			m.MappedFields[fieldName.(string)] = i
 			status = true
 		} else if len(m.DynamicFields) > 0 {
 			dynamicMatch := regexp.MustCompile(strings.Join(m.DynamicFields, "|"))
@@ -49,7 +47,7 @@ func (m *Mapper) SetColumns(values []interface{}) bool {
 }
 
 func (m *Mapper) GetValue(key string) (string, error) {
-	index, ok := m.Fields[key].(int)
+	index, ok := m.MappedFields[key]
 	if !ok || index >= len(m.Values) {
 		return "", nil
 	}
