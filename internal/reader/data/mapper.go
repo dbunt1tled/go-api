@@ -32,6 +32,29 @@ func NewMapper(fields map[string]interface{}, dynamicFields []string) *Mapper {
 
 func (m *Mapper) SetColumns(values []string) bool {
 	status := false
+	var (
+		in  int
+		ini interface{}
+		ok  bool
+	)
+	if isMapStringInt(m.Fields) {
+		for i, v := range m.Fields {
+			if in, ok = v.(int); !ok && !isSpecialField(i) {
+				return false
+			}
+
+			if isSpecialField(i) {
+				f := trimSpecialField(i)
+				if ini, ok = m.Fields[f]; !ok {
+					continue
+				}
+				m.MappedFields[v.(string)] = ini.(int)
+				continue
+			}
+			m.MappedFields[i] = in
+		}
+		return true
+	}
 	for i, strValue := range values {
 		strValue = strings.ToLower(strValue)
 
@@ -43,7 +66,15 @@ func (m *Mapper) SetColumns(values []string) bool {
 			if dynamicMatch.MatchString(strValue) {
 				m.DynamicValues[i] = strValue
 			}
+			status = true
 		}
+	}
+	for i, v := range m.SpecialFields {
+		f := trimSpecialField(v)
+		if ini, ok = m.MappedFields[f]; !ok {
+			continue
+		}
+		m.MappedFields[i] = ini.(int)
 	}
 	return status
 }
@@ -55,8 +86,7 @@ func (m *Mapper) GetValue(key string) (string, error) {
 		if !o {
 			return "", nil
 		}
-		k = strings.TrimPrefix(k, "_#")
-		k = strings.TrimSuffix(k, "#_")
+		k = trimSpecialField(k)
 		index, ok = m.MappedFields[k]
 		if !ok || index >= len(m.Values) {
 			return "", nil
@@ -71,6 +101,12 @@ func (m *Mapper) GetValue(key string) (string, error) {
 	default:
 		return fmt.Sprintf("%v", value), nil
 	}
+}
+
+func trimSpecialField(field string) string {
+	field = strings.TrimPrefix(field, "_#")
+	field = strings.TrimSuffix(field, "#_")
+	return field
 }
 
 func (m *Mapper) sanitizeString(input string) string {
@@ -111,6 +147,8 @@ func transformFields(fields map[string]interface{}) map[string]interface{} {
 			}
 		case string:
 			result[strings.ToLower(v)] = key
+		case int:
+			result[key] = value
 		}
 	}
 	return result
@@ -163,4 +201,13 @@ func SliceToSliceInterface[T any](value []T) []interface{} {
 		interfaces[i] = v
 	}
 	return interfaces
+}
+
+func isMapStringInt(m map[string]interface{}) bool {
+	for f, value := range m {
+		if _, ok := value.(int); !ok && !isSpecialField(f) {
+			return false
+		}
+	}
+	return true
 }
