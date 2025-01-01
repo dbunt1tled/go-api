@@ -3,6 +3,7 @@ package driver
 import (
 	"fmt"
 	"go_echo/internal/reader/data"
+	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/thedatashed/xlsxreader"
@@ -30,7 +31,7 @@ func (f *XLSXParser) Read() (<-chan []string, <-chan error) {
 		defer close(errCh)
 		var (
 			i          int
-			rec        []string = make([]string, 0)
+			rec        []string
 			fileReader *xlsxreader.XlsxFileCloser
 			err        error
 		)
@@ -48,7 +49,11 @@ func (f *XLSXParser) Read() (<-chan []string, <-chan error) {
 			rec = make([]string, cap(row.Cells))
 			for _, cell := range row.Cells {
 				i = cell.ColumnIndex()
-				rec[i] = cell.Value
+				if cell.Type == xlsxreader.TypeNumerical {
+					rec[i] = strings.TrimSuffix(cell.Value, ".0")
+				} else {
+					rec[i] = cell.Value
+				}
 			}
 			outCh <- rec
 		}

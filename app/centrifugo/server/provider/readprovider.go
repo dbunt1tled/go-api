@@ -12,7 +12,7 @@ import (
 
 const channelReadName = "read:#"
 
-var instanceHandler *ReadChannelResolver
+var instanceHandler *ReadChannelResolver //nolint:gochecknoglobals // singleton
 
 type ReadProvider struct {
 }
@@ -43,7 +43,7 @@ func (u *ReadProvider) Publish(channel string, userID int64, data []byte) (*[]by
 	if err != nil {
 		return nil, errors.Wrap(err, "invalid read channel data")
 	}
-	ch = dt["channel"].(string)
+	ch = dt["channel"].(string) //nolint:errcheck
 	if ch == "" {
 		return nil, errors.New("invalid read channel")
 	}

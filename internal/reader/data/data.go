@@ -9,4 +9,5 @@ type FileOptions struct {
 	FileName  string
 	SheetNum  *int
 	Delimiter *rune
+	Mapper    *Mapper
 }

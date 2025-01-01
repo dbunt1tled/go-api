@@ -1,6 +1,7 @@
 package reader
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"go_echo/internal/reader/data"
@@ -12,16 +13,18 @@ type FileReader struct {
 	Options data.FileOptions
 	Parsers map[string]data.Parser
 	Parser  *data.Parser
-	Mapper  *Mapper
+	Mapper  *data.Mapper
 }
 
 func NewFileReader(options data.FileOptions) (*FileReader, error) {
 	reader := &FileReader{
 		Options: options,
 		Parsers: map[string]data.Parser{
+			"txt":  &driver.TXTParser{},
 			"csv":  &driver.CSVParser{},
 			"xlsx": &driver.XLSXParser{},
 		},
+		Mapper: options.Mapper,
 	}
 	if err := reader.setParser(); err != nil {
 		return nil, err
@@ -44,8 +47,8 @@ func (f *FileReader) setParser() error {
 	return nil
 }
 
-func (f *FileReader) Read() (<-chan []string, <-chan error) {
-	resOutCh := make(chan []string)
+func (f *FileReader) ReadMap() (<-chan map[string]string, <-chan error) {
+	resOutCh := make(chan map[string]string)
 	resErrCh := make(chan error, 1)
 	if f.Parser == nil {
 		defer close(resOutCh)
@@ -58,16 +61,34 @@ func (f *FileReader) Read() (<-chan []string, <-chan error) {
 		defer close(resOutCh)
 		defer close(resErrCh)
 		iterator, errChan := (*f.Parser).Read()
+		isColumnsSet := false
+		i := 0
 		for row := range iterator {
-			if err := ValidateRow(row); err != nil {
-				// Логируем ошибку (если нужно)
-				fmt.Println("Validation failed:", err)
-				continue // Пропускаем невалидные строки
+			i++
+			if f.Mapper == nil {
+				resOutCh <- map[string]string{"row": strings.Join(row, "|")}
+				continue
 			}
-			resOutCh <- row
+			if !isColumnsSet {
+				isColumnsSet = f.Mapper.SetColumns(row)
+				if !isColumnsSet && i == 10 {
+					resErrCh <- errors.New("columns not set")
+					return
+				}
+				continue
+			}
+			f.Mapper.Values = data.SliceToSliceInterface(row)
+			res := make(map[string]string)
+			for key := range f.Mapper.MappedFields {
+				k, e := f.Mapper.GetValue(key)
+				if e != nil {
+					resErrCh <- e
+					return
+				}
+				res[key] = k
+			}
+			resOutCh <- res
 		}
-
-		// Передаём ошибки чтения из оригинального итератора
 		if err := <-errChan; err != nil {
 			resErrCh <- err
 		}
@@ -76,14 +97,35 @@ func (f *FileReader) Read() (<-chan []string, <-chan error) {
 	return resOutCh, resErrCh
 }
 
-func ValidateRow(row []string) error {
-	if len(row) < 3 {
-		return errors.New("row has less than 3 columns")
+func (f *FileReader) ReadLine() (<-chan string, <-chan error) {
+	resOutCh := make(chan string)
+	resErrCh := make(chan error, 1)
+	if f.Parser == nil {
+		defer close(resOutCh)
+		defer close(resErrCh)
+		resErrCh <- errors.New("parser is not set")
+		return resOutCh, resErrCh
 	}
-	for _, field := range row {
-		if len(strings.TrimSpace(field)) == 0 {
-			return errors.New("row contains empty field")
+	go func() {
+		defer close(resOutCh)
+		defer close(resErrCh)
+		iterator, errChan := f.ReadMap()
+		for row := range iterator {
+			r, ok := row["row"]
+			if !ok {
+				b, err := json.Marshal(row)
+				if err != nil {
+					resErrCh <- err
+					return
+				}
+				resOutCh <- string(b)
+			} else {
+				resOutCh <- r
+			}
 		}
-	}
-	return nil
+		if err := <-errChan; err != nil {
+			resErrCh <- err
+		}
+	}()
+	return resOutCh, resErrCh
 }

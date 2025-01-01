@@ -1,4 +1,4 @@
-package reader
+package data
 
 import (
 	"fmt"
@@ -8,22 +8,24 @@ import (
 	"time"
 )
 
+var specialRegex = regexp.MustCompile(`_#([a-zA-Z\s\d_]+)#_`)
+
 type Mapper struct {
 	Fields        map[string]interface{}
 	MappedFields  map[string]int
+	SpecialFields map[string]string
 	Values        []interface{}
 	DynamicValues map[int]string
-	DateFormat    string
 	DynamicFields []string
 }
 
-func NewMapper(fields map[string]interface{}, dateFormat string, dynamicFields []string) *Mapper {
+func NewMapper(fields map[string]interface{}, dynamicFields []string) *Mapper {
 	return &Mapper{
 		Fields:        transformFields(fields),
+		SpecialFields: getSpecialFields(fields), // TODO: fix, original code was hardcoded, currently it is reference to field
 		MappedFields:  map[string]int{},
 		Values:        []interface{}{},
 		DynamicValues: map[int]string{},
-		DateFormat:    dateFormat,
 		DynamicFields: dynamicFields,
 	}
 }
@@ -34,7 +36,7 @@ func (m *Mapper) SetColumns(values []string) bool {
 		strValue = strings.ToLower(strValue)
 
 		if fieldName, found := m.Fields[strValue]; found {
-			m.MappedFields[fieldName.(string)] = i
+			m.MappedFields[fieldName.(string)] = i //nolint:errcheck
 			status = true
 		} else if len(m.DynamicFields) > 0 {
 			dynamicMatch := regexp.MustCompile(strings.Join(m.DynamicFields, "|"))
@@ -49,7 +51,16 @@ func (m *Mapper) SetColumns(values []string) bool {
 func (m *Mapper) GetValue(key string) (string, error) {
 	index, ok := m.MappedFields[key]
 	if !ok || index >= len(m.Values) {
-		return "", nil
+		k, o := m.SpecialFields[key]
+		if !o {
+			return "", nil
+		}
+		k = strings.TrimPrefix(k, "_#")
+		k = strings.TrimSuffix(k, "#_")
+		index, ok = m.MappedFields[k]
+		if !ok || index >= len(m.Values) {
+			return "", nil
+		}
 	}
 
 	switch value := m.Values[index].(type) {
@@ -65,6 +76,29 @@ func (m *Mapper) GetValue(key string) (string, error) {
 func (m *Mapper) sanitizeString(input string) string {
 	spaceReplacer := regexp.MustCompile(`\s+`)
 	return strings.TrimSpace(spaceReplacer.ReplaceAllString(input, " "))
+}
+
+func getSpecialFields(fields map[string]interface{}) map[string]string {
+	result := make(map[string]string)
+	for key, value := range fields {
+		switch v := value.(type) {
+		case []string:
+			for _, subValue := range v {
+				if isSpecialField(subValue) {
+					result[strings.ToLower(key)] = strings.ToLower(subValue)
+				}
+			}
+		case string:
+			if isSpecialField(v) {
+				result[strings.ToLower(key)] = strings.ToLower(v)
+			}
+		}
+	}
+	return result
+}
+
+func isSpecialField(field string) bool {
+	return specialRegex.MatchString(field)
 }
 
 func transformFields(fields map[string]interface{}) map[string]interface{} {
@@ -94,7 +128,6 @@ func (m *Mapper) ReturnInteger(value interface{}, field string) (int, error) {
 	return 0, fmt.Errorf("%s is not an integer", field)
 }
 
-// ReturnFloat возвращает число с плавающей точкой или ошибку
 func (m *Mapper) ReturnFloat(value interface{}, field string) (float64, error) {
 	switch v := value.(type) {
 	case string:
@@ -108,11 +141,10 @@ func (m *Mapper) ReturnFloat(value interface{}, field string) (float64, error) {
 	return 0, fmt.Errorf("%s is not a float", field)
 }
 
-// ReturnDate парсит дату или возвращает ошибку
-func (m *Mapper) ReturnDate(value interface{}, field string) (time.Time, error) {
+func (m *Mapper) ReturnDate(value interface{}, field string, dateFormat string) (time.Time, error) {
 	switch v := value.(type) {
 	case string:
-		if date, err := time.Parse(m.DateFormat, v); err == nil {
+		if date, err := time.Parse(dateFormat, v); err == nil {
 			return date, nil
 		}
 	case float64:
@@ -123,4 +155,12 @@ func (m *Mapper) ReturnDate(value interface{}, field string) (time.Time, error) 
 		return v, nil
 	}
 	return time.Time{}, fmt.Errorf("%s is not a date", field)
+}
+
+func SliceToSliceInterface[T any](value []T) []interface{} {
+	interfaces := make([]interface{}, len(value))
+	for i, v := range value {
+		interfaces[i] = v
+	}
+	return interfaces
 }
