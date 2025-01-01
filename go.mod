@@ -38,6 +38,7 @@ require (
 	github.com/ompluscator/dynamic-struct v1.4.0 // indirect
 	github.com/rabbitmq/amqp091-go v1.10.0 // indirect
 	github.com/redis/go-redis/v9 v9.7.0 // indirect
+	github.com/thedatashed/xlsxreader v1.2.8 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	github.com/wneessen/go-mail v0.5.2 // indirect
