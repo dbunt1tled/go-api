@@ -11,15 +11,15 @@ import (
 
 type FileReader struct {
 	Options data.FileOptions
-	Parsers map[string]data.Parser
-	Parser  *data.Parser
+	Parsers map[string]data.FileParser
+	Parser  *data.FileParser
 	Mapper  *data.Mapper
 }
 
 func NewFileReader(options data.FileOptions) (*FileReader, error) {
 	reader := &FileReader{
 		Options: options,
-		Parsers: map[string]data.Parser{
+		Parsers: map[string]data.FileParser{
 			"txt":  &driver.TXTParser{},
 			"csv":  &driver.CSVParser{},
 			"xlsx": &driver.XLSXParser{},

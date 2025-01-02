@@ -11,6 +11,7 @@ import (
 	"reflect"
 	"regexp"
 	"runtime"
+	"strconv"
 	"strings"
 	"time"
 
@@ -237,4 +238,38 @@ func IfThenElse[T any](condition bool, ifTrue T, ifFalse T) T {
 		return ifTrue
 	}
 	return ifFalse
+}
+
+func AnyToString(a any) string {
+	switch value := a.(type) {
+	case nil:
+		return ""
+	case string:
+		return value
+	case int:
+		return strconv.Itoa(value)
+	case int8, int16, int32, int64:
+		return strconv.FormatInt(reflect.ValueOf(value).Int(), 10)
+	case uint, uint8, uint16, uint32, uint64:
+		return strconv.FormatUint(reflect.ValueOf(value).Uint(), 10)
+	case []byte:
+		return string(value)
+	case float32:
+		return strconv.FormatFloat(float64(value), 'f', -1, 32)
+	case float64:
+		return strconv.FormatFloat(value, 'f', -1, 64)
+	case bool:
+		return strconv.FormatBool(value)
+	case time.Time:
+		return value.Format(time.RFC3339)
+	default:
+		if reflect.TypeOf(value).Kind() == reflect.Ptr {
+			elem := reflect.ValueOf(value).Elem()
+			if !elem.IsValid() {
+				return ""
+			}
+			return AnyToString(elem.Interface())
+		}
+		return fmt.Sprintf("%v", value)
+	}
 }

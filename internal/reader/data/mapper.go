@@ -2,6 +2,7 @@ package data
 
 import (
 	"fmt"
+	"go_echo/internal/util/helper"
 	"regexp"
 	"strconv"
 	"strings"
@@ -42,13 +43,12 @@ func (m *Mapper) SetColumns(values []string) bool {
 			if in, ok = v.(int); !ok && !isSpecialField(i) {
 				return false
 			}
-
 			if isSpecialField(i) {
 				f := trimSpecialField(i)
 				if ini, ok = m.Fields[f]; !ok {
 					continue
 				}
-				m.MappedFields[v.(string)] = ini.(int)
+				m.MappedFields[v.(string)] = ini.(int) //nolint:errcheck // already checked
 				continue
 			}
 			m.MappedFields[i] = in
@@ -74,7 +74,7 @@ func (m *Mapper) SetColumns(values []string) bool {
 		if ini, ok = m.MappedFields[f]; !ok {
 			continue
 		}
-		m.MappedFields[i] = ini.(int)
+		m.MappedFields[i] = ini.(int) //nolint:errcheck // already checked
 	}
 	return status
 }
@@ -93,14 +93,7 @@ func (m *Mapper) GetValue(key string) (string, error) {
 		}
 	}
 
-	switch value := m.Values[index].(type) {
-	case string:
-		return m.sanitizeString(value), nil
-	case time.Time:
-		return value.Format(time.RFC3339), nil
-	default:
-		return fmt.Sprintf("%v", value), nil
-	}
+	return helper.AnyToString(m.Values[index]), nil
 }
 
 func trimSpecialField(field string) string {
