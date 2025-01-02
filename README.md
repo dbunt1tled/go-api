@@ -14,5 +14,6 @@ Api Includes:
 - User registration
 - Email templates
 - Mail sending (RabbitMQ)
+- File Reader/Writer (XLSX, CSV, TXT)
 - Error handling
 ```
