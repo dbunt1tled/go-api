@@ -1,6 +1,6 @@
 # GoAPI (Echo+MySQL)
 
-[![Go Reference](https://pkg.go.dev/badge/golang.org/x/example.svg)](https://pkg.go.dev/golang.org/x/example)
+[![Go Reference](https://pkg.go.dev/badge/golang.org/x/example.svg)](https://github.com/dbunt1tled/go-api)
 
 Small boilerplate for REST API
 ![GoAPI](assets/images/goapi.jpeg)
