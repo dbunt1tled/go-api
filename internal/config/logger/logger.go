@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"fmt"
 	"go_echo/internal/lib/logger/handlers/pretty"
 	"log/slog"
 	"os"
@@ -12,36 +13,41 @@ const (
 	EnvDev  = "dev"
 )
 
+type AppLogger struct {
+	*slog.Logger
+	AdditionalLogs bool
+}
+
 var (
-	logInstance *slog.Logger //nolint:gochecknoglobals // singleton
-	m           sync.Once    //nolint:gochecknoglobals // singleton
+	logInstance *AppLogger //nolint:gochecknoglobals // singleton
+	m           sync.Once  //nolint:gochecknoglobals // singleton
 )
 
-func InitLogger(env string, debug bool) *slog.Logger {
+func InitLogger(env string, debug bool) *AppLogger {
 	m.Do(func() {
 		logInstance = setupLogger(env, debug)
 	})
 	return GetLoggerInstance()
 }
-func GetLoggerInstance() *slog.Logger {
+func GetLoggerInstance() *AppLogger {
 	if logInstance == nil {
 		panic("Singleton is not initialized. Call InitSingleton first.")
 	}
 	return logInstance
 }
 
-func setupLogger(env string, debug bool) *slog.Logger {
-	var log *slog.Logger
-
+func setupLogger(env string, debug bool) *AppLogger {
+	log := &AppLogger{
+		AdditionalLogs: debug,
+	}
 	switch env {
 	case EnvProd:
-		log = slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
+		log.Logger = slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
 	case EnvDev:
-		log = PrettyLogHandler(env, debug)
+		log.Logger = PrettyLogHandler(env, debug)
 	default:
-		log = slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
+		log.Logger = slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
 	}
-
 	return log
 }
 
@@ -57,4 +63,35 @@ func PrettyLogHandler(env string, debug bool) *slog.Logger {
 		// logger = logger.With(slog.String("env", env))
 	}
 	return logger
+}
+
+func (l *AppLogger) Fatalf(msg string, args ...interface{}) {
+	if !l.AdditionalLogs {
+		return
+	}
+	l.Logger.Error(fmt.Sprintf(msg, args...))
+}
+func (l *AppLogger) Errorf(msg string, args ...interface{}) {
+	if !l.AdditionalLogs {
+		return
+	}
+	l.Logger.Error(fmt.Sprintf(msg, args...))
+}
+func (l *AppLogger) Warnf(msg string, args ...interface{}) {
+	if !l.AdditionalLogs {
+		return
+	}
+	l.Logger.Warn(fmt.Sprintf(msg, args...))
+}
+func (l *AppLogger) Infof(msg string, args ...interface{}) {
+	if !l.AdditionalLogs {
+		return
+	}
+	l.Logger.Info(fmt.Sprintf(msg, args...))
+}
+func (l *AppLogger) Debugf(msg string, args ...interface{}) {
+	if !l.AdditionalLogs {
+		return
+	}
+	l.Logger.Debug(msg, args...)
 }

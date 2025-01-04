@@ -14,7 +14,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"github.com/rabbitmq/amqp091-go"
+	"github.com/wagslane/go-rabbitmq"
 )
 
 const (
@@ -33,9 +33,9 @@ func main() {
 	mailer.GetMailInstance()
 	defer mailer.Close()
 	jobResolver := rmqmail.NewRMQJobMailResolver()
-	rc := rmq.GetRMQInstance()
-	defer rc.Close()
-	f := func(d amqp091.Delivery) error {
+	rmq.GetRMQInstance()
+	defer rmq.Close()
+	f := func(d rabbitmq.Delivery) error {
 		handler, err := jobResolver.Resolver.Resolve(d.Type)
 		if err != nil {
 			return fmt.Errorf("mail consumer Error: %s", err.Error())
@@ -49,5 +49,5 @@ func main() {
 		return nil
 	}
 	sleep := Duration
-	rc.Consume(rmq.MailExchange, rmq.MailQueue, f, NumWorkers, &sleep)
+	rmq.Consume(rmq.MailExchange, rmq.MailQueue, f, &sleep)
 }

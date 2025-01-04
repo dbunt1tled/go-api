@@ -47,8 +47,7 @@ func (e UserConfirmationEmail) Send(userID int64, token string) {
 		Subject: ConfirmSubject,
 		Token:   token,
 	}
-	rc := rmq.GetRMQInstance()
-	rc.Publish(
+	rmq.Publish(
 		rmq.MailExchange,
 		rmq.MailQueue,
 		ConfirmSubject,

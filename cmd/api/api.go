@@ -34,8 +34,8 @@ func main() {
 	defer storage.Close()
 	cache.GetRedisCache()
 	defer cache.GetRedisCache().Close()
-	rc := rmq.GetRMQInstance()
-	defer rc.Close()
+	rmq.GetRMQInstance()
+	defer rmq.Close()
 	httpServer := echo.New()
 	httpServer.HideBanner = true
 	httpServer.Debug = cfg.Debug.Debug

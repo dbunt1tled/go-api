@@ -44,6 +44,7 @@ require (
 	github.com/thedatashed/xlsxreader v1.2.8 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
+	github.com/wagslane/go-rabbitmq v0.15.0 // indirect
 	github.com/wneessen/go-mail v0.5.2 // indirect
 	github.com/xuri/efp v0.0.0-20241211021726-c4e992084aa6 // indirect
 	github.com/xuri/excelize/v2 v2.9.0 // indirect
