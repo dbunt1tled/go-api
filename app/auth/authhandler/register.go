@@ -66,7 +66,7 @@ func Register(c echo.Context) error {
 	if err != nil {
 		return jsonerror.ErrorUnprocessableEntity(c, err, app_error.Err422SignupUserNotFoundError)
 	}
-	code, err = auth.GenerateConfirmToken(*u)
+	code, err = auth.GenerateConfirmToken(u)
 	if err != nil {
 		return jsonerror.ErrorUnprocessableEntity(c, err, app_error.Err422SignupAuthTokensError)
 	}

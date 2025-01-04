@@ -15,11 +15,13 @@ import (
 const (
 	MailExchange = "mail-go-exchange"
 	MailQueue    = "mail-go-queue"
+	MaxTry       = 10
 )
 
 var (
 	rabbitMQInstance map[string]*RabbitClient //nolint:gochecknoglobals // singleton
-	m                sync.Once                //nolint:gochecknoglobals // singleton
+	m                sync.RWMutex             //nolint:gochecknoglobals // singleton
+	m1               sync.Once                //nolint:gochecknoglobals // singleton
 )
 
 type RabbitClient struct {
@@ -27,6 +29,14 @@ type RabbitClient struct {
 	recCon  *amqp091.Connection
 	sendCh  *amqp091.Channel
 	recCh   *amqp091.Channel
+	sendTry int
+	recTry  int
+}
+
+func Init() {
+	m1.Do(func() {
+		rabbitMQInstance = make(map[string]*RabbitClient)
+	})
 }
 
 func GetRMQInstance(exchange string) *RabbitClient {
@@ -34,11 +44,16 @@ func GetRMQInstance(exchange string) *RabbitClient {
 		val *RabbitClient
 		ok  bool
 	)
-	m.Do(func() {
-		rabbitMQInstance = make(map[string]*RabbitClient)
-	})
+	if rabbitMQInstance == nil {
+		panic("rabbitmq instance not initialized")
+	}
+	m.Lock()
+	defer m.Unlock()
 	if val, ok = rabbitMQInstance[exchange]; !ok {
-		val = &RabbitClient{}
+		val = &RabbitClient{
+			sendTry: 0,
+			recTry:  0,
+		}
 		rabbitMQInstance[exchange] = val
 	}
 
@@ -226,22 +241,23 @@ func worker(msg amqp091.Delivery, f func(d amqp091.Delivery) error, exchangeName
 }
 
 func (rcl *RabbitClient) connect(isRec bool, reconect bool) (*amqp091.Connection, error) {
-	if reconect {
-		if isRec {
-			rcl.recCon = nil
-		} else {
-			rcl.sendCon = nil
+
+	if !reconect {
+		if isRec && rcl.recCon != nil {
+			return rcl.recCon, nil
+		} else if !isRec && rcl.sendCon != nil {
+			return rcl.sendCon, nil
 		}
 	}
-
-	if isRec && rcl.recCon != nil {
-		return rcl.recCon, nil
-	} else if !isRec && rcl.sendCon != nil {
-		return rcl.sendCon, nil
-	}
-
 	cfg := env.GetConfigInstance()
 	log := logger.GetLoggerInstance()
+
+	if isRec {
+		rcl.recCon = nil
+	} else {
+		rcl.sendCon = nil
+	}
+
 	amqpURL := fmt.Sprintf(
 		"amqp://%s:%s@%s:%d/%s",
 		cfg.RabbitMQ.User,
@@ -266,29 +282,33 @@ func (rcl *RabbitClient) connect(isRec bool, reconect bool) (*amqp091.Connection
 
 func (rcl *RabbitClient) channel(isRec bool, recreate bool) (*amqp091.Channel, error) { //nolint:unparam
 	log := logger.GetLoggerInstance()
-	if recreate {
-		if isRec {
-			rcl.recCh = nil
-		} else {
-			rcl.sendCh = nil
+	if !recreate {
+		if isRec && rcl.recCh != nil {
+			return rcl.recCh, nil
+		} else if !isRec && rcl.sendCh != nil {
+			return rcl.sendCh, nil
 		}
 	}
+	m.Lock()
+	defer m.Unlock()
+	if isRec {
+		rcl.recCh = nil
+	} else {
+		rcl.sendCh = nil
+	}
+
 	if isRec && rcl.recCon == nil {
 		rcl.recCh = nil
 	}
 	if !isRec && rcl.sendCon == nil {
 		rcl.recCh = nil
 	}
-	if isRec && rcl.recCh != nil {
-		return rcl.recCh, nil
-	} else if !isRec && rcl.sendCh != nil {
-		return rcl.sendCh, nil
-	}
 	for {
 		_, err := rcl.connect(isRec, recreate)
 		if err == nil {
 			break
 		}
+		rcl.stopTryConnect(isRec)
 	}
 	var err error
 	if isRec {
@@ -319,5 +339,21 @@ func (rcl *RabbitClient) Close() {
 	}
 	if rcl.recCon != nil {
 		_ = rcl.recCon.Close()
+	}
+}
+
+func (rcl *RabbitClient) stopTryConnect(isRec bool) {
+	if isRec {
+		rcl.recTry++
+		if rcl.recTry > MaxTry {
+			rcl.recTry = 0
+			panic("RabbitMQ connection is not available")
+		}
+	} else {
+		rcl.sendTry++
+		if rcl.sendTry > MaxTry {
+			rcl.sendTry = 0
+			panic("RabbitMQ connection is not available")
+		}
 	}
 }
