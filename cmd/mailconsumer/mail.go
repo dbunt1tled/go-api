@@ -49,5 +49,4 @@ func main() {
 		return nil
 	}
 	rc.Consume(rmq.MailExchange, rmq.MailQueue, f, NumWorkers)
-	rc.Close()
 }
