@@ -33,10 +33,19 @@ type RabbitClient struct {
 	recTry  int
 }
 
-func Init() {
+func Init() map[string]*RabbitClient {
 	m1.Do(func() {
 		rabbitMQInstance = make(map[string]*RabbitClient)
 	})
+	return rabbitMQInstance
+}
+func Close() {
+	for _, rcl := range rabbitMQInstance {
+		if rcl == nil {
+			continue
+		}
+		rcl.Close()
+	}
 }
 
 func GetRMQInstance(exchange string) *RabbitClient {
