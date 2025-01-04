@@ -33,6 +33,7 @@ func main() {
 
 	jobResolver := rmqmail.NewRMQJobMailResolver()
 	rmq.Init()
+	defer rmq.Close()
 	rc := rmq.GetRMQInstance(rmq.MailExchange)
 	f := func(d amqp091.Delivery) error {
 		handler, err := jobResolver.Resolver.Resolve(d.Type)
