@@ -11,6 +11,7 @@ import (
 	"go_echo/internal/lib/profiler"
 	"go_echo/internal/rmq"
 	"go_echo/internal/storage"
+	"time"
 
 	"github.com/pkg/errors"
 	"github.com/rabbitmq/amqp091-go"
@@ -18,6 +19,7 @@ import (
 
 const (
 	NumWorkers = 6
+	Duration   = 1 * time.Second
 )
 
 func main() {
@@ -30,11 +32,9 @@ func main() {
 	defer storage.Close()
 	mailer.GetMailInstance()
 	defer mailer.Close()
-
 	jobResolver := rmqmail.NewRMQJobMailResolver()
-	rmq.Init()
-	defer rmq.Close()
-	rc := rmq.GetRMQInstance(rmq.MailExchange)
+	rc := rmq.GetRMQInstance()
+	defer rc.Close()
 	f := func(d amqp091.Delivery) error {
 		handler, err := jobResolver.Resolver.Resolve(d.Type)
 		if err != nil {
@@ -48,5 +48,6 @@ func main() {
 		}
 		return nil
 	}
-	rc.Consume(rmq.MailExchange, rmq.MailQueue, f, NumWorkers)
+	sleep := Duration
+	rc.Consume(rmq.MailExchange, rmq.MailQueue, f, NumWorkers, &sleep)
 }

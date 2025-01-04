@@ -16,12 +16,12 @@ const (
 	MailExchange = "mail-go-exchange"
 	MailQueue    = "mail-go-queue"
 	MaxTry       = 10
+	Delay        = 100 * time.Millisecond
 )
 
 var (
-	rabbitMQInstance map[string]*RabbitClient //nolint:gochecknoglobals // singleton
-	m                sync.RWMutex             //nolint:gochecknoglobals // singleton
-	m1               sync.Once                //nolint:gochecknoglobals // singleton
+	rabbitMQInstance *RabbitClient //nolint:gochecknoglobals // singleton
+	m1               sync.Once     //nolint:gochecknoglobals // singleton
 )
 
 type RabbitClient struct {
@@ -31,42 +31,19 @@ type RabbitClient struct {
 	recCh   *amqp091.Channel
 	sendTry int
 	recTry  int
+	ms      sync.Mutex
+	mr      sync.Mutex
 }
 
-func Init() map[string]*RabbitClient {
+func GetRMQInstance() *RabbitClient {
 	m1.Do(func() {
-		rabbitMQInstance = make(map[string]*RabbitClient)
-	})
-	return rabbitMQInstance
-}
-func Close() {
-	for _, rcl := range rabbitMQInstance {
-		if rcl == nil {
-			continue
-		}
-		rcl.Close()
-	}
-}
-
-func GetRMQInstance(exchange string) *RabbitClient {
-	var (
-		val *RabbitClient
-		ok  bool
-	)
-	if rabbitMQInstance == nil {
-		panic("rabbitmq instance not initialized")
-	}
-	m.Lock()
-	defer m.Unlock()
-	if val, ok = rabbitMQInstance[exchange]; !ok {
-		val = &RabbitClient{
+		rabbitMQInstance = &RabbitClient{
 			sendTry: 0,
 			recTry:  0,
 		}
-		rabbitMQInstance[exchange] = val
-	}
+	})
 
-	return val
+	return rabbitMQInstance
 }
 
 func (rcl *RabbitClient) Publish(exchangeName string, queueName string, action string, body string) {
@@ -106,8 +83,13 @@ func (rcl *RabbitClient) Consume(
 	queueName string,
 	f func(d amqp091.Delivery) error,
 	concurrency int,
+	sleep *time.Duration,
 ) {
 	log := logger.GetLoggerInstance()
+	delay := Delay
+	if sleep != nil {
+		delay = *sleep
+	}
 	for {
 		for {
 			_, err := rcl.channel(true, true)
@@ -121,7 +103,7 @@ func (rcl *RabbitClient) Consume(
 			true,  // durable -queue stored after server restart
 			false, // delete when unused
 			false, // exclusive - only one consumer and deleted when queue is empty
-			false, // no-wait - don't wait for queue to be declared if true - fast but you don't know if it has error
+			false, // no-wait - don't wait for queue to be declared if true - fast, but you don't know if it has error
 			amqp091.Table{"x-queue-mode": "lazy"},
 		)
 		if err != nil {
@@ -200,7 +182,7 @@ func (rcl *RabbitClient) Consume(
 				shouldStop = true
 				break
 			case d := <-msgs:
-				time.Sleep(time.Millisecond * 100)
+				time.Sleep(delay)
 				go func() {
 					worker(d, f, exchangeName, q.Name)
 				}()
@@ -249,9 +231,8 @@ func worker(msg amqp091.Delivery, f func(d amqp091.Delivery) error, exchangeName
 	))
 }
 
-func (rcl *RabbitClient) connect(isRec bool, reconect bool) (*amqp091.Connection, error) {
-
-	if !reconect {
+func (rcl *RabbitClient) connect(isRec bool, reconnect bool) (*amqp091.Connection, error) {
+	if !reconnect {
 		if isRec && rcl.recCon != nil {
 			return rcl.recCon, nil
 		} else if !isRec && rcl.sendCon != nil {
@@ -289,17 +270,19 @@ func (rcl *RabbitClient) connect(isRec bool, reconect bool) (*amqp091.Connection
 	return rcl.sendCon, nil
 }
 
-func (rcl *RabbitClient) channel(isRec bool, recreate bool) (*amqp091.Channel, error) { //nolint:unparam
+func (rcl *RabbitClient) channel(isRec bool, recreate bool) (*amqp091.Channel, error) { //nolint:unparam // response currently is not used, but don't want to omit param
 	log := logger.GetLoggerInstance()
 	if !recreate {
+		rcl.mr.Lock()
+		defer rcl.mr.Unlock()
 		if isRec && rcl.recCh != nil {
 			return rcl.recCh, nil
 		} else if !isRec && rcl.sendCh != nil {
 			return rcl.sendCh, nil
 		}
 	}
-	m.Lock()
-	defer m.Unlock()
+	rcl.ms.Lock()
+	defer rcl.ms.Unlock()
 	if isRec {
 		rcl.recCh = nil
 	} else {
@@ -337,6 +320,8 @@ func (rcl *RabbitClient) channel(isRec bool, recreate bool) (*amqp091.Channel, e
 }
 
 func (rcl *RabbitClient) Close() {
+	rcl.ms.Lock()
+	defer rcl.ms.Unlock()
 	if rcl.sendCh != nil {
 		_ = rcl.sendCh.Close()
 	}
