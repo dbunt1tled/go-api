@@ -67,9 +67,8 @@ func Login(c echo.Context) error {
 			app_error.Err422LoginInvalidPasswordError,
 		)
 	}
-	req.Password = u.Password
 
-	tokens, err = auth.GetAuthTokens(*u)
+	tokens, err = auth.GetAuthTokens(u)
 	if err != nil {
 		return jsonerror.ErrorUnprocessableEntity(c, err, app_error.Err422LoginAuthTokensError)
 	}

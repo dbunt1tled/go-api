@@ -9,6 +9,7 @@ import (
 	"go_echo/internal/config/validate"
 	"go_echo/internal/lib/handler"
 	"go_echo/internal/lib/profiler"
+	"go_echo/internal/rmq"
 	"go_echo/internal/router"
 	"go_echo/internal/storage"
 	"go_echo/internal/util/sanitizer"
@@ -33,6 +34,7 @@ func main() {
 	defer storage.Close()
 	cache.GetRedisCache()
 	defer cache.GetRedisCache().Close()
+	rmq.Init()
 	httpServer := echo.New()
 	httpServer.HideBanner = true
 	httpServer.Debug = cfg.Debug.Debug
@@ -41,17 +43,17 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
 	go func() {
-		log.Debug("Start listening on address: " + cfg.HTTPServer.Address)
+		log.Debug("(っ◕‿◕)っ Start listening on address: " + cfg.HTTPServer.Address)
 		if err := httpServer.Start(cfg.HTTPServer.Address); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			log.Error("shutting down the server" + err.Error())
+			log.Error("Shutting down the server" + err.Error())
 		}
 	}()
 	<-ctx.Done()
-	log.Warn("quit: shutting down ...")
-	defer log.Warn("quit: shutdown completed")
+	log.Warn("Quit: shutting down ...")
+	defer log.Warn("Quit: shutdown completed")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second) //nolint:mnd // 10 seconds timeout
 	defer cancel()
 	if err := httpServer.Shutdown(ctx); err != nil {
-		log.ErrorContext(ctx, "error shutting down the server", err)
+		log.ErrorContext(ctx, "Error shutting down the server"+err.Error())
 	}
 }

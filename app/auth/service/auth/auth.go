@@ -14,7 +14,7 @@ const (
 	ConfirmTokenSubject = "confirm_token"
 )
 
-func GetAuthTokens(user user.User) (*token.Tokens, error) {
+func GetAuthTokens(user *user.User) (*token.Tokens, error) {
 	accessToken, err := generateAccessToken(user)
 	if err != nil {
 		return nil, err
@@ -29,7 +29,7 @@ func GetAuthTokens(user user.User) (*token.Tokens, error) {
 	}, nil
 }
 
-func generateAccessToken(user user.User) (string, error) {
+func generateAccessToken(user *user.User) (string, error) {
 	cfg := env.GetConfigInstance()
 	data := map[string]interface{}{
 		"iss": user.ID,
@@ -45,7 +45,7 @@ func generateAccessToken(user user.User) (string, error) {
 	return token, nil
 }
 
-func generateRefreshToken(user user.User) (string, error) {
+func generateRefreshToken(user *user.User) (string, error) {
 	cfg := env.GetConfigInstance()
 	data := map[string]interface{}{
 		"iss": user.ID,
@@ -61,7 +61,7 @@ func generateRefreshToken(user user.User) (string, error) {
 	return token, nil
 }
 
-func GenerateConfirmToken(user user.User) (string, error) {
+func GenerateConfirmToken(user *user.User) (string, error) {
 	cfg := env.GetConfigInstance()
 	data := map[string]interface{}{
 		"iss": user.ID,
