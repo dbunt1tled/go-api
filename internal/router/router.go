@@ -9,7 +9,6 @@ import (
 	apiServer "go_echo/internal/router/handler/server"
 	"go_echo/internal/router/middlewares"
 	"go_echo/internal/util/hasher"
-	"net/http"
 	"strconv"
 	"strings"
 	"time"
@@ -34,11 +33,7 @@ func SetupRoutes(server *echo.Echo) {
 }
 func generalRoutes(server *echo.Echo) {
 	generalRouter := server.Group("/")
-	// generalRouter.Use(middlewares.AuthBearer)
-	generalRouter.GET("", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello, World!")
-	})
-	generalRouter.GET("home", generalhandler.Home)
+	generalRouter.GET("", generalhandler.Home)
 }
 
 func authRoutes(server *echo.Echo) {
@@ -70,15 +65,12 @@ func setGeneralMiddlewares(server *echo.Echo, cfg *env.Config) {
 			} else {
 				u = ub.String()
 			}
-
 			return u
 		},
 	}))
-	server.Use(middleware.GzipWithConfig(middleware.GzipConfig{Level: 6})) // nolint:gomnd // 6 currently is the best value
+	server.Use(middleware.GzipWithConfig(middleware.GzipConfig{Level: 6}))
 	server.Use(middleware.Recover())
-	server.Use(middlewares.Base)
 	server.Use(middlewares.Language())
-	server.Use(middlewares.LogRequest)
 	server.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins:     strings.Split(cfg.CORS.AccessControlAllowOrigin, ","),
 		AllowMethods:     strings.Split(cfg.CORS.AccessControlAllowMethods, ","),
@@ -86,4 +78,6 @@ func setGeneralMiddlewares(server *echo.Echo, cfg *env.Config) {
 		AllowCredentials: false,
 		MaxAge:           300, //nolint:mnd // Maximum value not ignored by any of major browsers
 	}))
+	server.Use(middlewares.LogRequest)
+	server.Use(middlewares.Base)
 }

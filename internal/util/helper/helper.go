@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"go_echo/internal/config/env"
 	"go_echo/internal/util/builder/page"
 	"go_echo/internal/util/type/checker"
 	jf "go_echo/internal/util/type/json"
@@ -21,6 +22,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	dynamicstruct "github.com/ompluscator/dynamic-struct"
+	"golang.org/x/text/language"
 )
 
 func ValidationErrorString(
@@ -112,6 +114,8 @@ func GetTemplate(templ string) *template.Template {
 	return Must(template.New(templ).ParseFiles([]string{
 		basePath + "base/header.gohtml",
 		basePath + "base/footer.gohtml",
+		basePath + "base/layout/l_header.gohtml",
+		basePath + "base/layout/l_footer.gohtml",
 		basePath + templ,
 	}...))
 }
@@ -272,4 +276,17 @@ func AnyToString(a any) string {
 		}
 		return fmt.Sprintf("%v", value)
 	}
+}
+
+func MakeTemplateData(data map[string]any) interface{} {
+	_, ok := data["Locale"]
+	if !ok {
+		data["Locale"] = language.English.String()
+	}
+	cfg := env.GetConfigInstance()
+	data["AppStaticImageLink"] = cfg.Static.URL
+	data["AppLink"] = cfg.AppURL
+	data["AppName"] = cfg.AppName
+	data["Year"] = time.Now().UTC().Year()
+	return MakeStruct(data)
 }

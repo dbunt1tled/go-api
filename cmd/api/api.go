@@ -44,9 +44,17 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
 	go func() {
-		log.Debug("(っ◕‿◕)っ Start listening on address: " + cfg.HTTPServer.Address)
-		if err := httpServer.Start(cfg.HTTPServer.Address); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			log.Error("Shutting down the server" + err.Error())
+		if cfg.HTTPServer.TLS.CertFile != "" || cfg.HTTPServer.TLS.KeyFile != "" {
+			log.Debug("(っ◕‿◕)っ Start Server TLS listening on address: " + cfg.HTTPServer.Address)
+			err := httpServer.StartTLS(cfg.HTTPServer.Address, cfg.HTTPServer.TLS.CertFile, cfg.HTTPServer.TLS.KeyFile)
+			if !errors.Is(err, http.ErrServerClosed) {
+				log.Error("Shutting down the server" + err.Error())
+			}
+		} else {
+			log.Debug("(っ◕‿◕)っ Start Server listening on address: " + cfg.HTTPServer.Address)
+			if err := httpServer.Start(cfg.HTTPServer.Address); err != nil && !errors.Is(err, http.ErrServerClosed) {
+				log.Error("Shutting down the server" + err.Error())
+			}
 		}
 	}()
 	<-ctx.Done()

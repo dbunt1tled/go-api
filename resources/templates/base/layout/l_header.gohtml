@@ -1,0 +1,27 @@
+{{define "l_header"}}
+<!DOCTYPE html>
+<html lang="{{.Locale}}">
+<head>
+    <meta charset="UTF-8">
+    <title>Go API</title>
+	<link href="{{.AppStaticImageLink}}/images/favicon.ico" rel="shortcut icon" type="image/x-icon">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'none'; style-src * 'unsafe-inline'; default-src *; img-src * data:">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width">
+	<link rel="stylesheet" type="text/css" href="{{.AppStaticImageLink}}/style.css">
+</head>
+<body style="margin: 0; padding: 0">
+<header>
+	<div class="logo">
+	    <img src="{{.AppStaticImageLink}}/images/logo30.webp" alt="Logo">
+		<span>{{.AppName}} </span> Starter KIT
+	</div>
+	<div class="title">
+		Backend REST JSON API Server
+	</div>
+	<div class="nav">
+		<a href="https://github.com/dbunt1tled/go-api">Github</a>
+	</div>
+</header>
+<main>
+{{end}}

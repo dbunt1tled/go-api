@@ -3,20 +3,25 @@ package middlewares
 import (
 	"go_echo/internal/config/env"
 	"go_echo/internal/util/helper"
+	"slices"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
 
+//nolint:gocognit
 func LogRequest(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		cfg := env.GetConfigInstance()
 		if !cfg.Debug.Debug {
 			return next(c)
 		}
-		if cfg.Debug.DebugRequest {
+		if cfg.Debug.DebugRequest { //nolint:nestif
 			loggerMiddleware := middleware.Logger()
-			if cfg.Debug.DebugBody {
+			path := c.Path()
+			urls := []string{"/", "/system/helm"}
+			if cfg.Debug.DebugBody && !slices.Contains(urls, path) && !strings.HasPrefix(path, "/"+cfg.Static.URL) {
 				bodyDumpMiddleware := middleware.BodyDump(func(c echo.Context, reqBody, resBody []byte) {
 					rqB := string(reqBody)
 					rsB := string(resBody)

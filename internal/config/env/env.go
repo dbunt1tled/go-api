@@ -72,6 +72,12 @@ type HTTPServer struct {
 	Address     string        `env:"HTTP_SERVER_ADDRESS" env-default:"localhost:8080" env-required:"true"`
 	Timeout     time.Duration `env:"HTTP_SERVER_TIMEOUT" env-required:"true"`
 	IdleTimeout time.Duration `env:"HTTP_SERVER_IDLE_TIMEOUT" env-required:"true"`
+	TLS         TLS
+}
+
+type TLS struct {
+	CertFile string `env:"TLS_CERT_FILE" env-default:""`
+	KeyFile  string `env:"TLS_KEY_FILE" env-default:""`
 }
 
 type CORS struct {

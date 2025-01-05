@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"go_echo/internal/config/app_error"
 	"go_echo/internal/lib/jsonerror"
-	"go_echo/internal/lib/mailservice"
 	"go_echo/internal/util/helper"
 	"net/http"
 
@@ -14,8 +13,9 @@ import (
 
 func Home(c echo.Context) error {
 	var doc bytes.Buffer
-	t := helper.GetTemplate("auth/register.gohtml")
-	err := t.Execute(&doc, mailservice.MakeMailTemplateData(map[string]any{}))
+	err := helper.
+		GetTemplate("general/home.gohtml").
+		Execute(&doc, helper.MakeTemplateData(map[string]any{}))
 	if err != nil {
 		return jsonerror.ErrorUnprocessableEntity(
 			c,
@@ -23,5 +23,6 @@ func Home(c echo.Context) error {
 			app_error.Err422HomeGeneralError,
 		)
 	}
-	return c.String(http.StatusOK, doc.String())
+
+	return c.HTML(http.StatusOK, doc.String())
 }
