@@ -44,25 +44,25 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
 	go func() {
-		if cfg.HTTPServer.TLS.CertFile != "" || cfg.HTTPServer.TLS.KeyFile != "" {
+		if cfg.HTTPServer.TLS.IsSet() {
 			log.Debug("(っ◕‿◕)っ Start Server TLS listening on address: " + cfg.HTTPServer.Address)
-			err := httpServer.StartTLS(cfg.HTTPServer.Address, cfg.HTTPServer.TLS.CertFile, cfg.HTTPServer.TLS.KeyFile)
+			err := httpServer.StartTLS(cfg.HTTPServer.Address, cfg.HTTPServer.TLS.GetCertData(), cfg.HTTPServer.TLS.GetKeyData())
 			if !errors.Is(err, http.ErrServerClosed) {
-				log.Error("Shutting down the server" + err.Error())
+				log.Error("¯\\_(͡° ͜ʖ ͡°)_/¯Shutting down the server" + err.Error())
 			}
 		} else {
-			log.Debug("(っ◕‿◕)っ Start Server listening on address: " + cfg.HTTPServer.Address)
+			log.Debug("(/◔◡◔)/ Start Server listening on address: " + cfg.HTTPServer.Address)
 			if err := httpServer.Start(cfg.HTTPServer.Address); err != nil && !errors.Is(err, http.ErrServerClosed) {
-				log.Error("Shutting down the server" + err.Error())
+				log.Error("¯\\_(͡° ͜ʖ ͡°)_/¯Shutting down the server" + err.Error())
 			}
 		}
 	}()
 	<-ctx.Done()
 	log.Warn("Quit: shutting down ...")
-	defer log.Warn("Quit: shutdown completed")
+	defer log.Warn("｡◕‿‿◕｡ Quit: shutdown completed")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second) //nolint:mnd // 10 seconds timeout
 	defer cancel()
 	if err := httpServer.Shutdown(ctx); err != nil {
-		log.ErrorContext(ctx, "Error shutting down the server"+err.Error())
+		log.ErrorContext(ctx, "¯\\_(͡° ͜ʖ ͡°)_/¯ Error shutting down the server"+err.Error())
 	}
 }

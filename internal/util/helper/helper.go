@@ -290,3 +290,30 @@ func MakeTemplateData(data map[string]any) interface{} {
 	data["Year"] = time.Now().UTC().Year()
 	return MakeStruct(data)
 }
+
+func ToPointer[T any](t T) *T {
+	return &t
+}
+
+func ToPointerOrNil[T comparable](t T) *T {
+	if z, ok := any(t).(interface{ IsZero() bool }); ok {
+		if z.IsZero() {
+			return nil
+		}
+		return &t
+	}
+
+	var v T
+	if t == v {
+		return nil
+	}
+	return &t
+}
+
+func ValueFromPointer[T any](t *T) T {
+	if t == nil {
+		var v T
+		return v
+	}
+	return *t
+}

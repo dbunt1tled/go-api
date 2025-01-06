@@ -1,6 +1,7 @@
 package env
 
 import (
+	"encoding/base64"
 	"log"
 	"os"
 	"sync"
@@ -76,8 +77,35 @@ type HTTPServer struct {
 }
 
 type TLS struct {
-	CertFile string `env:"TLS_CERT_FILE" env-default:""`
-	KeyFile  string `env:"TLS_KEY_FILE" env-default:""`
+	Cert string `env:"TLS_CERT" env-default:""`
+	Key  string `env:"TLS_KEY" env-default:""`
+}
+
+func (t *TLS) IsSet() bool {
+	return t.Cert != "" || t.Key != ""
+}
+func (t *TLS) GetCertData() interface{} {
+	_, err := os.Stat(t.Cert)
+	if err == nil {
+		return t.Cert
+	}
+	res, err := base64.StdEncoding.DecodeString(t.Cert)
+	if err == nil {
+		return res
+	}
+	return []byte(t.Cert)
+}
+
+func (t *TLS) GetKeyData() interface{} {
+	_, err := os.Stat(t.Key)
+	if err == nil {
+		return t.Key
+	}
+	res, err := base64.StdEncoding.DecodeString(t.Key)
+	if err == nil {
+		return res
+	}
+	return []byte(t.Cert)
 }
 
 type CORS struct {
