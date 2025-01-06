@@ -9,7 +9,6 @@ import (
 	proxyproto "go_echo/internal/grpc"
 	"go_echo/internal/lib/profiler"
 	"go_echo/internal/storage"
-	"log/slog"
 	"net"
 	"os"
 	"os/signal"
@@ -31,7 +30,7 @@ func main() {
 	run(cfg, log)
 }
 
-func run(cfg *env.Config, log *slog.Logger) {
+func run(cfg *env.Config, log *logger.AppLogger) {
 	lis, err := net.Listen("tcp", cfg.Centrifugo.ServerURL)
 	if err != nil {
 		log.Error("failed to listen: " + err.Error())
