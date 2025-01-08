@@ -9,7 +9,7 @@ import (
 
 func Base(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		err := next(c) // Выполняем следующий обработчик
+		err := next(c)
 		c.Response().After(func() {
 			cfg := env.GetConfigInstance()
 			if !(cfg.Static.Enable && strings.HasPrefix(c.Request().URL.Path, "/"+cfg.Static.URL)) &&

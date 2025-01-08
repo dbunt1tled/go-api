@@ -105,7 +105,7 @@ func (t *TLS) GetKeyData() interface{} {
 	if err == nil {
 		return res
 	}
-	return []byte(t.Cert)
+	return []byte(t.Key)
 }
 
 type CORS struct {

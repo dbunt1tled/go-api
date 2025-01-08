@@ -16,10 +16,12 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/pkg/errors"
+	_ "github.com/redis/go-redis/v9"
 )
 
 func main() {
@@ -31,22 +33,29 @@ func main() {
 	sanitizer.GetSanitizerInstance()
 	profiler.SetProfiler()
 	storage.GetInstance()
-	defer storage.Close()
 	cache.GetRedisCache()
-	defer cache.GetRedisCache().Close()
 	rmq.GetRMQInstance()
-	defer rmq.Close()
 	httpServer := echo.New()
 	httpServer.HideBanner = true
 	httpServer.Debug = cfg.Debug.Debug
 	httpServer.HTTPErrorHandler = handler.APIErrorHandler
 	router.SetupRoutes(httpServer)
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+	ctx, stop := signal.NotifyContext(
+		context.Background(),
+		syscall.SIGINT,
+		syscall.SIGTERM,
+		syscall.SIGQUIT,
+		os.Interrupt,
+	)
 	defer stop()
 	go func() {
 		if cfg.HTTPServer.TLS.IsSet() {
 			log.Debug("(っ◕‿◕)っ Start Server TLS listening on address: " + cfg.HTTPServer.Address)
-			err := httpServer.StartTLS(cfg.HTTPServer.Address, cfg.HTTPServer.TLS.GetCertData(), cfg.HTTPServer.TLS.GetKeyData())
+			err := httpServer.StartTLS(
+				cfg.HTTPServer.Address,
+				cfg.HTTPServer.TLS.GetCertData(),
+				cfg.HTTPServer.TLS.GetKeyData(),
+			)
 			if !errors.Is(err, http.ErrServerClosed) {
 				log.Error("¯\\_(͡° ͜ʖ ͡°)_/¯Shutting down the server" + err.Error())
 			}
@@ -58,11 +67,42 @@ func main() {
 		}
 	}()
 	<-ctx.Done()
+	var cancel context.CancelFunc
+	ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second) //nolint:mnd // 10 seconds timeout
+	defer cancel()
 	log.Warn("Quit: shutting down ...")
 	defer log.Warn("｡◕‿‿◕｡ Quit: shutdown completed")
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second) //nolint:mnd // 10 seconds timeout
-	defer cancel()
-	if err := httpServer.Shutdown(ctx); err != nil {
-		log.ErrorContext(ctx, "¯\\_(͡° ͜ʖ ͡°)_/¯ Error shutting down the server"+err.Error())
+	gracefulShutdown(
+		log,
+		func() error {
+			log.Info("㋡ Quit: closing database connection")
+			return storage.Close()
+		},
+		func() error {
+			log.Info("㋡ Quit: closing cache connection")
+			return cache.GetRedisCache().Close()
+		},
+		func() error {
+			log.Info("㋡ Quit: closing rmq connection")
+			return rmq.Close()
+		},
+		func() error {
+			log.Info("㋡ Quit: shutting down the server")
+			return httpServer.Shutdown(ctx)
+		},
+		func() error {
+			log.Warn("｡◕‿‿◕｡ Quit: shutdown completed")
+			os.Exit(0)
+			return nil
+		},
+	)
+}
+
+func gracefulShutdown(log *logger.AppLogger, ops ...func() error) {
+	for _, op := range ops {
+		if err := op(); err != nil {
+			log.Error("(ツ)_/¯ Graceful Shutdown op failed", "error", err)
+			panic(err)
+		}
 	}
 }

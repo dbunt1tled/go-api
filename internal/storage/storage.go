@@ -3,7 +3,6 @@ package storage
 import (
 	"database/sql"
 	"go_echo/internal/config/env"
-	"go_echo/internal/config/logger"
 	"sync"
 	"time"
 
@@ -59,11 +58,6 @@ func Open() (*Mysql, error) {
 	return &Mysql{db: db}, nil
 }
 
-func Close() {
-	db := GetInstance()
-	log := logger.GetLoggerInstance()
-	err := db.db.Close()
-	if err != nil {
-		log.Error(errors.Wrap(err, "db close error").Error())
-	}
+func Close() error {
+	return GetInstance().db.Close()
 }

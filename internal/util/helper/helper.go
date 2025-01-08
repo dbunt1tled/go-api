@@ -30,8 +30,12 @@ func ValidationErrorString(
 	validationErrors validator.ValidationErrors,
 ) map[string]interface{} {
 	var fName string
-	localizer := ctx.Get("localizer").(*i18n.Localizer)
 	errors := make(map[string]interface{})
+	localizer := GetLocalizer(ctx)
+	if localizer == nil {
+		errors["localizer"] = "Localizer not setup"
+		return errors
+	}
 	defaultMessage := localizer.MustLocalize(&i18n.LocalizeConfig{
 		MessageID: "default_validation_message",
 		TemplateData: map[string]interface{}{
@@ -276,6 +280,10 @@ func AnyToString(a any) string {
 		}
 		return fmt.Sprintf("%v", value)
 	}
+}
+
+func IsA(a any, typeToAssert reflect.Kind) bool {
+	return typeToAssert == reflect.ValueOf(a).Kind()
 }
 
 func MakeTemplateData(data map[string]any) interface{} {

@@ -72,9 +72,9 @@ func (s *Server) Connect(
 			},
 		}, nil
 	}
-	userId := strconv.FormatInt(u.ID, 10)
+	userID := strconv.FormatInt(u.ID, 10)
 	data := map[string]interface{}{
-		"channels": []string{"user:#" + userId, "read:#" + userId},
+		"channels": []string{"user:#" + userID, "read:#" + userID},
 		"user":     u.FirstName + " " + u.SecondName,
 	}
 	dataBytes, err := json.Marshal(data)
@@ -93,23 +93,26 @@ func (s *Server) Connect(
 	}
 	return &proxyproto.ConnectResponse{
 		Result: &proxyproto.ConnectResult{
-			User:     userId,
+			User:     userID,
 			Data:     dataBytes,
 			ExpireAt: int64(token["exp"].(float64)),
 		},
 	}, nil
 }
 
-func (s *Server) Subscribe(ctx context.Context, request *proxyproto.SubscribeRequest) (*proxyproto.SubscribeResponse, error) {
+func (s *Server) Subscribe(
+	ctx context.Context,
+	request *proxyproto.SubscribeRequest,
+) (*proxyproto.SubscribeResponse, error) {
 	var (
 		provider *server.ChannelProvider
 		err      error
-		userId   int64
+		userID   int64
 	)
 	log := logger.GetLoggerInstance()
 	providerResolver := server.GetChannelProviderResolver()
 	channel := request.GetChannel()
-	userId, err = strconv.ParseInt(request.GetUser(), 10, 64)
+	userID, err = strconv.ParseInt(request.GetUser(), 10, 64)
 	if err != nil {
 		log.ErrorContext(ctx, "Centrifugo Subscribe error parse user id",
 			"request_data", request,
@@ -136,7 +139,7 @@ func (s *Server) Subscribe(ctx context.Context, request *proxyproto.SubscribeReq
 			},
 		}, nil
 	}
-	err = (*provider).Subscribe(channel, userId)
+	err = (*provider).Subscribe(channel, userID)
 	if err != nil {
 		log.ErrorContext(ctx, "Centrifugo Subscribe error subscribe channel",
 			"request_data", request,
@@ -161,14 +164,14 @@ func (s *Server) Publish(
 	var (
 		provider *server.ChannelProvider
 		err      error
-		userId   int64
+		userID   int64
 		dt       *[]byte
 	)
 	log := logger.GetLoggerInstance()
 	providerResolver := server.GetChannelProviderResolver()
 	data := request.GetData()
 	channel := request.GetChannel()
-	userId, err = strconv.ParseInt(request.GetUser(), 10, 64)
+	userID, err = strconv.ParseInt(request.GetUser(), 10, 64)
 	if err != nil {
 		log.ErrorContext(ctx, "Centrifugo Publish error parse user id",
 			"request_data", request,
@@ -195,7 +198,7 @@ func (s *Server) Publish(
 			},
 		}, nil
 	}
-	dt, err = (*provider).Publish(channel, userId, data)
+	dt, err = (*provider).Publish(channel, userID, data)
 	if err != nil {
 		log.ErrorContext(ctx, "Centrifugo Publish error publish channel",
 			"request_data", request,

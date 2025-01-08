@@ -26,7 +26,6 @@ func main() {
 	validate.GetValidateInstance()
 	profiler.SetProfiler()
 	storage.GetInstance()
-	defer storage.Close()
 	run(cfg, log)
 }
 
@@ -52,6 +51,29 @@ func run(cfg *env.Config, log *logger.AppLogger) {
 
 	<-stop
 	log.Info("Shutting down gRPC server...")
-	srv.GracefulStop()
-	log.Info("Server stopped gracefully")
+	gracefulShutdown(
+		log,
+		func() error {
+			log.Info("㋡ Quit: closing database connection")
+			return storage.Close()
+		},
+		func() error {
+			log.Info("㋡ gRPC Server stopped")
+			srv.GracefulStop()
+			return nil
+		},
+		func() error {
+			log.Warn("｡◕‿‿◕｡ Quit: shutdown completed")
+			os.Exit(0)
+			return nil
+		},
+	)
+}
+func gracefulShutdown(log *logger.AppLogger, ops ...func() error) {
+	for _, op := range ops {
+		if err := op(); err != nil {
+			log.Error("(ツ)_/¯ gRPC Graceful Shutdown op failed", "error", err)
+			panic(err)
+		}
+	}
 }

@@ -115,11 +115,7 @@ func Consume(
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 	go func() {
 		sig := <-sigs
-
-		log.Info("Consumer received signal: %s", sig)
-		fmt.Println(sig)
-		fmt.Println("stopping consumer")
-
+		log.Info("Consumer received signal: " + sig.String())
 		consumer.Close()
 	}()
 	err = consumer.Run(func(d rabbitmq.Delivery) rabbitmq.Action {
@@ -162,11 +158,6 @@ func worker(
 	return rabbitmq.Ack
 }
 
-func Close() {
-	err := GetRMQInstance().Close()
-	if err != nil {
-		log := logger.GetLoggerInstance()
-		log.Error("failed to close rmq connection: " + err.Error())
-		return
-	}
+func Close() error {
+	return GetRMQInstance().Close()
 }
