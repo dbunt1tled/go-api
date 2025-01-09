@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"go_echo/app/centrifugo"
 	"go_echo/internal/config/env"
 	"go_echo/internal/config/locale"
@@ -9,12 +10,15 @@ import (
 	proxyproto "go_echo/internal/grpc"
 	"go_echo/internal/lib/profiler"
 	"go_echo/internal/storage"
+	"go_echo/internal/util/helper"
 	"net"
 	"os"
 	"os/signal"
+	"reflect"
 	"syscall"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/reflection"
 )
 
@@ -26,15 +30,48 @@ func main() {
 	validate.GetValidateInstance()
 	profiler.SetProfiler()
 	storage.GetInstance()
+	defer storage.Close()
 	run(cfg, log)
 }
 
 func run(cfg *env.Config, log *logger.AppLogger) {
-	lis, err := net.Listen("tcp", cfg.Centrifugo.ServerURL)
-	if err != nil {
-		log.Error("failed to listen: " + err.Error())
+	var (
+		lis  net.Listener
+		srv  *grpc.Server
+		err  error
+		cert tls.Certificate
+		cred credentials.TransportCredentials
+	)
+	if cfg.HTTPServer.TLS.IsSet() {
+		certData := cfg.HTTPServer.TLS.GetCertData()
+		keyData := cfg.HTTPServer.TLS.GetKeyData()
+
+		if helper.IsA(certData, reflect.String) && helper.IsA(keyData, reflect.String) {
+			cred, err = credentials.NewServerTLSFromFile(helper.AnyToString(certData), helper.AnyToString(keyData))
+			if err != nil {
+				log.Error("failed to create TLS credentials: " + err.Error())
+				return
+			}
+		} else {
+			cert, err = tls.X509KeyPair(certData.([]byte), keyData.([]byte))
+			if err != nil {
+				log.Error("failed to create TLS certificate: " + err.Error())
+				return
+			}
+			cred = credentials.NewTLS(&tls.Config{Certificates: []tls.Certificate{cert}})
+		}
+		srv = grpc.NewServer(grpc.Creds(cred))
+		lis, err = net.Listen("tcp", cfg.Centrifugo.ServerURL)
+		if err != nil {
+			log.Error("failed to listen: " + err.Error())
+		}
+	} else {
+		lis, err = net.Listen("tcp", cfg.Centrifugo.ServerURL)
+		if err != nil {
+			log.Error("failed to listen: " + err.Error())
+		}
 	}
-	srv := grpc.NewServer()
+
 	proxyproto.RegisterCentrifugoProxyServer(srv, &centrifugo.Server{})
 	reflection.Register(srv)
 	log.Info("Start GRPC listening...")
@@ -51,29 +88,6 @@ func run(cfg *env.Config, log *logger.AppLogger) {
 
 	<-stop
 	log.Info("Shutting down gRPC server...")
-	gracefulShutdown(
-		log,
-		func() error {
-			log.Info("㋡ Quit: closing database connection")
-			return storage.Close()
-		},
-		func() error {
-			log.Info("㋡ gRPC Server stopped")
-			srv.GracefulStop()
-			return nil
-		},
-		func() error {
-			log.Warn("｡◕‿‿◕｡ Quit: shutdown completed")
-			os.Exit(0)
-			return nil
-		},
-	)
-}
-func gracefulShutdown(log *logger.AppLogger, ops ...func() error) {
-	for _, op := range ops {
-		if err := op(); err != nil {
-			log.Error("(ツ)_/¯ gRPC Graceful Shutdown op failed", "error", err)
-			panic(err)
-		}
-	}
+	srv.GracefulStop()
+	log.Info("Server stopped gracefully")
 }
