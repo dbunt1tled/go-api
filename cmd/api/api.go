@@ -12,6 +12,7 @@ import (
 	"go_echo/internal/rmq"
 	"go_echo/internal/router"
 	"go_echo/internal/storage"
+	"go_echo/internal/util/helper"
 	"go_echo/internal/util/sanitizer"
 	"net/http"
 	"os"
@@ -72,7 +73,7 @@ func main() {
 	defer cancel()
 	log.Warn("Quit: shutting down ...")
 	defer log.Warn("｡◕‿‿◕｡ Quit: shutdown completed")
-	gracefulShutdown(
+	helper.GracefulShutdown(
 		log,
 		func() error {
 			log.Info("㋡ Quit: closing database connection")
@@ -96,13 +97,4 @@ func main() {
 			return nil
 		},
 	)
-}
-
-func gracefulShutdown(log *logger.AppLogger, ops ...func() error) {
-	for _, op := range ops {
-		if err := op(); err != nil {
-			log.Error("(ツ)_/¯ Graceful Shutdown op failed", "error", err)
-			panic(err)
-		}
-	}
 }

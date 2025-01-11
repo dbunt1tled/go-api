@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/tls"
 	"go_echo/app/centrifugo"
+	"go_echo/app/centrifugo/interceptor"
 	"go_echo/internal/config/env"
 	"go_echo/internal/config/locale"
 	"go_echo/internal/config/logger"
@@ -30,7 +31,6 @@ func main() {
 	validate.GetValidateInstance()
 	profiler.SetProfiler()
 	storage.GetInstance()
-	defer storage.Close()
 	run(cfg, log)
 }
 
@@ -41,11 +41,15 @@ func run(cfg *env.Config, log *logger.AppLogger) {
 		err  error
 		cert tls.Certificate
 		cred credentials.TransportCredentials
+		opts []grpc.ServerOption
 	)
+
+	if cfg.Debug.DebugRequest {
+		opts = append(opts, grpc.UnaryInterceptor(interceptor.LoggingInterceptor))
+	}
 	if cfg.HTTPServer.TLS.IsSet() {
 		certData := cfg.HTTPServer.TLS.GetCertData()
 		keyData := cfg.HTTPServer.TLS.GetKeyData()
-
 		if helper.IsA(certData, reflect.String) && helper.IsA(keyData, reflect.String) {
 			cred, err = credentials.NewServerTLSFromFile(helper.AnyToString(certData), helper.AnyToString(keyData))
 			if err != nil {
@@ -60,16 +64,12 @@ func run(cfg *env.Config, log *logger.AppLogger) {
 			}
 			cred = credentials.NewTLS(&tls.Config{Certificates: []tls.Certificate{cert}})
 		}
-		srv = grpc.NewServer(grpc.Creds(cred))
-		lis, err = net.Listen("tcp", cfg.Centrifugo.ServerURL)
-		if err != nil {
-			log.Error("failed to listen: " + err.Error())
-		}
-	} else {
-		lis, err = net.Listen("tcp", cfg.Centrifugo.ServerURL)
-		if err != nil {
-			log.Error("failed to listen: " + err.Error())
-		}
+		opts = append(opts, grpc.Creds(cred))
+	}
+	srv = grpc.NewServer(opts...)
+	lis, err = net.Listen("tcp", cfg.Centrifugo.ServerURL)
+	if err != nil {
+		log.Error("failed to listen: " + err.Error())
 	}
 
 	proxyproto.RegisterCentrifugoProxyServer(srv, &centrifugo.Server{})
@@ -88,6 +88,21 @@ func run(cfg *env.Config, log *logger.AppLogger) {
 
 	<-stop
 	log.Info("Shutting down gRPC server...")
-	srv.GracefulStop()
-	log.Info("Server stopped gracefully")
+	helper.GracefulShutdown(
+		log,
+		func() error {
+			log.Info("㋡ Quit: closing database connection")
+			return storage.Close()
+		},
+		func() error {
+			log.Info("㋡ Quit: closing gRPC server")
+			srv.GracefulStop()
+			return nil
+		},
+		func() error {
+			log.Warn("｡◕‿‿◕｡ Quit: shutdown completed")
+			os.Exit(0)
+			return nil
+		},
+	)
 }

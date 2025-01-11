@@ -11,6 +11,7 @@ import (
 	proxyproto "go_echo/internal/grpc"
 	"go_echo/internal/util/helper"
 	"go_echo/internal/util/jwt"
+	"log/slog"
 	"strconv"
 
 	"google.golang.org/grpc"
@@ -34,8 +35,8 @@ func (s *Server) Connect(
 	err = json.Unmarshal(request.GetData(), &req)
 	if err != nil {
 		log.ErrorContext(ctx, "Centrifugo Connect error unmarshal request",
-			"request_data", request.GetData(),
-			"error", err,
+			slog.String("request_data", string(request.GetData())),
+			slog.Any("error", err),
 		)
 		return &proxyproto.ConnectResponse{
 			Error: &proxyproto.Error{
@@ -47,8 +48,8 @@ func (s *Server) Connect(
 	token, err = jwt.JWToken{}.Decode(req.AccessToken, true)
 	if err != nil {
 		log.ErrorContext(ctx, "Centrifugo Connect error decode user token",
-			"request_data", request.GetData(),
-			"error", err,
+			slog.String("request_data", string(request.GetData())),
+			slog.Any("error", err),
 		)
 		return &proxyproto.ConnectResponse{
 			Error: &proxyproto.Error{
@@ -61,9 +62,9 @@ func (s *Server) Connect(
 	if err != nil || u.Status != user.Active {
 
 		log.ErrorContext(ctx, "Centrifugo Connect error find user by id",
-			"request_data", request.GetData(),
-			"error", err,
-			"user", u,
+			slog.String("request_data", string(request.GetData())),
+			slog.Any("error", err),
+			slog.Any("user", u),
 		)
 		return &proxyproto.ConnectResponse{
 			Error: &proxyproto.Error{
@@ -80,9 +81,9 @@ func (s *Server) Connect(
 	dataBytes, err := json.Marshal(data)
 	if err != nil {
 		log.ErrorContext(ctx, "Centrifugo Connect error marshal data",
-			"request_data", request.GetData(),
-			"error", err,
-			"user", u,
+			slog.String("request_data", string(request.GetData())),
+			slog.Any("error", err),
+			slog.Any("user", u),
 		)
 		return &proxyproto.ConnectResponse{
 			Error: &proxyproto.Error{
@@ -95,7 +96,7 @@ func (s *Server) Connect(
 		Result: &proxyproto.ConnectResult{
 			User:     userID,
 			Data:     dataBytes,
-			ExpireAt: int64(token["exp"].(float64)),
+			ExpireAt: int64(token["exp"].(float64)), //nolint:errcheck
 		},
 	}, nil
 }
@@ -115,8 +116,8 @@ func (s *Server) Subscribe(
 	userID, err = strconv.ParseInt(request.GetUser(), 10, 64)
 	if err != nil {
 		log.ErrorContext(ctx, "Centrifugo Subscribe error parse user id",
-			"request_data", request,
-			"error", err,
+			slog.String("request_data", string(request.GetData())),
+			slog.Any("error", err),
 		)
 		return &proxyproto.SubscribeResponse{
 			Error: &proxyproto.Error{
@@ -129,8 +130,8 @@ func (s *Server) Subscribe(
 	provider, err = providerResolver.Resolve(helper.SubStr(channel, ":"))
 	if err != nil {
 		log.ErrorContext(ctx, "Centrifugo Subscribe error resolve provider",
-			"request_data", request,
-			"error", err,
+			slog.String("request_data", string(request.GetData())),
+			slog.Any("error", err),
 		)
 		return &proxyproto.SubscribeResponse{
 			Error: &proxyproto.Error{
@@ -142,8 +143,8 @@ func (s *Server) Subscribe(
 	err = (*provider).Subscribe(channel, userID)
 	if err != nil {
 		log.ErrorContext(ctx, "Centrifugo Subscribe error subscribe channel",
-			"request_data", request,
-			"error", err,
+			slog.String("request_data", string(request.GetData())),
+			slog.Any("error", err),
 		)
 		return &proxyproto.SubscribeResponse{
 			Error: &proxyproto.Error{
@@ -174,8 +175,8 @@ func (s *Server) Publish(
 	userID, err = strconv.ParseInt(request.GetUser(), 10, 64)
 	if err != nil {
 		log.ErrorContext(ctx, "Centrifugo Publish error parse user id",
-			"request_data", request,
-			"error", err,
+			slog.String("request_data", string(request.GetData())),
+			slog.Any("error", err),
 		)
 		return &proxyproto.PublishResponse{
 			Error: &proxyproto.Error{
@@ -188,8 +189,8 @@ func (s *Server) Publish(
 	provider, err = providerResolver.Resolve(helper.SubStr(channel, ":"))
 	if err != nil {
 		log.ErrorContext(ctx, "Centrifugo Publish error resolve provider",
-			"request_data", request,
-			"error", err,
+			slog.String("request_data", string(request.GetData())),
+			slog.Any("error", err),
 		)
 		return &proxyproto.PublishResponse{
 			Error: &proxyproto.Error{
@@ -201,8 +202,8 @@ func (s *Server) Publish(
 	dt, err = (*provider).Publish(channel, userID, data)
 	if err != nil {
 		log.ErrorContext(ctx, "Centrifugo Publish error publish channel",
-			"request_data", request,
-			"error", err,
+			slog.String("request_data", string(request.GetData())),
+			slog.Any("error", err),
 		)
 		return &proxyproto.PublishResponse{
 			Error: &proxyproto.Error{

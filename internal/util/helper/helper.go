@@ -5,10 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"go_echo/internal/config/env"
+	"go_echo/internal/config/logger"
 	"go_echo/internal/util/builder/page"
 	"go_echo/internal/util/type/checker"
 	jf "go_echo/internal/util/type/json"
 	"html/template"
+	"log/slog"
 	"reflect"
 	"regexp"
 	"runtime"
@@ -324,4 +326,16 @@ func ValueFromPointer[T any](t *T) T {
 		return v
 	}
 	return *t
+}
+
+func GracefulShutdown(log *logger.AppLogger, ops ...func() error) {
+	for _, op := range ops {
+		if err := op(); err != nil {
+			log.Error(
+				"(ツ)_/¯ Graceful Shutdown op failed",
+				slog.Any("error", err),
+			)
+			panic(err)
+		}
+	}
 }
