@@ -7,7 +7,7 @@ require (
 	github.com/centrifugal/gocent/v3 v3.3.0
 	github.com/cespare/xxhash/v2 v2.3.0
 	github.com/fatih/color v1.18.0
-	github.com/go-playground/validator/v10 v10.23.0
+	github.com/go-playground/validator/v10 v10.24.0
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/google/jsonapi v1.0.0
@@ -22,11 +22,11 @@ require (
 	github.com/redis/go-redis/v9 v9.7.0
 	github.com/thedatashed/xlsxreader v1.2.8
 	github.com/wagslane/go-rabbitmq v0.15.0
-	github.com/wneessen/go-mail v0.6.0
+	github.com/wneessen/go-mail v0.6.1
 	github.com/xuri/excelize/v2 v2.9.0
 	golang.org/x/crypto v0.32.0
 	golang.org/x/text v0.21.0
-	google.golang.org/grpc v1.69.2
+	google.golang.org/grpc v1.69.4
 	google.golang.org/protobuf v1.36.2
 )
 

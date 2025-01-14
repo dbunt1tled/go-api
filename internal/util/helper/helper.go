@@ -339,3 +339,19 @@ func GracefulShutdown(log *logger.AppLogger, ops ...func() error) {
 		}
 	}
 }
+
+func Ter[T any](cond bool, a, b T) T {
+	if cond {
+		return a
+	}
+
+	return b
+}
+
+func IsNil(x interface{}) bool {
+	if x == nil {
+		return true
+	}
+
+	return reflect.ValueOf(x).IsNil()
+}
