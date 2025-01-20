@@ -16,7 +16,10 @@ gen_proto:
 	@protoc --proto_path=proto proto/*.proto  --go-grpc_out=./internal/grpc --go_out=./internal/grpc
 gen_clean:
 	@rm -rf ./internal/grpc/*.pb.go
-
+install_govulncheck:
+	@go install golang.org/x/vuln/cmd/govulncheck@latest
+check_vulnerabilities:
+	@govulncheck ./...
 #  MIGRATION_NAME=create_table_users make migration_sql
 migration_sql:
 	@GOOSE_DRIVER="${GOOSE_DRIVER}" GOOSE_DBSTRING="${GOOSE_DBSTRING}" goose -dir ./internal/database/migrations create $(MIGRATION_NAME) sql
