@@ -36,17 +36,19 @@ func main() {
 
 func run(cfg *env.Config, log *logger.AppLogger) {
 	var (
-		lis  net.Listener
-		srv  *grpc.Server
-		err  error
-		cert tls.Certificate
-		cred credentials.TransportCredentials
-		opts []grpc.ServerOption
+		lis         net.Listener
+		srv         *grpc.Server
+		err         error
+		cert        tls.Certificate
+		cred        credentials.TransportCredentials
+		opts        []grpc.ServerOption
+		middlewares []grpc.UnaryServerInterceptor
 	)
-
+	middlewares = append(middlewares, interceptor.RecoverInterceptor())
 	if cfg.Debug.DebugRequest {
-		opts = append(opts, grpc.UnaryInterceptor(interceptor.LoggingInterceptor))
+		middlewares = append(middlewares, interceptor.LoggingInterceptor())
 	}
+	opts = append(opts, grpc.ChainUnaryInterceptor(middlewares...))
 	if cfg.HTTPServer.TLS.IsSet() {
 		certData := cfg.HTTPServer.TLS.GetCertData()
 		keyData := cfg.HTTPServer.TLS.GetKeyData()

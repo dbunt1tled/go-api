@@ -6,7 +6,8 @@ Small boilerplate for REST API
 ![GoAPI](assets/images/goapi.jpeg)
 ## What's this GoAPI thing?
 
-It's a boilerplate for REST API with MySQL database. It uses [Echo](https://echo.labstack.com/) framework and [MySQL](https://github.com/go-sql-driver/mysql) driver and [RabbitMQ](https://www.rabbitmq.com/) for message queue.
+It's a boilerplate for REST API with MySQL database. It uses [Echo](https://echo.labstack.com/) framework, [MySQL](https://github.com/go-sql-driver/mysql) driver, [RabbitMQ](https://www.rabbitmq.com/) for message queue, [Centrifugo](https://centrifugal.dev/) for realtime messaging.
+
 Api Includes:
 ```
 - Authentication (JWT)
