@@ -2,13 +2,13 @@ package centservice
 
 import (
 	"context"
-	"encoding/json"
 	"go_echo/app/usernotification/model/usernotification"
 	"go_echo/app/usernotification/service"
 	"go_echo/internal/config/cntrfgclient"
 	"go_echo/internal/util/helper"
 	"strconv"
 
+	"github.com/bytedance/sonic"
 	"github.com/centrifugal/gocent/v3"
 	"github.com/pkg/errors"
 )
@@ -37,7 +37,7 @@ func SendUserNotification(message UserNotification) (gocent.PublishResult, error
 	if err != nil {
 		return gocent.PublishResult{}, errors.Wrap(err, "Error save User Notification message")
 	}
-	d, err = json.Marshal(un)
+	d, err = sonic.Marshal(un)
 	if err != nil {
 		return gocent.PublishResult{}, errors.Wrap(err, "Error marshal User Notification message")
 	}

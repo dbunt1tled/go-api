@@ -1,10 +1,10 @@
 package readhandlers
 
 import (
-	"encoding/json"
 	"go_echo/app/usernotification/model/usernotification"
 	"go_echo/app/usernotification/service"
 
+	"github.com/bytedance/sonic"
 	"github.com/pkg/errors"
 )
 
@@ -28,7 +28,7 @@ func (u *UserReadChannelHandler) Handle(userID int64, data []byte) (*[]byte, err
 		dt  UserReadMessage
 		err error
 	)
-	err = json.Unmarshal(data, &dt)
+	err = sonic.Unmarshal(data, &dt)
 	if err != nil {
 		return nil, errors.Wrap(err, "invalid read channel")
 	}

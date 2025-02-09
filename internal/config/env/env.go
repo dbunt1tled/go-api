@@ -43,8 +43,8 @@ type Debug struct {
 
 type Centrifugo struct {
 	ServerURL string `env:"SERVER_CENTRIFUGO_URL" env-default:"localhost:5000"`
-	APIURL    string `env:"CENTRIFUGO_API_URL" env-default:"http://127.0.0.1:8000"`
-	APIKey    string `env:"CENTRIFUGO_API_KEY" env-required:"true"`
+	APIURL    string `env:"API_CENTRIFUGO_URL" env-default:"http://127.0.0.1:8000"`
+	APIKey    string `env:"API_CENTRIFUGO_KEY" env-required:"true"`
 }
 
 type RabbitMQ struct {

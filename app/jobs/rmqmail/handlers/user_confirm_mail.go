@@ -1,13 +1,14 @@
 package handlers
 
 import (
-	"encoding/json"
 	"fmt"
 	"go_echo/app/user/model/user"
 	"go_echo/app/user/service"
 	"go_echo/internal/lib/mailservice"
 	"go_echo/internal/rmq"
 	"go_echo/internal/util/helper"
+
+	"github.com/bytedance/sonic"
 )
 
 const (
@@ -30,7 +31,7 @@ func (e UserConfirmationEmail) Handle(body []byte) error {
 		u   *user.User
 	)
 
-	if err = json.Unmarshal(body, &job); err != nil {
+	if err = sonic.Unmarshal(body, &job); err != nil {
 		return fmt.Errorf("failed to unmarshal message: %s", err.Error())
 	}
 	u, err = service.UserRepository{}.ByID(int64(job.UserID))
@@ -51,6 +52,6 @@ func (e UserConfirmationEmail) Send(userID int64, token string) {
 		rmq.MailExchange,
 		rmq.MailQueue,
 		ConfirmSubject,
-		string(helper.Must(json.Marshal(&job))),
+		string(helper.Must(sonic.Marshal(&job))),
 	)
 }

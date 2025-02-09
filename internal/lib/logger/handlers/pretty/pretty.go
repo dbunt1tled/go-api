@@ -2,13 +2,13 @@ package pretty
 
 import (
 	"context"
-	"encoding/json"
 	"go_echo/internal/util/type/checker"
 	"io"
 	stdLog "log"
 	"log/slog"
 	"reflect"
 
+	"github.com/bytedance/sonic"
 	"github.com/fatih/color"
 )
 
@@ -73,7 +73,7 @@ func (h *PrettyHandler) Handle(_ context.Context, r slog.Record) error {
 	var err error
 
 	if len(fields) > 0 {
-		b, err = json.MarshalIndent(fields, "", "  ")
+		b, err = sonic.MarshalIndent(fields, "", "  ")
 		if err != nil {
 			return err
 		}

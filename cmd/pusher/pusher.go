@@ -1,11 +1,12 @@
 package main
 
 import (
-	"encoding/json"
 	"go_echo/internal/config/env"
 	"go_echo/internal/config/locale"
 	"go_echo/internal/config/logger"
 	"go_echo/internal/lib/centservice"
+
+	"github.com/bytedance/sonic"
 )
 
 func main() {
@@ -21,7 +22,7 @@ func main() {
 		log.Error("Error send user notification: " + err.Error())
 		return
 	}
-	d, err := json.Marshal(u)
+	d, err := sonic.Marshal(u)
 	if err != nil {
 		log.Error("Error marshal user notification: " + err.Error())
 		return

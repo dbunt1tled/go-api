@@ -2,9 +2,9 @@ package sanitizer
 
 import (
 	"bytes"
-	"encoding/json"
 	"sync"
 
+	"github.com/bytedance/sonic"
 	"github.com/microcosm-cc/bluemonday"
 )
 
@@ -37,7 +37,7 @@ func SanitizeString(str string, strict bool) string {
 }
 
 func SanitizeJSON(s []byte, strict bool) ([]byte, error) {
-	d := json.NewDecoder(bytes.NewReader(s))
+	d := sonic.ConfigDefault.NewDecoder(bytes.NewReader(s))
 	d.UseNumber()
 	var i interface{}
 	err := d.Decode(&i)
@@ -45,7 +45,7 @@ func SanitizeJSON(s []byte, strict bool) ([]byte, error) {
 		return nil, err
 	}
 	sanitize(i, strict)
-	return json.MarshalIndent(i, "", "    ")
+	return sonic.MarshalIndent(i, "", "    ")
 }
 
 func sanitize(data interface{}, strict bool) {

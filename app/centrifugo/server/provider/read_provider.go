@@ -1,12 +1,12 @@
 package provider
 
 import (
-	"encoding/json"
 	"fmt"
 	"go_echo/app/centrifugo/server/provider/readhandlers"
 	"go_echo/internal/util/helper"
 	"strconv"
 
+	"github.com/bytedance/sonic"
 	"github.com/pkg/errors"
 )
 
@@ -39,7 +39,7 @@ func (u *ReadProvider) Publish(channel string, userID int64, data []byte) (*[]by
 	)
 	handlerResolver := GetReadChannelResolver()
 	dt := make(map[string]interface{})
-	err = json.Unmarshal(data, &dt)
+	err = sonic.Unmarshal(data, &dt)
 	if err != nil {
 		return nil, errors.Wrap(err, "invalid read channel data")
 	}

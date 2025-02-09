@@ -3,7 +3,8 @@ package dbtype
 import (
 	"database/sql"
 	"database/sql/driver"
-	"encoding/json"
+
+	"github.com/bytedance/sonic"
 )
 
 type NilString sql.NullString //nolint:recvcheck
@@ -12,7 +13,7 @@ func (ns NilString) MarshalJSON() ([]byte, error) {
 	if !ns.Valid {
 		return []byte("null"), nil
 	}
-	return json.Marshal(ns.String)
+	return sonic.Marshal(ns.String)
 }
 
 func (ns *NilString) UnmarshalJSON(data []byte) error {
@@ -21,7 +22,7 @@ func (ns *NilString) UnmarshalJSON(data []byte) error {
 		return nil
 	}
 	ns.Valid = true
-	return json.Unmarshal(data, &ns.String)
+	return sonic.Unmarshal(data, &ns.String)
 }
 
 func (ns *NilString) Scan(value any) error {

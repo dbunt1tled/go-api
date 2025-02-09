@@ -15,3 +15,18 @@ type HelmResponse struct {
 func Helm(c echo.Context) error {
 	return helper.JSONAPIModel(c.Response(), &HelmResponse{ID: 1, DB: "test"}, http.StatusOK)
 }
+
+// TODO Implement check db connection
+// func GetInfoHandler(w http.ResponseWriter, r *http.Request) {
+//
+// 	w.Header().Set("Content-Type", "application/json")
+//
+// 	if err := json.NewEncoder(w).Encode(db.Stats()); err != nil {
+//
+// 		http.Error(w, "Error encoding response", http.StatusInternalServerError)
+//
+// 		return
+//
+// 	}
+//
+// }

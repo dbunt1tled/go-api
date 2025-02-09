@@ -4,6 +4,7 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 
+	"github.com/bytedance/sonic"
 	"github.com/pkg/errors"
 )
 
@@ -46,9 +47,9 @@ func (c *Roles) Scan(v interface{}) error {
 	)
 	switch tv := v.(type) {
 	case []byte:
-		err = json.Unmarshal(tv, &_rl)
+		err = sonic.Unmarshal(tv, &_rl)
 		// case []uint8:
-		// 	err = json.Unmarshal([]byte(tv), &_rl)
+		// 	err = sonic.Unmarshal([]byte(tv), &_rl)
 	}
 	if err != nil {
 		errors.Wrap(err, "Error roles")

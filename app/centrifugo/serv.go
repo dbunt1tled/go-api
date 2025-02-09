@@ -2,7 +2,6 @@ package centrifugo
 
 import (
 	"context"
-	"encoding/json"
 	"go_echo/app/centrifugo/param"
 	"go_echo/app/centrifugo/server"
 	"go_echo/app/user/model/user"
@@ -14,6 +13,7 @@ import (
 	"log/slog"
 	"strconv"
 
+	"github.com/bytedance/sonic"
 	"google.golang.org/grpc"
 )
 
@@ -32,7 +32,7 @@ func (s *Server) Connect(
 		u     *user.User
 	)
 	log := logger.GetLoggerInstance()
-	err = json.Unmarshal(request.GetData(), &req)
+	err = sonic.Unmarshal(request.GetData(), &req)
 	if err != nil {
 		log.ErrorContext(ctx, "Centrifugo Connect error unmarshal request",
 			slog.String("request_data", string(request.GetData())),
@@ -78,7 +78,7 @@ func (s *Server) Connect(
 		"channels": []string{"user:#" + userID, "read:#" + userID},
 		"user":     u.FirstName + " " + u.SecondName,
 	}
-	dataBytes, err := json.Marshal(data)
+	dataBytes, err := sonic.Marshal(data)
 	if err != nil {
 		log.ErrorContext(ctx, "Centrifugo Connect error marshal data",
 			slog.String("request_data", string(request.GetData())),

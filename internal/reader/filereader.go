@@ -1,12 +1,13 @@
 package reader
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"go_echo/internal/reader/data"
 	"go_echo/internal/reader/driver"
 	"strings"
+
+	"github.com/bytedance/sonic"
 )
 
 type FileReader struct {
@@ -113,7 +114,7 @@ func (f *FileReader) ReadLine() (<-chan string, <-chan error) {
 		for row := range iterator {
 			r, ok := row["row"]
 			if !ok {
-				b, err := json.Marshal(row)
+				b, err := sonic.Marshal(row)
 				if err != nil {
 					resErrCh <- err
 					return

@@ -2,7 +2,6 @@ package helper
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"go_echo/internal/config/env"
 	"go_echo/internal/config/logger"
@@ -18,6 +17,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/bytedance/sonic"
 	"github.com/go-playground/validator/v10"
 	"github.com/google/jsonapi"
 	"github.com/iancoleman/strcase"
@@ -86,7 +86,7 @@ func JSONAPIModel[
 			"currentPage": (*pg).GetCurrentPage(),
 			"totalPages":  (*pg).GetTotalPages(),
 		}
-		e = json.NewEncoder(r).Encode(payload)
+		e = sonic.ConfigDefault.NewEncoder(r).Encode(payload)
 		if e != nil {
 			return e
 		}
@@ -148,8 +148,8 @@ func MakeStruct(data map[string]any) interface{} {
 		)
 	}
 	structType := sc.Build().New()
-	jsonString, _ := json.Marshal(data)
-	err := json.Unmarshal(jsonString, &structType)
+	jsonString, _ := sonic.Marshal(data)
+	err := sonic.Unmarshal(jsonString, &structType)
 	if err != nil {
 		panic(err)
 	}
@@ -191,11 +191,11 @@ func SubStr(stack string, needle string) string {
 
 func StructToMap(obj interface{}) (map[string]interface{}, error) {
 	newMap := make(map[string]interface{})
-	data, err := json.Marshal(obj)
+	data, err := sonic.Marshal(obj)
 	if err != nil {
 		return nil, err
 	}
-	err = json.Unmarshal(data, &newMap)
+	err = sonic.Unmarshal(data, &newMap)
 	return newMap, err
 }
 func StructToJSONField(obj interface{}) (jf.JsonField, error) {
@@ -207,7 +207,7 @@ func StructToJSONField(obj interface{}) (jf.JsonField, error) {
 }
 
 func MapToByte(obj map[string]interface{}) ([]byte, error) {
-	data, err := json.Marshal(obj)
+	data, err := sonic.Marshal(obj)
 	if err != nil {
 		return nil, err
 	}
@@ -236,7 +236,7 @@ func RequestID(c echo.Context) string {
 
 func AnyToBytesBuffer(i interface{}) (*bytes.Buffer, error) {
 	buf := new(bytes.Buffer)
-	err := json.NewEncoder(buf).Encode(i)
+	err := sonic.ConfigDefault.NewEncoder(buf).Encode(i)
 	if err != nil {
 		return buf, err
 	}

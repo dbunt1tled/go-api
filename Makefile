@@ -3,15 +3,21 @@ include .env
 run_api:
 	@go run cmd/api/api.go
 build_api:
-	@go build -o bin/api cmd/api/api.go
+	@go build -o bin cmd/api/api.go
 build_opt_api:
-	@go build -ldflags "-s -w"  -o bin/api cmd/api/api.go
+	@go build -ldflags "-s -w"  -o bin cmd/api/api.go
 run_mail:
 	@go run cmd/consumer/mail.go
 build_mail:
-	@go build -o bin/api cmd/consumer/mail.go
+	@go build -o bin cmd/consumer/mail.go
 build_opt_mail:
-	@go build -ldflags "-s -w"  -o bin/api cmd/consumer/mail.go
+	@go build -ldflags "-s -w"  -o bin cmd/consumer/mail.go
+run_centrifugo:
+	@go run cmd/centrifugo/centrifugo_server.go
+build_centrifugo:
+	@go build -o bin/api cmd/centrifugo/centrifugo_server.go
+build_opt_centrifugo:
+	@go build -ldflags "-s -w"  -o bin cmd/centrifugo/centrifugo_server.go
 gen_proto:
 	@protoc --proto_path=proto proto/*.proto  --go-grpc_out=./internal/grpc --go_out=./internal/grpc
 gen_clean:

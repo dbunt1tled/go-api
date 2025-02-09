@@ -86,7 +86,8 @@ func run(cfg *env.Config, log *logger.AppLogger) {
 		}
 	}()
 
-	<-stop
+	code := <-stop
+	log.Info("System received signal: " + code.String())
 	log.Info("Shutting down gRPC server...")
 	helper.GracefulShutdown(
 		log,

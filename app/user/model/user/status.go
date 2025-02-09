@@ -7,7 +7,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-type Status int
+type Status int //nolint:recvcheck
 
 const (
 	Active  Status = 1
@@ -37,9 +37,9 @@ func FromStatus(s Status) int {
 	case Active:
 		return 1 //nolint:nolintlint
 	case Delete:
-		return 2 //nolint:nolintlint
+		return 2 //nolint:nolintlint //nolint:mnd
 	case Pending:
-		return 3 //nolint:nolintlint
+		return 3 //nolint:nolintlint //nolint:mnd
 	default:
 		panic(fmt.Errorf("unknown user status: %d", s))
 	}
@@ -73,15 +73,6 @@ func (s *Status) Scan(value interface{}) error {
 	return nil
 }
 
-func (s *Status) Value() (driver.Value, error) {
-	switch *s {
-	case Active:
-		return 1, nil //nolint:nolintlint
-	case Delete:
-		return 2, nil //nolint:nolintlint
-	case Pending:
-		return 3, nil //nolint:nolintlint
-	default:
-		return nil, errors.New("invalid status value")
-	}
+func (s Status) Value() (driver.Value, error) {
+	return FromStatus(s), nil
 }
