@@ -13,7 +13,7 @@ func (ns NilString) MarshalJSON() ([]byte, error) {
 	if !ns.Valid {
 		return []byte("null"), nil
 	}
-	return sonic.Marshal(ns.String)
+	return sonic.ConfigFastest.Marshal(ns.String)
 }
 
 func (ns *NilString) UnmarshalJSON(data []byte) error {
@@ -22,7 +22,7 @@ func (ns *NilString) UnmarshalJSON(data []byte) error {
 		return nil
 	}
 	ns.Valid = true
-	return sonic.Unmarshal(data, &ns.String)
+	return sonic.ConfigFastest.Unmarshal(data, &ns.String)
 }
 
 func (ns *NilString) Scan(value any) error {

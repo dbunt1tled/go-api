@@ -37,7 +37,7 @@ func SendUserNotification(message UserNotification) (gocent.PublishResult, error
 	if err != nil {
 		return gocent.PublishResult{}, errors.Wrap(err, "Error save User Notification message")
 	}
-	d, err = sonic.Marshal(un)
+	d, err = sonic.ConfigFastest.Marshal(un)
 	if err != nil {
 		return gocent.PublishResult{}, errors.Wrap(err, "Error marshal User Notification message")
 	}

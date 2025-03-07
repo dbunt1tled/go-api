@@ -73,7 +73,7 @@ func (h *PrettyHandler) Handle(_ context.Context, r slog.Record) error {
 	var err error
 
 	if len(fields) > 0 {
-		b, err = sonic.MarshalIndent(fields, "", "  ")
+		b, err = sonic.ConfigFastest.MarshalIndent(fields, "", "  ")
 		if err != nil {
 			return err
 		}

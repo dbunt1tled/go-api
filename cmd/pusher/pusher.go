@@ -22,7 +22,7 @@ func main() {
 		log.Error("Error send user notification: " + err.Error())
 		return
 	}
-	d, err := sonic.Marshal(u)
+	d, err := sonic.ConfigFastest.Marshal(u)
 	if err != nil {
 		log.Error("Error marshal user notification: " + err.Error())
 		return

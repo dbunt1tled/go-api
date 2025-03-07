@@ -37,7 +37,7 @@ func SanitizeString(str string, strict bool) string {
 }
 
 func SanitizeJSON(s []byte, strict bool) ([]byte, error) {
-	d := sonic.ConfigDefault.NewDecoder(bytes.NewReader(s))
+	d := sonic.ConfigFastest.NewDecoder(bytes.NewReader(s))
 	d.UseNumber()
 	var i interface{}
 	err := d.Decode(&i)
@@ -45,7 +45,7 @@ func SanitizeJSON(s []byte, strict bool) ([]byte, error) {
 		return nil, err
 	}
 	sanitize(i, strict)
-	return sonic.MarshalIndent(i, "", "    ")
+	return sonic.ConfigFastest.MarshalIndent(i, "", "    ")
 }
 
 func sanitize(data interface{}, strict bool) {

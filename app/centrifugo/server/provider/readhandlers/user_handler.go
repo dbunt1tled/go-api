@@ -28,7 +28,7 @@ func (u *UserReadChannelHandler) Handle(userID int64, data []byte) (*[]byte, err
 		dt  UserReadMessage
 		err error
 	)
-	err = sonic.Unmarshal(data, &dt)
+	err = sonic.ConfigFastest.Unmarshal(data, &dt)
 	if err != nil {
 		return nil, errors.Wrap(err, "invalid read channel")
 	}

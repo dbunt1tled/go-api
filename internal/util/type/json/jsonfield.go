@@ -20,7 +20,7 @@ func (m *JsonField) Scan(src interface{}) error {
 	default:
 		return errors.New("incompatible type for JsonField")
 	}
-	err := sonic.Unmarshal(source, &_m)
+	err := sonic.ConfigFastest.Unmarshal(source, &_m)
 	if err != nil {
 		return err
 	}
@@ -32,7 +32,7 @@ func (m JsonField) Value() (driver.Value, error) {
 	if len(m) == 0 {
 		return nil, nil //nolint:nilnil
 	}
-	j, err := sonic.Marshal(m)
+	j, err := sonic.ConfigFastest.Marshal(m)
 	if err != nil {
 		return nil, err
 	}

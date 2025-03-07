@@ -47,9 +47,9 @@ func (c *Roles) Scan(v interface{}) error {
 	)
 	switch tv := v.(type) {
 	case []byte:
-		err = sonic.Unmarshal(tv, &_rl)
+		err = sonic.ConfigFastest.Unmarshal(tv, &_rl)
 		// case []uint8:
-		// 	err = sonic.Unmarshal([]byte(tv), &_rl)
+		// 	err = sonic.ConfigFastest.Unmarshal([]byte(tv), &_rl)
 	}
 	if err != nil {
 		errors.Wrap(err, "Error roles")

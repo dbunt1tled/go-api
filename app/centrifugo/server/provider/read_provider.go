@@ -39,7 +39,7 @@ func (u *ReadProvider) Publish(channel string, userID int64, data []byte) (*[]by
 	)
 	handlerResolver := GetReadChannelResolver()
 	dt := make(map[string]interface{})
-	err = sonic.Unmarshal(data, &dt)
+	err = sonic.ConfigFastest.Unmarshal(data, &dt)
 	if err != nil {
 		return nil, errors.Wrap(err, "invalid read channel data")
 	}

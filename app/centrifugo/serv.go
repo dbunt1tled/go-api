@@ -32,7 +32,7 @@ func (s *Server) Connect(
 		u     *user.User
 	)
 	log := logger.GetLoggerInstance()
-	err = sonic.Unmarshal(request.GetData(), &req)
+	err = sonic.ConfigFastest.Unmarshal(request.GetData(), &req)
 	if err != nil {
 		log.ErrorContext(ctx, "Centrifugo Connect error unmarshal request",
 			slog.String("request_data", string(request.GetData())),
@@ -78,7 +78,7 @@ func (s *Server) Connect(
 		"channels": []string{"user:#" + userID, "read:#" + userID},
 		"user":     u.FirstName + " " + u.SecondName,
 	}
-	dataBytes, err := sonic.Marshal(data)
+	dataBytes, err := sonic.ConfigFastest.Marshal(data)
 	if err != nil {
 		log.ErrorContext(ctx, "Centrifugo Connect error marshal data",
 			slog.String("request_data", string(request.GetData())),

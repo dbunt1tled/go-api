@@ -88,7 +88,7 @@ func JSONAPIModel[
 			"currentPage": (*pg).GetCurrentPage(),
 			"totalPages":  (*pg).GetTotalPages(),
 		}
-		e = sonic.ConfigDefault.NewEncoder(r).Encode(payload)
+		e = sonic.ConfigFastest.NewEncoder(r).Encode(payload)
 		if e != nil {
 			return e
 		}
@@ -150,8 +150,8 @@ func MakeStruct(data map[string]any) interface{} {
 		)
 	}
 	structType := sc.Build().New()
-	jsonString, _ := sonic.Marshal(data)
-	err := sonic.Unmarshal(jsonString, &structType)
+	jsonString, _ := sonic.ConfigFastest.Marshal(data)
+	err := sonic.ConfigFastest.Unmarshal(jsonString, &structType)
 	if err != nil {
 		panic(err)
 	}
@@ -194,11 +194,11 @@ func SubStr(stack string, needle string) string {
 
 func StructToMap(obj interface{}) (map[string]interface{}, error) {
 	newMap := make(map[string]interface{})
-	data, err := sonic.Marshal(obj)
+	data, err := sonic.ConfigFastest.Marshal(obj)
 	if err != nil {
 		return nil, err
 	}
-	err = sonic.Unmarshal(data, &newMap)
+	err = sonic.ConfigFastest.Unmarshal(data, &newMap)
 	return newMap, err
 }
 func StructToJSONField(obj interface{}) (jf.JsonField, error) {
@@ -210,7 +210,7 @@ func StructToJSONField(obj interface{}) (jf.JsonField, error) {
 }
 
 func MapToByte(obj map[string]interface{}) ([]byte, error) {
-	data, err := sonic.Marshal(obj)
+	data, err := sonic.ConfigFastest.Marshal(obj)
 	if err != nil {
 		return nil, err
 	}
@@ -239,7 +239,7 @@ func RequestID(c echo.Context) string {
 
 func AnyToBytesBuffer(i interface{}) (*bytes.Buffer, error) {
 	buf := new(bytes.Buffer)
-	err := sonic.ConfigDefault.NewEncoder(buf).Encode(i)
+	err := sonic.ConfigFastest.NewEncoder(buf).Encode(i)
 	if err != nil {
 		return buf, err
 	}
