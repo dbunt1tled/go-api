@@ -19,9 +19,11 @@ import (
 
 	"github.com/bytedance/sonic"
 	"github.com/go-playground/validator/v10"
+	_ "github.com/go-playground/validator/v10"
 	"github.com/google/jsonapi"
 	"github.com/iancoleman/strcase"
 	"github.com/labstack/echo/v4"
+	_ "github.com/labstack/echo/v4"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	dynamicstruct "github.com/ompluscator/dynamic-struct"
 	"golang.org/x/text/language"
@@ -172,12 +174,13 @@ func RuntimeStatistics(startTime time.Time, showName bool) string {
 	))
 }
 func MemoryUsage() string {
+	const Mib = 1024 * 1024
 	var memStats runtime.MemStats
 	runtime.ReadMemStats(&memStats)
 	return fmt.Sprintf(
 		"TotalAlloc: %v MB, Sys: %v MB",
-		memStats.TotalAlloc/1024/1024, //nolint:mnd // Convert to MB
-		memStats.Sys/1024/1024,        //nolint:mnd // Convert to MB
+		memStats.TotalAlloc/Mib,
+		memStats.Sys/Mib,
 	)
 }
 

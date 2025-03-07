@@ -74,7 +74,7 @@ func fromAuthHeader(c echo.Context) (string, bool) {
 }
 
 func fromQueryParam(c echo.Context) (string, bool) {
-	authToken := c.QueryParam("team")
+	authToken := c.QueryParam("token")
 	if authToken == "" {
 		return "", true
 	}
