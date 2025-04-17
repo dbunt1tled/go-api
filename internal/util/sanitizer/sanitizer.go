@@ -44,11 +44,11 @@ func SanitizeJSON(s []byte, strict bool) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	sanitize(i, strict)
+	Sanitize(i, strict)
 	return sonic.ConfigFastest.MarshalIndent(i, "", "    ")
 }
 
-func sanitize(data interface{}, strict bool) {
+func Sanitize(data interface{}, strict bool) {
 	switch d := data.(type) {
 	case map[string]interface{}:
 		for k, v := range d {
@@ -56,9 +56,9 @@ func sanitize(data interface{}, strict bool) {
 			case string:
 				d[k] = SanitizeString(tv, strict)
 			case map[string]interface{}:
-				sanitize(tv, strict)
+				Sanitize(tv, strict)
 			case []interface{}:
-				sanitize(tv, strict)
+				Sanitize(tv, strict)
 			case nil:
 				delete(d, k)
 			}
@@ -72,11 +72,11 @@ func sanitize(data interface{}, strict bool) {
 				}
 			case map[string]interface{}:
 				for _, t := range d {
-					sanitize(t, strict)
+					Sanitize(t, strict)
 				}
 			case []interface{}:
 				for _, t := range d {
-					sanitize(t, strict)
+					Sanitize(t, strict)
 				}
 			}
 		}

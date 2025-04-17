@@ -1,12 +1,13 @@
 # IntelliJ project files
-.idea
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
 *.iml
 out
 gen
 
-# If you prefer the allow list template instead of the deny list, see community template:
-# https://github.com/github/gitignore/blob/main/community/Golang/Go.AllowList.gitignore
-#
 # Binaries for programs and plugins
 *.exe
 *.exe~
@@ -21,7 +22,7 @@ bin/*
 *.out
 
 # Dependency directories (remove the comment below to include it)
-# vendor/
+vendor/
 
 # Go workspace file
 go.work
@@ -29,5 +30,27 @@ go.work.sum
 
 # env file
 .env
+.env.local
+.env.development
+.env.test
+.env.production
 rest-api.http
 http-client.env.json
+
+# Log files
+*.log
+
+# Build directory
+/bin/
+/dist/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Generated files
+/generated/
+
+# Temporary files
+/tmp/
