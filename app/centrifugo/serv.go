@@ -35,8 +35,8 @@ func (s *Server) Connect(
 	err = sonic.ConfigFastest.Unmarshal(request.GetData(), &req)
 	if err != nil {
 		log.ErrorContext(ctx, "Centrifugo Connect error unmarshal request",
+			err,
 			slog.String("request_data", string(request.GetData())),
-			slog.Any("error", err),
 		)
 		return &proxyproto.ConnectResponse{
 			Error: &proxyproto.Error{
@@ -48,8 +48,8 @@ func (s *Server) Connect(
 	token, err = jwt.JWToken{}.Decode(req.AccessToken, true)
 	if err != nil {
 		log.ErrorContext(ctx, "Centrifugo Connect error decode user token",
+			err,
 			slog.String("request_data", string(request.GetData())),
-			slog.Any("error", err),
 		)
 		return &proxyproto.ConnectResponse{
 			Error: &proxyproto.Error{
@@ -62,8 +62,8 @@ func (s *Server) Connect(
 	if err != nil || u.Status != user.Active {
 
 		log.ErrorContext(ctx, "Centrifugo Connect error find user by id",
+			err,
 			slog.String("request_data", string(request.GetData())),
-			slog.Any("error", err),
 			slog.Any("user", u),
 		)
 		return &proxyproto.ConnectResponse{
@@ -81,8 +81,8 @@ func (s *Server) Connect(
 	dataBytes, err := sonic.ConfigFastest.Marshal(data)
 	if err != nil {
 		log.ErrorContext(ctx, "Centrifugo Connect error marshal data",
+			err,
 			slog.String("request_data", string(request.GetData())),
-			slog.Any("error", err),
 			slog.Any("user", u),
 		)
 		return &proxyproto.ConnectResponse{
@@ -116,8 +116,8 @@ func (s *Server) Subscribe(
 	userID, err = strconv.ParseInt(request.GetUser(), 10, 64)
 	if err != nil {
 		log.ErrorContext(ctx, "Centrifugo Subscribe error parse user id",
+			err,
 			slog.String("request_data", string(request.GetData())),
-			slog.Any("error", err),
 		)
 		return &proxyproto.SubscribeResponse{
 			Error: &proxyproto.Error{
@@ -130,8 +130,8 @@ func (s *Server) Subscribe(
 	provider, err = providerResolver.Resolve(helper.SubStr(channel, ":"))
 	if err != nil {
 		log.ErrorContext(ctx, "Centrifugo Subscribe error resolve provider",
+			err,
 			slog.String("request_data", string(request.GetData())),
-			slog.Any("error", err),
 		)
 		return &proxyproto.SubscribeResponse{
 			Error: &proxyproto.Error{
@@ -143,8 +143,8 @@ func (s *Server) Subscribe(
 	err = (*provider).Subscribe(channel, userID)
 	if err != nil {
 		log.ErrorContext(ctx, "Centrifugo Subscribe error subscribe channel",
+			err,
 			slog.String("request_data", string(request.GetData())),
-			slog.Any("error", err),
 		)
 		return &proxyproto.SubscribeResponse{
 			Error: &proxyproto.Error{
@@ -175,8 +175,8 @@ func (s *Server) Publish(
 	userID, err = strconv.ParseInt(request.GetUser(), 10, 64)
 	if err != nil {
 		log.ErrorContext(ctx, "Centrifugo Publish error parse user id",
+			err,
 			slog.String("request_data", string(request.GetData())),
-			slog.Any("error", err),
 		)
 		return &proxyproto.PublishResponse{
 			Error: &proxyproto.Error{
@@ -189,8 +189,8 @@ func (s *Server) Publish(
 	provider, err = providerResolver.Resolve(helper.SubStr(channel, ":"))
 	if err != nil {
 		log.ErrorContext(ctx, "Centrifugo Publish error resolve provider",
+			err,
 			slog.String("request_data", string(request.GetData())),
-			slog.Any("error", err),
 		)
 		return &proxyproto.PublishResponse{
 			Error: &proxyproto.Error{
@@ -202,8 +202,8 @@ func (s *Server) Publish(
 	dt, err = (*provider).Publish(channel, userID, data)
 	if err != nil {
 		log.ErrorContext(ctx, "Centrifugo Publish error publish channel",
+			err,
 			slog.String("request_data", string(request.GetData())),
-			slog.Any("error", err),
 		)
 		return &proxyproto.PublishResponse{
 			Error: &proxyproto.Error{

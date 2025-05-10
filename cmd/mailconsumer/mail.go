@@ -25,7 +25,7 @@ const (
 func main() {
 	cfg := env.GetConfigInstance()
 	locale.GetLocaleBundleInstance()
-	logger.InitLogger(cfg.Env, cfg.Debug.Debug)
+	logger.InitLogger(cfg.Env, cfg.Debug.Debug, cfg.Logger)
 	validate.GetValidateInstance()
 	profiler.SetProfiler()
 	storage.GetInstance()

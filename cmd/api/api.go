@@ -28,7 +28,7 @@ import (
 func main() {
 	cfg := env.GetConfigInstance()
 	locale.GetLocaleBundleInstance()
-	logger.InitLogger(cfg.Env, cfg.Debug.Debug)
+	logger.InitLogger(cfg.Env, cfg.Debug.Debug, cfg.Logger)
 	log := logger.GetLoggerInstance()
 	validate.GetValidateInstance()
 	sanitizer.GetSanitizerInstance()
@@ -58,12 +58,12 @@ func main() {
 				cfg.HTTPServer.TLS.GetKeyData(),
 			)
 			if !errors.Is(err, http.ErrServerClosed) {
-				log.Error("¯\\_(͡° ͜ʖ ͡°)_/¯Shutting down the server" + err.Error())
+				log.Error("¯\\_(͡° ͜ʖ ͡°)_/¯Shutting down the server", err)
 			}
 		} else {
 			log.Debug("(/◔◡◔)/ Start Server listening on address: " + cfg.HTTPServer.Address)
 			if err := httpServer.Start(cfg.HTTPServer.Address); err != nil && !errors.Is(err, http.ErrServerClosed) {
-				log.Error("¯\\_(͡° ͜ʖ ͡°)_/¯Shutting down the server" + err.Error())
+				log.Error("¯\\_(͡° ͜ʖ ͡°)_/¯Shutting down the server", err)
 			}
 		}
 	}()

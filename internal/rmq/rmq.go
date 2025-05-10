@@ -78,7 +78,7 @@ func Publish(exchangeName string, queueName string, action string, body string) 
 		rabbitmq.WithPublishOptionsMessageID(helper.Must(hasher.UUIDVv7()).String()),
 	)
 	if err != nil {
-		log.Error(fmt.Sprintf("Failed to publish in queue %s: %s.", queueName, err.Error()))
+		log.Error(fmt.Sprintf("Failed to publish in queue %s:", queueName, ), err)
 	}
 }
 

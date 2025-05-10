@@ -33,6 +33,6 @@ func APIErrorHandler(err error, c echo.Context) {
 	log.Warn(err.Error())
 	err = helper.JSONAPIModel(c.Response(), jsonerror.NewErrorString(message, code, status, nil), status)
 	if err != nil {
-		log.Error(err.Error())
+		log.Error("Error JSONAPIModel",err)
 	}
 }

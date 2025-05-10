@@ -18,7 +18,7 @@ func SetProfiler() {
 			err := http.ListenAndServe("localhost:6060", nil)
 			if err != nil {
 				log := logger.GetLoggerInstance()
-				log.Error(err.Error())
+				log.Error("Error start profiler", err)
 			}
 		}()
 	}

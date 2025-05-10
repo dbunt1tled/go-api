@@ -2,6 +2,7 @@ package pretty
 
 import (
 	"context"
+	"fmt"
 	"go_echo/internal/util/type/checker"
 	"io"
 	stdLog "log"
@@ -75,7 +76,9 @@ func (h *PrettyHandler) Handle(_ context.Context, r slog.Record) error {
 	if len(fields) > 0 {
 		b, err = sonic.ConfigFastest.MarshalIndent(fields, "", "  ")
 		if err != nil {
-			return err
+			// If JSON marshaling fails, log the error and continue with a simplified representation
+			h.l.Printf("Error marshaling log fields: %v", err)
+			b = []byte(fmt.Sprintf("%+v", fields))
 		}
 	}
 
@@ -101,9 +104,10 @@ func (h *PrettyHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
 }
 
 func (h *PrettyHandler) WithGroup(name string) slog.Handler {
-	// TODO: implement
 	return &PrettyHandler{
 		Handler: h.Handler.WithGroup(name),
 		l:       h.l,
+		attrs:   h.attrs,
+		opts:    h.opts,
 	}
 }

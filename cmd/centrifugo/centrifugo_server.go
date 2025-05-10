@@ -26,7 +26,7 @@ import (
 func main() {
 	cfg := env.GetConfigInstance()
 	locale.GetLocaleBundleInstance()
-	logger.InitLogger(cfg.Env, cfg.Debug.Debug)
+	logger.InitLogger(cfg.Env, cfg.Debug.Debug, cfg.Logger)
 	log := logger.GetLoggerInstance()
 	validate.GetValidateInstance()
 	profiler.SetProfiler()
@@ -55,13 +55,13 @@ func run(cfg *env.Config, log *logger.AppLogger) {
 		if helper.IsA(certData, reflect.String) && helper.IsA(keyData, reflect.String) {
 			cred, err = credentials.NewServerTLSFromFile(helper.AnyToString(certData), helper.AnyToString(keyData))
 			if err != nil {
-				log.Error("failed to create TLS credentials: " + err.Error())
+				log.Error("failed to create TLS credentials", err)
 				return
 			}
 		} else {
 			cert, err = tls.X509KeyPair(certData.([]byte), keyData.([]byte))
 			if err != nil {
-				log.Error("failed to create TLS certificate: " + err.Error())
+				log.Error("failed to create TLS certificate",err)
 				return
 			}
 			cred = credentials.NewTLS(&tls.Config{Certificates: []tls.Certificate{cert}})
@@ -71,7 +71,7 @@ func run(cfg *env.Config, log *logger.AppLogger) {
 	srv = grpc.NewServer(opts...)
 	lis, err = net.Listen("tcp", cfg.Centrifugo.ServerURL)
 	if err != nil {
-		log.Error("failed to listen: " + err.Error())
+		log.Error("failed to listen", err)
 	}
 
 	proxyproto.RegisterCentrifugoProxyServer(srv, &centrifugo.Server{})
@@ -84,7 +84,7 @@ func run(cfg *env.Config, log *logger.AppLogger) {
 	go func() {
 		log.Info("gRPC server is running on :" + cfg.Centrifugo.ServerURL)
 		if err = srv.Serve(lis); err != nil {
-			log.Error("failed to serve: " + err.Error())
+			log.Error("failed to serve", err)
 		}
 	}()
 
