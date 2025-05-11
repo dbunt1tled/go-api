@@ -1,9 +1,11 @@
 package builder
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"go_echo/internal/dto"
+	e "go_echo/internal/err"
 	"go_echo/internal/storage"
 	"go_echo/internal/util/builder/page"
 	"math"
@@ -26,10 +28,10 @@ func BuildSQLQuery(
 	limit int,
 	offset int,
 	asCount bool,
-) (string, []interface{}) {
+) (string, []any) {
 	var whereClauses []string
 	var orderClauses []string
-	var args []interface{}
+	var args []any
 
 	if filters != nil && len(*filters) > 0 {
 		for _, filter := range *filters {
@@ -43,10 +45,20 @@ func BuildSQLQuery(
 			case page.NotNull, page.IsNull:
 				whereClauses = append(whereClauses, fmt.Sprintf("%s %s", filter.Field, filter.Type))
 			case page.In, page.NotIn:
-				placeholders := strings.Repeat("?, ", len(filter.Value.([]interface{})))
-				placeholders = strings.TrimRight(placeholders, ", ")
-				whereClauses = append(whereClauses, fmt.Sprintf("%s IN (%s)", filter.Field, placeholders))
-				args = append(args, filter.Value.([]interface{})...)
+				rt := reflect.TypeOf(filter.Value)
+				switch rt.Kind() {
+				case reflect.Slice, reflect.Array:
+					v := reflect.ValueOf(filter.Value)
+					l := v.Len()
+					placeholders := strings.Repeat("?, ", l)
+					placeholders = strings.TrimRight(placeholders, ", ")
+					whereClauses = append(whereClauses, fmt.Sprintf("%s IN (%s)", filter.Field, placeholders))
+					for i := range l {
+						args = append(args, v.Index(i).Interface())
+					}
+				default:
+					panic("Builder.FilterData invalid type IN, NotIn: " + rt.String())
+				}
 			}
 		}
 	}
@@ -175,14 +187,14 @@ func GetPagination(p dto.PaginationQuery) *page.Pagination {
 	return &res
 }
 
-func Count(table string, filter *[]page.FilterCondition) (int, error) {
+func Count(ctx context.Context, table string, filter *[]page.FilterCondition) (int, error) {
 	var (
 		cnt int
 		err error
 		res *sql.Row
 	)
 	query, args := BuildSQLQuery(table, filter, nil, 1, 0, true)
-	res = GetDB().QueryRow(query, args...)
+	res = GetDB().QueryRowContext(ctx, query, args...)
 	err = res.Scan(&cnt)
 	if err != nil {
 		return 0, errors.Wrap(err, table+" count cast error")
@@ -191,6 +203,7 @@ func Count(table string, filter *[]page.FilterCondition) (int, error) {
 }
 
 func ByID[T any](
+	ctx context.Context,
 	table string,
 	id int64,
 	mapper func(res *sql.Row) (*T, error),
@@ -199,23 +212,17 @@ func ByID[T any](
 	qb.WriteString("SELECT * FROM ")
 	qb.WriteString(table)
 	qb.WriteString(" WHERE id = ? LIMIT 1")
-	res := GetDB().QueryRow(qb.String(), id)
-	return mapper(res)
+	return ExecuteSQLRow(ctx, qb.String(), mapper, id)
 }
 
 func List[T any](
+	ctx context.Context,
 	table string,
 	filter *[]page.FilterCondition,
 	sorts *[]page.SortOrder,
 	mapper func(res *sql.Rows) (*T, error),
 	paginator *page.Pagination,
 ) ([]*T, error) {
-	var (
-		u   *T
-		res *sql.Rows
-		smt *sql.Stmt
-		err error
-	)
 	limit := 0
 	offset := 0
 	if paginator != nil {
@@ -223,42 +230,68 @@ func List[T any](
 		offset = (paginator.Page - 1) * paginator.PerPage
 	}
 	query, args := BuildSQLQuery(table, filter, sorts, limit, offset, false)
+	return ExecuteSQLQuery(ctx, query, mapper, args...)
+}
+
+func One[T any](
+	ctx context.Context,
+	table string,
+	filter *[]page.FilterCondition,
+	sorts *[]page.SortOrder,
+	mapper func(res *sql.Row) (*T, error),
+) (*T, error) {
+	query, args := BuildSQLQuery(table, filter, sorts, 1, 0, false)
+	return ExecuteSQLRow(ctx, query, mapper, args...)
+}
+
+func ExecuteSQLQuery[T any](
+	ctx context.Context,
+	query string,
+	mapper func(res *sql.Rows) (*T, error),
+	args ...interface{},
+) ([]*T, error) {
+	var (
+		u   *T
+		res *sql.Rows
+		smt *sql.Stmt
+		err error
+	)
 	models := make([]*T, 0)
-	smt, err = GetDB().Prepare(query)
+	smt, err = GetDB().PrepareContext(ctx, query)
 	if err != nil {
-		return nil, errors.Wrap(err, table+" list prepare error")
+		return nil, errors.Wrap(err, "query prepare error")
 	}
 	defer smt.Close()
-	res, err = smt.Query(args...)
+	res, err = smt.QueryContext(ctx, args...)
 	if err != nil {
-		return nil, errors.Wrap(err, table+" list error")
+		return nil, errors.Wrap(err, " query error")
 	}
 	defer res.Close()
 	for res.Next() {
 		u, err = mapper(res)
 		if err != nil {
-			return nil, errors.Wrap(err, table+" list cast error")
+			return nil, errors.Wrap(err, "query cast error")
 		}
 		models = append(models, u)
 	}
 	return models, nil
 }
 
-func One[T any](
-	table string,
-	filter *[]page.FilterCondition,
-	sorts *[]page.SortOrder,
+func ExecuteSQLRow[T any](
+	ctx context.Context,
+	query string,
 	mapper func(res *sql.Row) (*T, error),
+	args ...interface{},
 ) (*T, error) {
 	var (
 		res *sql.Row
 	)
-	query, args := BuildSQLQuery(table, filter, sorts, 1, 0, false)
-	res = GetDB().QueryRow(query, args...)
+	res = GetDB().QueryRowContext(ctx, query, args...)
 	return mapper(res)
 }
 
 func Paginator[T any](
+	ctx context.Context,
 	table string,
 	filter *[]page.FilterCondition,
 	sorts *[]page.SortOrder,
@@ -280,9 +313,9 @@ func Paginator[T any](
 	eStop := false
 
 	wg.Add(2) //nolint:nolintlint,mnd 2 requests list and count
-	fCount := func(filter *[]page.FilterCondition, wg *sync.WaitGroup, countChan chan int) {
+	fCount := func(ctx context.Context, filter *[]page.FilterCondition, wg *sync.WaitGroup, countChan chan int) {
 		defer wg.Done()
-		c, err := Count(table, filter)
+		c, err := Count(ctx, table, filter)
 		if err != nil {
 			errChan <- err
 			close(countChan)
@@ -292,6 +325,7 @@ func Paginator[T any](
 		close(countChan)
 	}
 	fList := func(
+		ctx context.Context,
 		filter *[]page.FilterCondition,
 		sorts *[]page.SortOrder,
 		paginator *page.Pagination,
@@ -299,7 +333,7 @@ func Paginator[T any](
 		rowsChan chan []*T,
 	) {
 		defer wg.Done()
-		res, err := List(table, filter, sorts, mapper, paginator)
+		res, err := List(ctx, table, filter, sorts, mapper, paginator)
 		if err != nil {
 			errChan <- err
 			close(rowsChan)
@@ -309,8 +343,8 @@ func Paginator[T any](
 		close(rowsChan)
 	}
 
-	go fCount(filter, &wg, countChan)
-	go fList(filter, sorts, paginator, &wg, rowsChan)
+	go fCount(ctx, filter, &wg, countChan)
+	go fList(ctx, filter, sorts, paginator, &wg, rowsChan)
 
 	go func() {
 		wg.Wait()
@@ -366,7 +400,7 @@ func ScanStructRows[T any](st T, rows *sql.Rows) (*T, error) {
 	s := reflect.ValueOf(&st).Elem()
 	numCols := s.NumField()
 	columns := make([]interface{}, numCols)
-	for i := 0; i < numCols; i++ {
+	for i := range numCols {
 		field := s.Field(i)
 		columns[i] = field.Addr().Interface()
 	}
@@ -374,7 +408,7 @@ func ScanStructRows[T any](st T, rows *sql.Rows) (*T, error) {
 	err := rows.Scan(columns...)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, errors.New("user not found")
+			return nil, e.NotFoundErr
 		}
 		return nil, err
 	}
@@ -385,7 +419,7 @@ func ScanStructRow[T any](st T, rows *sql.Row) (*T, error) {
 	s := reflect.ValueOf(&st).Elem()
 	numCols := s.NumField()
 	columns := make([]interface{}, numCols)
-	for i := 0; i < numCols; i++ {
+	for i := range numCols {
 		field := s.Field(i)
 		columns[i] = field.Addr().Interface()
 	}
@@ -393,7 +427,7 @@ func ScanStructRow[T any](st T, rows *sql.Row) (*T, error) {
 	err := rows.Scan(columns...)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, errors.New("user not found")
+			return nil, e.NotFoundErr
 		}
 		return nil, err
 	}

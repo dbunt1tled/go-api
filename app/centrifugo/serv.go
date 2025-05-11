@@ -58,7 +58,7 @@ func (s *Server) Connect(
 			},
 		}, nil
 	}
-	u, err = service.UserRepository{}.ByID(int64(token["iss"].(float64))) //nolint:nolintlint,errcheck
+	u, err = service.UserRepository{}.ByID(ctx, int64(token["iss"].(float64))) //nolint:nolintlint,errcheck
 	if err != nil || u.Status != user.Active {
 
 		log.ErrorContext(ctx, "Centrifugo Connect error find user by id",
@@ -140,7 +140,7 @@ func (s *Server) Subscribe(
 			},
 		}, nil
 	}
-	err = (*provider).Subscribe(channel, userID)
+	err = (*provider).Subscribe(ctx, channel, userID)
 	if err != nil {
 		log.ErrorContext(ctx, "Centrifugo Subscribe error subscribe channel",
 			err,
@@ -199,7 +199,7 @@ func (s *Server) Publish(
 			},
 		}, nil
 	}
-	dt, err = (*provider).Publish(channel, userID, data)
+	dt, err = (*provider).Publish(ctx, channel, userID, data)
 	if err != nil {
 		log.ErrorContext(ctx, "Centrifugo Publish error publish channel",
 			err,

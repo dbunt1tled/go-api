@@ -1,9 +1,12 @@
 package jobs
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+)
 
 type RMQJobHandler interface {
-	Handle(body []byte) error
+	Handle(ctx context.Context, body []byte) error
 }
 
 type RMQJobResolver struct {

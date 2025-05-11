@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"go_echo/app/centrifugo/server/provider"
 	"go_echo/internal/util/helper"
@@ -8,8 +9,8 @@ import (
 )
 
 type ChannelProvider interface {
-	Subscribe(channel string, userID int64) error
-	Publish(channel string, userID int64, data []byte) (*[]byte, error)
+	Subscribe(ctx context.Context, channel string, userID int64) error
+	Publish(ctx context.Context, channel string, userID int64, data []byte) (*[]byte, error)
 }
 
 type ChannelProviderResolver struct {

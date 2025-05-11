@@ -39,7 +39,7 @@ func AuthBearer(next echo.HandlerFunc) echo.HandlerFunc {
 				Status: http.StatusUnauthorized,
 			}
 		}
-		u, err := service.UserRepository{}.ByID(int64(token["iss"].(float64))) //nolint:nolintlint,errcheck
+		u, err := service.UserRepository{}.ByID(c.Request().Context(), int64(token["iss"].(float64))) //nolint:nolintlint,errcheck
 		if err != nil {
 			return &jsonerror.ExceptionErr{
 				Inner:  errors.New("unauthorized"),

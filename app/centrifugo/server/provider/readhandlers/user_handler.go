@@ -1,6 +1,7 @@
 package readhandlers
 
 import (
+	"context"
 	"go_echo/app/usernotification/model/usernotification"
 	"go_echo/app/usernotification/service"
 
@@ -20,10 +21,10 @@ type UserReadChannelHandler struct {
 }
 
 type ReadChannelHandler interface {
-	Handle(userID int64, data []byte) (*[]byte, error)
+	Handle(ctx context.Context, userID int64, data []byte) (*[]byte, error)
 }
 
-func (u *UserReadChannelHandler) Handle(userID int64, data []byte) (*[]byte, error) {
+func (u *UserReadChannelHandler) Handle(ctx context.Context, userID int64, data []byte) (*[]byte, error) {
 	var (
 		dt  UserReadMessage
 		err error
@@ -33,6 +34,7 @@ func (u *UserReadChannelHandler) Handle(userID int64, data []byte) (*[]byte, err
 		return nil, errors.Wrap(err, "invalid read channel")
 	}
 	_, err = service.UserNotificationRepository{}.Update(
+		ctx,
 		dt.ID,
 		service.UserNotificationParams{Status: &dt.Status},
 	)

@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"context"
 	"fmt"
 	"go_echo/app/centrifugo/server/provider/readhandlers"
 	"go_echo/internal/util/helper"
@@ -18,21 +19,21 @@ type ReadProvider struct {
 }
 
 type ReadChannelHandler interface {
-	Handle(userID int64, data []byte) (*[]byte, error)
+	Handle(ctx context.Context, userID int64, data []byte) (*[]byte, error)
 }
 
 type ReadChannelResolver struct {
 	handlers map[string]*ReadChannelHandler
 }
 
-func (u *ReadProvider) Subscribe(channel string, userID int64) error {
+func (u *ReadProvider) Subscribe(ctx context.Context, channel string, userID int64) error {
 	if channel != (channelReadName + strconv.FormatInt(userID, 10)) {
 		return errors.New("invalid read channel")
 	}
 	return nil
 }
 
-func (u *ReadProvider) Publish(channel string, userID int64, data []byte) (*[]byte, error) {
+func (u *ReadProvider) Publish(ctx context.Context, channel string, userID int64, data []byte) (*[]byte, error) {
 	var (
 		err error
 		ch  string
@@ -51,7 +52,7 @@ func (u *ReadProvider) Publish(channel string, userID int64, data []byte) (*[]by
 	if err != nil {
 		return nil, err
 	}
-	return (*handler).Handle(userID, data)
+	return (*handler).Handle(ctx, userID, data)
 }
 
 func GetReadChannelResolver() *ReadChannelResolver {

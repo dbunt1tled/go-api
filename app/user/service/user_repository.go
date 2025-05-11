@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"go_echo/app/user/model/user"
@@ -46,19 +47,22 @@ type CreateUserParams struct {
 	ConfirmedAt *time.Time
 }
 
-func (r UserRepository) ByID(id int64) (*user.User, error) {
+func (r UserRepository) ByID(ctx context.Context, id int64) (*user.User, error) {
 	return builder.ByID[user.User](
+		ctx,
 		UserTableName,
 		id,
 		castUserRow,
 	)
 }
 func (r UserRepository) Paginator(
+	ctx context.Context,
 	filter *[]page.FilterCondition,
 	sorts *[]page.SortOrder,
 	paginator *page.Pagination,
 ) (page.Paginate[user.User], error) {
 	return builder.Paginator[user.User](
+		ctx,
 		UserTableName,
 		filter,
 		sorts,
@@ -67,7 +71,7 @@ func (r UserRepository) Paginator(
 	)
 }
 
-func (r UserRepository) One(filter *[]page.FilterCondition, sorts *[]page.SortOrder) (*user.User, error) {
+func (r UserRepository) One(ctx context.Context, filter *[]page.FilterCondition, sorts *[]page.SortOrder) (*user.User, error) {
 	var _validFields = map[string]bool{
 		"id":     true,
 		"phone":  true,
@@ -81,9 +85,10 @@ func (r UserRepository) One(filter *[]page.FilterCondition, sorts *[]page.SortOr
 		}
 	}
 
-	return builder.One(UserTableName, filter, sorts, castUserRow)
+	return builder.One(ctx, UserTableName, filter, sorts, castUserRow)
 }
 func (r UserRepository) List(
+	ctx context.Context,
 	filter *[]page.FilterCondition,
 	sorts *[]page.SortOrder,
 ) ([]*user.User, error) {
@@ -100,11 +105,12 @@ func (r UserRepository) List(
 		}
 	}
 
-	return builder.List(UserTableName, filter, sorts, castUserRows, nil)
+	return builder.List(ctx, UserTableName, filter, sorts, castUserRows, nil)
 }
 
-func (r UserRepository) ByIdentity(login string) (*user.User, error) {
-	res := builder.GetDB().QueryRow(
+func (r UserRepository) ByIdentity(ctx context.Context, login string) (*user.User, error) {
+	res := builder.GetDB().QueryRowContext(
+		ctx,
 		"SELECT * FROM users WHERE (phone_number = ? OR email = ?) AND status = 1 LIMIT 1;",
 		login,
 		login,
@@ -113,7 +119,7 @@ func (r UserRepository) ByIdentity(login string) (*user.User, error) {
 }
 
 //nolint:funlen
-func (r UserRepository) Create(params CreateUserParams) (*user.User, error) {
+func (r UserRepository) Create(ctx context.Context, params CreateUserParams) (*user.User, error) {
 	var (
 		columns []string
 		values  []string
@@ -195,14 +201,14 @@ func (r UserRepository) Create(params CreateUserParams) (*user.User, error) {
 		return nil, errors.Wrap(err, "create user prepare error")
 	}
 	defer smt.Close()
-	res, err := smt.Exec(args...)
+	res, err := smt.ExecContext(ctx, args...)
 	if err != nil {
 		return nil, errors.Wrap(err, "create user error")
 	}
-	return helper.Must(r.ByID(helper.Must(res.LastInsertId()))), nil
+	return helper.Must(r.ByID(ctx, helper.Must(res.LastInsertId()))), nil
 }
 
-func (r UserRepository) Update(id int64, params UpdateUserParams) (*user.User, error) {
+func (r UserRepository) Update(ctx context.Context, id int64, params UpdateUserParams) (*user.User, error) {
 
 	var (
 		setClauses []string
@@ -255,7 +261,7 @@ func (r UserRepository) Update(id int64, params UpdateUserParams) (*user.User, e
 	}
 
 	if len(setClauses) == 0 {
-		return helper.Must(r.ByID(id)), nil
+		return helper.Must(r.ByID(ctx, id)), nil
 	}
 
 	setClauses = append(setClauses, "updated_at = ?")
@@ -269,12 +275,12 @@ func (r UserRepository) Update(id int64, params UpdateUserParams) (*user.User, e
 		return nil, errors.Wrap(err, "update user prepare error")
 	}
 	defer smt.Close()
-	_, err = smt.Exec(args...)
+	_, err = smt.ExecContext(ctx, args...)
 	if err != nil {
 		return nil, errors.Wrap(err, "update user error")
 	}
 
-	return helper.Must(r.ByID(id)), nil
+	return helper.Must(r.ByID(ctx, id)), nil
 }
 
 func castUserRow(row *sql.Row) (*user.User, error) {
