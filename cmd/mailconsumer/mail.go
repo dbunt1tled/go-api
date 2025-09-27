@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"go_echo/app/jobs/rmqmail"
 	"go_echo/internal/config/env"
@@ -25,7 +26,7 @@ const (
 func main() {
 	cfg := env.GetConfigInstance()
 	locale.GetLocaleBundleInstance()
-	logger.InitLogger(cfg.Env, cfg.Debug.Debug)
+	logger.InitLogger(cfg.Env, cfg.Debug.Debug, cfg.Logger)
 	validate.GetValidateInstance()
 	profiler.SetProfiler()
 	storage.GetInstance()
@@ -43,7 +44,7 @@ func main() {
 		if handler == nil {
 			return errors.New("mail consumer Error: handler is empty")
 		}
-		if err = (*handler).Handle(d.Body); err != nil {
+		if err = (*handler).Handle(context.Background(), d.Body); err != nil {
 			return fmt.Errorf("mail consumer Error processing message: %s", err.Error())
 		}
 		return nil

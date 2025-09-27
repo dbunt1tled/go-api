@@ -9,7 +9,6 @@ import (
 	"go_echo/internal/util/type/checker"
 	jf "go_echo/internal/util/type/json"
 	"html/template"
-	"log/slog"
 	"reflect"
 	"regexp"
 	"runtime"
@@ -336,7 +335,7 @@ func GracefulShutdown(log *logger.AppLogger, ops ...func() error) {
 		if err := op(); err != nil {
 			log.Error(
 				"(ツ)_/¯ Graceful Shutdown op failed",
-				slog.Any("error", err),
+				err,
 			)
 			panic(err)
 		}

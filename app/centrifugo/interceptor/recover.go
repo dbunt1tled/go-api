@@ -17,7 +17,7 @@ func RecoverInterceptor() grpc.UnaryServerInterceptor {
 				stack := make([]byte, 64<<10)
 				stack = stack[:runtime.Stack(stack, false)]
 				err = &PanicError{Method: info.FullMethod, Panic: r, Stack: stack}
-				log.ErrorContext(ctx, err.Error())
+				log.ErrorContext(ctx, "RecoverInterceptor Panic",err)
 			}
 		}()
 

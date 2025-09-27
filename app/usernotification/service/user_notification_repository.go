@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"go_echo/app/usernotification/model/usernotification"
@@ -27,8 +28,9 @@ type UserNotificationParams struct {
 	Status *usernotification.Status
 }
 
-func (r UserNotificationRepository) ByID(id int64) (*usernotification.UserNotification, error) {
+func (r UserNotificationRepository) ByID(ctx context.Context, id int64) (*usernotification.UserNotification, error) {
 	return builder.ByID[usernotification.UserNotification](
+		ctx,
 		UserNotificationTableName,
 		id,
 		castUserNotificationRow,
@@ -36,11 +38,13 @@ func (r UserNotificationRepository) ByID(id int64) (*usernotification.UserNotifi
 }
 
 func (r UserNotificationRepository) Paginator(
+	ctx context.Context,
 	filter *[]page.FilterCondition,
 	sorts *[]page.SortOrder,
 	paginator *page.Pagination,
 ) (page.Paginate[usernotification.UserNotification], error) {
 	return builder.Paginator[usernotification.UserNotification](
+		ctx,
 		UserNotificationTableName,
 		filter,
 		sorts,
@@ -50,6 +54,7 @@ func (r UserNotificationRepository) Paginator(
 }
 
 func (r UserNotificationRepository) One(
+	ctx context.Context,
 	filter *[]page.FilterCondition,
 	sorts *[]page.SortOrder,
 ) (*usernotification.UserNotification, error) {
@@ -65,10 +70,11 @@ func (r UserNotificationRepository) One(
 		}
 	}
 
-	return builder.One(UserNotificationTableName, filter, sorts, castUserNotificationRow)
+	return builder.One(ctx, UserNotificationTableName, filter, sorts, castUserNotificationRow)
 }
 
 func (r UserNotificationRepository) List(
+	ctx context.Context,
 	filter *[]page.FilterCondition,
 	sorts *[]page.SortOrder,
 ) ([]*usernotification.UserNotification, error) {
@@ -83,10 +89,11 @@ func (r UserNotificationRepository) List(
 			return nil, err
 		}
 	}
-	return builder.List(UserNotificationTableName, filter, sorts, castUserNotificationRows, nil)
+	return builder.List(ctx, UserNotificationTableName, filter, sorts, castUserNotificationRows, nil)
 }
 
 func (r UserNotificationRepository) Count(
+	ctx context.Context,
 	filter *[]page.FilterCondition,
 ) (int, error) {
 	var _validFields = map[string]bool{
@@ -102,10 +109,10 @@ func (r UserNotificationRepository) Count(
 			return 0, err
 		}
 	}
-	return builder.Count(UserNotificationTableName, filter)
+	return builder.Count(ctx, UserNotificationTableName, filter)
 }
 
-func (r UserNotificationRepository) Create(params UserNotificationParams) (*usernotification.UserNotification, error) {
+func (r UserNotificationRepository) Create(ctx context.Context, params UserNotificationParams) (*usernotification.UserNotification, error) {
 	var (
 		columns []string
 		values  []string
@@ -153,14 +160,15 @@ func (r UserNotificationRepository) Create(params UserNotificationParams) (*user
 		return nil, errors.Wrap(err, "create user prepare error")
 	}
 	defer smt.Close()
-	res, err := smt.Exec(args...)
+	res, err := smt.ExecContext(ctx, args...)
 	if err != nil {
 		return nil, errors.Wrap(err, "create user error")
 	}
-	return helper.Must(r.ByID(helper.Must(res.LastInsertId()))), nil
+	return helper.Must(r.ByID(ctx, helper.Must(res.LastInsertId()))), nil
 }
 
 func (r UserNotificationRepository) Update(
+	ctx context.Context,
 	id int64, params UserNotificationParams,
 ) (*usernotification.UserNotification, error) {
 
@@ -185,7 +193,7 @@ func (r UserNotificationRepository) Update(
 	}
 
 	if len(setClauses) == 0 {
-		return helper.Must(r.ByID(id)), nil
+		return helper.Must(r.ByID(ctx, id)), nil
 	}
 
 	setClauses = append(setClauses, "updated_at = ?")
@@ -199,12 +207,12 @@ func (r UserNotificationRepository) Update(
 		return nil, errors.Wrap(err, "update user prepare error")
 	}
 	defer smt.Close()
-	_, err = smt.Exec(args...)
+	_, err = smt.ExecContext(ctx, args...)
 	if err != nil {
 		return nil, errors.Wrap(err, "update user error")
 	}
 
-	return helper.Must(r.ByID(id)), nil
+	return helper.Must(r.ByID(ctx, id)), nil
 }
 
 func castUserNotificationRow(row *sql.Row) (*usernotification.UserNotification, error) {

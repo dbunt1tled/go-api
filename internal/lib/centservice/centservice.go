@@ -32,6 +32,7 @@ func SendUserNotification(message UserNotification) (gocent.PublishResult, error
 		return gocent.PublishResult{}, errors.Wrap(err, "Error convert User Notification message to map")
 	}
 	un, err = service.UserNotificationRepository{}.Create(
+		ctx,
 		service.UserNotificationParams{UserID: &message.UserID, Data: &dt},
 	)
 	if err != nil {

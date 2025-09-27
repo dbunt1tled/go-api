@@ -18,6 +18,7 @@ type Config struct {
 	Profiling   bool   `env:"PROFILING" env-default:"false"`
 	DatabaseDSN string `env:"DATABASE_DSN" env-required:"true"`
 	HTTPServer  HTTPServer
+	Logger      Logger
 	CORS        CORS
 	JWT         JWT
 	Mail        Mail
@@ -79,6 +80,10 @@ type HTTPServer struct {
 type TLS struct {
 	Cert string `env:"TLS_CERT" env-default:""`
 	Key  string `env:"TLS_KEY" env-default:""`
+}
+
+type Logger struct {
+	FilePath string `env:"LOGGER_FILE_PATH"`
 }
 
 func (t *TLS) IsSet() bool {

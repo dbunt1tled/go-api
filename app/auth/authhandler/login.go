@@ -51,7 +51,7 @@ func Login(c echo.Context) error {
 		return jsonerror.ErrorUnprocessableEntity(c, err, app_error.Err422LoginValidateError)
 	}
 
-	u, err = service.UserRepository{}.ByIdentity(req.Login)
+	u, err = service.UserRepository{}.ByIdentity(c.Request().Context(), req.Login)
 	if err != nil {
 		return jsonerror.ErrorUnprocessableEntity(c, err, app_error.Err422LoginUserNotFoundError)
 	}

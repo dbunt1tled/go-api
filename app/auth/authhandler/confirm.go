@@ -53,7 +53,7 @@ func Confirm(c echo.Context) error {
 	if err != nil || token["sub"] != auth.ConfirmTokenSubject {
 		return jsonerror.ErrorUnprocessableEntity(c, err, app_error.Err422ConfirmTokenError)
 	}
-	u, err = service.UserRepository{}.ByID(int64(token["iss"].(float64))) //nolint:nolintlint,errcheck
+	u, err = service.UserRepository{}.ByID(c.Request().Context(), int64(token["iss"].(float64))) //nolint:nolintlint,errcheck
 	if err != nil {
 		return jsonerror.ErrorUnprocessableEntity(c, err, app_error.Err422ConfirmUserError)
 	}
@@ -68,7 +68,7 @@ func Confirm(c echo.Context) error {
 
 	status := user.Active
 	date := time.Now()
-	u, err = service.UserRepository{}.Update(u.ID, service.UpdateUserParams{
+	u, err = service.UserRepository{}.Update(c.Request().Context(), u.ID, service.UpdateUserParams{
 		Status:      &status,
 		ConfirmedAt: &date,
 	})

@@ -52,17 +52,19 @@ func Register(c echo.Context) error {
 		return jsonerror.ErrorUnprocessableEntity(c, err, app_error.Err422SignupValidateError)
 	}
 	status := user.Pending
-	u, err = service.UserRepository{}.Create(service.CreateUserParams{
-		FirstName:   &req.FirstName,
-		SecondName:  &req.SecondName,
-		Email:       &req.Email,
-		PhoneNumber: &req.PhoneNumber,
-		Password:    &req.Password,
-		Status:      &status,
-		Hash:        nil,
-		Roles:       nil,
-		ConfirmedAt: nil,
-	})
+	u, err = service.UserRepository{}.Create(
+		c.Request().Context(),
+		service.CreateUserParams{
+			FirstName:   &req.FirstName,
+			SecondName:  &req.SecondName,
+			Email:       &req.Email,
+			PhoneNumber: &req.PhoneNumber,
+			Password:    &req.Password,
+			Status:      &status,
+			Hash:        nil,
+			Roles:       nil,
+			ConfirmedAt: nil,
+		})
 	if err != nil {
 		return jsonerror.ErrorUnprocessableEntity(c, err, app_error.Err422SignupUserNotFoundError)
 	}

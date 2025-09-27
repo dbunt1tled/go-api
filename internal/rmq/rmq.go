@@ -8,6 +8,7 @@ import (
 	"go_echo/internal/util/helper"
 	"os"
 	"os/signal"
+	"strings"
 	"sync"
 	"syscall"
 	"time"
@@ -38,7 +39,7 @@ func GetRMQInstance() *rabbitmq.Conn {
 			cfg.RabbitMQ.Password,
 			cfg.RabbitMQ.Host,
 			cfg.RabbitMQ.Port,
-			cfg.RabbitMQ.Vhost,
+			strings.TrimSuffix(cfg.RabbitMQ.Vhost, "/"),
 		)
 		rabbitMQInstance, err = rabbitmq.NewConn(
 			amqpURL,
@@ -78,7 +79,7 @@ func Publish(exchangeName string, queueName string, action string, body string) 
 		rabbitmq.WithPublishOptionsMessageID(helper.Must(hasher.UUIDVv7()).String()),
 	)
 	if err != nil {
-		log.Error(fmt.Sprintf("Failed to publish in queue %s: %s.", queueName, err.Error()))
+		log.Error(fmt.Sprintf("Failed to publish in queue %s:", queueName, ), err)
 	}
 }
 

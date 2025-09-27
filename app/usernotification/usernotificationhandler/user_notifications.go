@@ -52,10 +52,12 @@ func UserNotificationList(c echo.Context) error {
 		return jsonerror.ErrorUnprocessableEntity(c, err, app_error.Err422UserNotificationValidateError)
 	}
 
-	p, err = service.UserNotificationRepository{}.Paginator(&[]page.FilterCondition{
-		builder.Eq("user_id", u.ID),
-		builder.Eq("status", helper.GetVarValue(req.Status)),
-	},
+	p, err = service.UserNotificationRepository{}.Paginator(
+		c.Request().Context(),
+		&[]page.FilterCondition{
+			builder.Eq("user_id", u.ID),
+			builder.Eq("status", helper.GetVarValue(req.Status)),
+		},
 		builder.GetSortOrder(req.Pagination.Sort),
 		builder.GetPagination(req.Pagination),
 	)
