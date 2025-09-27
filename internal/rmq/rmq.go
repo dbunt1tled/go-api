@@ -8,6 +8,7 @@ import (
 	"go_echo/internal/util/helper"
 	"os"
 	"os/signal"
+	"strings"
 	"sync"
 	"syscall"
 	"time"
@@ -38,7 +39,7 @@ func GetRMQInstance() *rabbitmq.Conn {
 			cfg.RabbitMQ.Password,
 			cfg.RabbitMQ.Host,
 			cfg.RabbitMQ.Port,
-			cfg.RabbitMQ.Vhost,
+			strings.TrimSuffix(cfg.RabbitMQ.Vhost, "/"),
 		)
 		rabbitMQInstance, err = rabbitmq.NewConn(
 			amqpURL,

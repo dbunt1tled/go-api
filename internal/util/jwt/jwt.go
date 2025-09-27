@@ -3,10 +3,10 @@ package jwt
 import (
 	"crypto/ecdsa"
 	"encoding/base64"
+	"errors"
 	"go_echo/internal/config/env"
 
-	"github.com/golang-jwt/jwt"
-	"github.com/pkg/errors"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 type JWToken struct{}
@@ -30,7 +30,7 @@ func (JWToken) Decode(token string, checkExpire bool) (map[string]interface{}, e
 	})
 
 	if !tokenData.Valid || err != nil {
-		if err.(*jwt.ValidationError).Errors&jwt.ValidationErrorExpired != 0 && !checkExpire { //nolint:errcheck
+		if errors.Is(err, jwt.ErrTokenExpired) && !checkExpire {
 			return claims, nil
 		}
 		return nil, errors.New("invalid token")
