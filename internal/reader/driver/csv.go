@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"encoding/csv"
 	"fmt"
-	"go_echo/internal/reader/data"
+	"github.com/dbunt1tled/go-api/internal/reader/data"
 	"io"
 	"os"
 	"strings"

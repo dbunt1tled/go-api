@@ -2,8 +2,8 @@ package writer
 
 import (
 	"fmt"
-	"go_echo/internal/writer/data"
-	"go_echo/internal/writer/driver"
+	"github.com/dbunt1tled/go-api/internal/writer/data"
+	"github.com/dbunt1tled/go-api/internal/writer/driver"
 	"strings"
 )
 

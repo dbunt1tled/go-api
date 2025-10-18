@@ -1,14 +1,14 @@
-module go_echo
+module github.com/dbunt1tled/go-api
 
 go 1.24.1
 
 require (
 	github.com/BurntSushi/toml v1.5.0
 	github.com/bytedance/sonic v1.14.1
-	github.com/centrifugal/gocent/v3 v3.3.0
+	github.com/centrifugal/gocent/v3 v3.4.0
 	github.com/cespare/xxhash/v2 v2.3.0
 	github.com/fatih/color v1.18.0
-	github.com/go-playground/validator/v10 v10.27.0
+	github.com/go-playground/validator/v10 v10.28.0
 	github.com/go-sql-driver/mysql v1.9.3
 	github.com/google/jsonapi v1.0.0
 	github.com/google/uuid v1.6.0
@@ -19,16 +19,16 @@ require (
 	github.com/nicksnyder/go-i18n/v2 v2.6.0
 	github.com/ompluscator/dynamic-struct v1.4.0
 	github.com/pkg/errors v0.9.1
-	github.com/redis/go-redis/v9 v9.15.0
+	github.com/redis/go-redis/v9 v9.14.0
 	github.com/stretchr/testify v1.11.1
 	github.com/thedatashed/xlsxreader v1.2.8
 	github.com/wagslane/go-rabbitmq v0.15.0
-	github.com/wneessen/go-mail v0.7.1
-	github.com/xuri/excelize/v2 v2.9.1
-	golang.org/x/crypto v0.42.0
-	golang.org/x/text v0.29.0
-	google.golang.org/grpc v1.75.1
-	google.golang.org/protobuf v1.36.9
+	github.com/wneessen/go-mail v0.7.2
+	github.com/xuri/excelize/v2 v2.10.0
+	golang.org/x/crypto v0.43.0
+	golang.org/x/text v0.30.0
+	google.golang.org/grpc v1.76.0
+	google.golang.org/protobuf v1.36.10
 )
 
 require (
@@ -60,12 +60,12 @@ require (
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	github.com/xuri/efp v0.0.1 // indirect
-	github.com/xuri/nfp v0.0.1 // indirect
-	golang.org/x/arch v0.21.0 // indirect
-	golang.org/x/net v0.44.0 // indirect
-	golang.org/x/sys v0.36.0 // indirect
-	golang.org/x/time v0.13.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20250922171735-9219d122eba9 // indirect
+	github.com/xuri/nfp v0.0.2-0.20250530014748-2ddeb826f9a9 // indirect
+	golang.org/x/arch v0.22.0 // indirect
+	golang.org/x/net v0.46.0 // indirect
+	golang.org/x/sys v0.37.0 // indirect
+	golang.org/x/time v0.14.0 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20251014184007-4626949a642f // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	olympos.io/encoding/edn v0.0.0-20201019073823-d3554ca0b0a3 // indirect
 )

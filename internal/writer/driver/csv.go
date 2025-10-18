@@ -2,8 +2,8 @@ package driver
 
 import (
 	"encoding/csv"
-	"go_echo/internal/util/helper"
-	"go_echo/internal/writer/data"
+	"github.com/dbunt1tled/go-api/internal/util/helper"
+	"github.com/dbunt1tled/go-api/internal/writer/data"
 	"os"
 
 	"github.com/pkg/errors"

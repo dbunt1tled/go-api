@@ -2,7 +2,7 @@ package driver
 
 import (
 	"bufio"
-	"go_echo/internal/reader/data"
+	"github.com/dbunt1tled/go-api/internal/reader/data"
 	"os"
 
 	"github.com/pkg/errors"

@@ -1,16 +1,16 @@
 package usernotificationhandler
 
 import (
-	"go_echo/app/user/model/user"
-	"go_echo/app/usernotification/model/usernotification"
-	"go_echo/app/usernotification/service"
-	"go_echo/internal/config/app_error"
-	"go_echo/internal/config/validate"
-	"go_echo/internal/dto"
-	"go_echo/internal/lib/jsonerror"
-	"go_echo/internal/util/builder"
-	"go_echo/internal/util/builder/page"
-	"go_echo/internal/util/helper"
+	"github.com/dbunt1tled/go-api/app/user/model/user"
+	"github.com/dbunt1tled/go-api/app/usernotification/model/usernotification"
+	"github.com/dbunt1tled/go-api/app/usernotification/service"
+	"github.com/dbunt1tled/go-api/internal/config/app_error"
+	"github.com/dbunt1tled/go-api/internal/config/validate"
+	"github.com/dbunt1tled/go-api/internal/dto"
+	"github.com/dbunt1tled/go-api/internal/lib/jsonerror"
+	"github.com/dbunt1tled/go-api/internal/util/builder"
+	"github.com/dbunt1tled/go-api/internal/util/builder/page"
+	"github.com/dbunt1tled/go-api/internal/util/helper"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"

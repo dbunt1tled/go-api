@@ -3,8 +3,8 @@ package provider
 import (
 	"context"
 	"fmt"
-	"go_echo/app/centrifugo/server/provider/readhandlers"
-	"go_echo/internal/util/helper"
+	"github.com/dbunt1tled/go-api/app/centrifugo/server/provider/readhandlers"
+	"github.com/dbunt1tled/go-api/internal/util/helper"
 	"strconv"
 
 	"github.com/bytedance/sonic"

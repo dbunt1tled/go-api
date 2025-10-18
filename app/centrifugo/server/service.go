@@ -3,8 +3,8 @@ package server
 import (
 	"context"
 	"fmt"
-	"go_echo/app/centrifugo/server/provider"
-	"go_echo/internal/util/helper"
+	"github.com/dbunt1tled/go-api/app/centrifugo/server/provider"
+	"github.com/dbunt1tled/go-api/internal/util/helper"
 	"sync"
 )
 

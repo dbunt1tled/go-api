@@ -3,7 +3,7 @@ package logger
 import (
 	"errors"
 	"fmt"
-	"go_echo/internal/config/app_error"
+	"github.com/dbunt1tled/go-api/internal/config/app_error"
 	"log/slog"
 )
 

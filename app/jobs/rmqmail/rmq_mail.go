@@ -1,8 +1,8 @@
 package rmqmail
 
 import (
-	"go_echo/app/jobs"
-	"go_echo/app/jobs/rmqmail/handlers"
+	"github.com/dbunt1tled/go-api/app/jobs"
+	"github.com/dbunt1tled/go-api/app/jobs/rmqmail/handlers"
 )
 
 type RMQJobMailResolver struct {

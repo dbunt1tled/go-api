@@ -2,7 +2,7 @@ package storage
 
 import (
 	"database/sql"
-	"go_echo/internal/config/env"
+	"github.com/dbunt1tled/go-api/internal/config/env"
 	"sync"
 	"time"
 

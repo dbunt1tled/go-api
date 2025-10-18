@@ -1,10 +1,10 @@
 package main
 
 import (
-	"go_echo/internal/config/env"
-	"go_echo/internal/config/locale"
-	"go_echo/internal/config/logger"
-	"go_echo/internal/lib/centservice"
+	"github.com/dbunt1tled/go-api/internal/config/env"
+	"github.com/dbunt1tled/go-api/internal/config/locale"
+	"github.com/dbunt1tled/go-api/internal/config/logger"
+	"github.com/dbunt1tled/go-api/internal/lib/centservice"
 
 	"github.com/bytedance/sonic"
 )

@@ -1,14 +1,14 @@
 package router
 
 import (
-	"go_echo/app/auth/authhandler"
-	"go_echo/app/general/generalhandler"
-	"go_echo/app/user/userhandler"
-	"go_echo/app/usernotification/usernotificationhandler"
-	"go_echo/internal/config/env"
-	apiServer "go_echo/internal/router/handler/server"
-	"go_echo/internal/router/middlewares"
-	"go_echo/internal/util/hasher"
+	"github.com/dbunt1tled/go-api/app/auth/authhandler"
+	"github.com/dbunt1tled/go-api/app/general/generalhandler"
+	"github.com/dbunt1tled/go-api/app/user/userhandler"
+	"github.com/dbunt1tled/go-api/app/usernotification/usernotificationhandler"
+	"github.com/dbunt1tled/go-api/internal/config/env"
+	apiServer "github.com/dbunt1tled/go-api/internal/router/handler/server"
+	"github.com/dbunt1tled/go-api/internal/router/middlewares"
+	"github.com/dbunt1tled/go-api/internal/util/hasher"
 	"strconv"
 	"strings"
 	"time"

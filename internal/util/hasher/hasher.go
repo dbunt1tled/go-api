@@ -5,7 +5,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"go_echo/internal/util/rand"
+	"github.com/dbunt1tled/go-api/internal/util/rand"
 	"strconv"
 	"strings"
 

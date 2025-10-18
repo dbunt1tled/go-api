@@ -2,7 +2,7 @@ package driver
 
 import (
 	"fmt"
-	"go_echo/internal/reader/data"
+	"github.com/dbunt1tled/go-api/internal/reader/data"
 	"strings"
 
 	"github.com/pkg/errors"

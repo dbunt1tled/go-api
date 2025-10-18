@@ -3,7 +3,7 @@ package pretty
 import (
 	"context"
 	"fmt"
-	"go_echo/internal/util/type/checker"
+	"github.com/dbunt1tled/go-api/internal/util/type/checker"
 	"io"
 	stdLog "log"
 	"log/slog"

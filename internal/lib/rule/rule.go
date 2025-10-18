@@ -3,8 +3,8 @@ package rule
 import (
 	sql2 "database/sql"
 	"fmt"
-	"go_echo/internal/util/builder"
-	"go_echo/internal/util/helper"
+	"github.com/dbunt1tled/go-api/internal/util/builder"
+	"github.com/dbunt1tled/go-api/internal/util/helper"
 	"regexp"
 	"strings"
 	"unicode"

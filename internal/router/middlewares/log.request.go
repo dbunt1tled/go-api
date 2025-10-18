@@ -1,8 +1,8 @@
 package middlewares
 
 import (
-	"go_echo/internal/config/env"
-	"go_echo/internal/util/helper"
+	"github.com/dbunt1tled/go-api/internal/config/env"
+	"github.com/dbunt1tled/go-api/internal/util/helper"
 	"slices"
 	"strings"
 

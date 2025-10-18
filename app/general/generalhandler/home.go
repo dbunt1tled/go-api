@@ -2,9 +2,9 @@ package generalhandler
 
 import (
 	"bytes"
-	"go_echo/internal/config/app_error"
-	"go_echo/internal/lib/jsonerror"
-	"go_echo/internal/util/helper"
+	"github.com/dbunt1tled/go-api/internal/config/app_error"
+	"github.com/dbunt1tled/go-api/internal/lib/jsonerror"
+	"github.com/dbunt1tled/go-api/internal/util/helper"
 	"net/http"
 
 	"github.com/labstack/echo/v4"

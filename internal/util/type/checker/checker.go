@@ -1,7 +1,7 @@
 package checker
 
 import (
-	"go_echo/internal/util/builder/page"
+	"github.com/dbunt1tled/go-api/internal/util/builder/page"
 	"reflect"
 )
 

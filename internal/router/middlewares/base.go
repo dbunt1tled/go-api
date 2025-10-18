@@ -1,7 +1,7 @@
 package middlewares
 
 import (
-	"go_echo/internal/config/env"
+	"github.com/dbunt1tled/go-api/internal/config/env"
 	"strings"
 
 	"github.com/labstack/echo/v4"

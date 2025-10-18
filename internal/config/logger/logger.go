@@ -3,9 +3,9 @@ package logger
 import (
 	"context"
 	"fmt"
-	"go_echo/internal/config/env"
-	"go_echo/internal/lib/logger"
-	"go_echo/internal/lib/logger/handlers/pretty"
+	"github.com/dbunt1tled/go-api/internal/config/env"
+	"github.com/dbunt1tled/go-api/internal/lib/logger"
+	"github.com/dbunt1tled/go-api/internal/lib/logger/handlers/pretty"
 	"io"
 	"log/slog"
 	"os"

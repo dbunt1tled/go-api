@@ -2,10 +2,10 @@ package rmq
 
 import (
 	"fmt"
-	"go_echo/internal/config/env"
-	"go_echo/internal/config/logger"
-	"go_echo/internal/util/hasher"
-	"go_echo/internal/util/helper"
+	"github.com/dbunt1tled/go-api/internal/config/env"
+	"github.com/dbunt1tled/go-api/internal/config/logger"
+	"github.com/dbunt1tled/go-api/internal/util/hasher"
+	"github.com/dbunt1tled/go-api/internal/util/helper"
 	"os"
 	"os/signal"
 	"strings"
@@ -79,7 +79,7 @@ func Publish(exchangeName string, queueName string, action string, body string) 
 		rabbitmq.WithPublishOptionsMessageID(helper.Must(hasher.UUIDVv7()).String()),
 	)
 	if err != nil {
-		log.Error(fmt.Sprintf("Failed to publish in queue %s:", queueName, ), err)
+		log.Error(fmt.Sprintf("Failed to publish in queue %s:", queueName), err)
 	}
 }
 

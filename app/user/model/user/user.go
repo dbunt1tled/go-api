@@ -1,9 +1,9 @@
 package user
 
 import (
-	"go_echo/internal/util/type/dbtype"
-	"go_echo/internal/util/type/roles"
-	"go_echo/internal/util/type/timestamp"
+	"github.com/dbunt1tled/go-api/internal/util/type/dbtype"
+	"github.com/dbunt1tled/go-api/internal/util/type/roles"
+	"github.com/dbunt1tled/go-api/internal/util/type/timestamp"
 	"strings"
 )
 
