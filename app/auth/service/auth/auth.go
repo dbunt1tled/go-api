@@ -1,10 +1,10 @@
 package auth
 
 import (
-	"go_echo/app/auth/model/token"
-	"go_echo/app/user/model/user"
-	"go_echo/internal/config/env"
-	"go_echo/internal/util/jwt"
+	"github.com/dbunt1tled/go-api/app/auth/model/token"
+	"github.com/dbunt1tled/go-api/app/user/model/user"
+	"github.com/dbunt1tled/go-api/internal/config/env"
+	"github.com/dbunt1tled/go-api/internal/util/jwt"
 	"time"
 )
 

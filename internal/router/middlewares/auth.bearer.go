@@ -1,11 +1,11 @@
 package middlewares
 
 import (
-	"go_echo/app/user/model/user"
-	"go_echo/app/user/service"
-	"go_echo/internal/config/app_error"
-	"go_echo/internal/lib/jsonerror"
-	"go_echo/internal/util/jwt"
+	"github.com/dbunt1tled/go-api/app/user/model/user"
+	"github.com/dbunt1tled/go-api/app/user/service"
+	"github.com/dbunt1tled/go-api/internal/config/app_error"
+	"github.com/dbunt1tled/go-api/internal/lib/jsonerror"
+	"github.com/dbunt1tled/go-api/internal/util/jwt"
 	"net/http"
 	"strings"
 

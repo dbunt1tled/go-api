@@ -1,8 +1,8 @@
 package usernotification
 
 import (
-	"go_echo/internal/util/type/json"
-	"go_echo/internal/util/type/timestamp"
+	"github.com/dbunt1tled/go-api/internal/util/type/json"
+	"github.com/dbunt1tled/go-api/internal/util/type/timestamp"
 )
 
 type UserNotification struct {

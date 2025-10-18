@@ -2,16 +2,16 @@ package main
 
 import (
 	"crypto/tls"
-	"go_echo/app/centrifugo"
-	"go_echo/app/centrifugo/interceptor"
-	"go_echo/internal/config/env"
-	"go_echo/internal/config/locale"
-	"go_echo/internal/config/logger"
-	"go_echo/internal/config/validate"
-	proxyproto "go_echo/internal/grpc"
-	"go_echo/internal/lib/profiler"
-	"go_echo/internal/storage"
-	"go_echo/internal/util/helper"
+	"github.com/dbunt1tled/go-api/app/centrifugo"
+	"github.com/dbunt1tled/go-api/app/centrifugo/interceptor"
+	"github.com/dbunt1tled/go-api/internal/config/env"
+	"github.com/dbunt1tled/go-api/internal/config/locale"
+	"github.com/dbunt1tled/go-api/internal/config/logger"
+	"github.com/dbunt1tled/go-api/internal/config/validate"
+	proxyproto "github.com/dbunt1tled/go-api/internal/grpc"
+	"github.com/dbunt1tled/go-api/internal/lib/profiler"
+	"github.com/dbunt1tled/go-api/internal/storage"
+	"github.com/dbunt1tled/go-api/internal/util/helper"
 	"net"
 	"os"
 	"os/signal"
@@ -61,7 +61,7 @@ func run(cfg *env.Config, log *logger.AppLogger) {
 		} else {
 			cert, err = tls.X509KeyPair(certData.([]byte), keyData.([]byte))
 			if err != nil {
-				log.Error("failed to create TLS certificate",err)
+				log.Error("failed to create TLS certificate", err)
 				return
 			}
 			cred = credentials.NewTLS(&tls.Config{Certificates: []tls.Certificate{cert}})

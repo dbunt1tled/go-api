@@ -2,10 +2,10 @@ package mailservice
 
 import (
 	"bytes"
-	"go_echo/app/user/model/user"
-	"go_echo/internal/config/env"
-	"go_echo/internal/config/mailer"
-	"go_echo/internal/util/helper"
+	"github.com/dbunt1tled/go-api/app/user/model/user"
+	"github.com/dbunt1tled/go-api/internal/config/env"
+	"github.com/dbunt1tled/go-api/internal/config/mailer"
+	"github.com/dbunt1tled/go-api/internal/util/helper"
 	"time"
 
 	"github.com/wneessen/go-mail"

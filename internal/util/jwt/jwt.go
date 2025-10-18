@@ -4,7 +4,7 @@ import (
 	"crypto/ecdsa"
 	"encoding/base64"
 	"errors"
-	"go_echo/internal/config/env"
+	"github.com/dbunt1tled/go-api/internal/config/env"
 
 	"github.com/golang-jwt/jwt/v5"
 )

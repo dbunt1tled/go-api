@@ -1,7 +1,7 @@
 package validate
 
 import (
-	"go_echo/internal/lib/rule"
+	"github.com/dbunt1tled/go-api/internal/lib/rule"
 	"sync"
 
 	"github.com/go-playground/validator/v10"

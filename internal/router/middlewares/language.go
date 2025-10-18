@@ -1,7 +1,7 @@
 package middlewares
 
 import (
-	"go_echo/internal/config/locale"
+	"github.com/dbunt1tled/go-api/internal/config/locale"
 
 	"github.com/labstack/echo/v4"
 	"github.com/nicksnyder/go-i18n/v2/i18n"

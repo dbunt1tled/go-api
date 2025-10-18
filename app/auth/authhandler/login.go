@@ -1,15 +1,15 @@
 package authhandler
 
 import (
-	"go_echo/app/auth/model/token"
-	"go_echo/app/auth/service/auth"
-	"go_echo/app/user/model/user"
-	"go_echo/app/user/service"
-	"go_echo/internal/config/app_error"
-	"go_echo/internal/config/validate"
-	"go_echo/internal/lib/jsonerror"
-	"go_echo/internal/util/hasher"
-	"go_echo/internal/util/helper"
+	"github.com/dbunt1tled/go-api/app/auth/model/token"
+	"github.com/dbunt1tled/go-api/app/auth/service/auth"
+	"github.com/dbunt1tled/go-api/app/user/model/user"
+	"github.com/dbunt1tled/go-api/app/user/service"
+	"github.com/dbunt1tled/go-api/internal/config/app_error"
+	"github.com/dbunt1tled/go-api/internal/config/validate"
+	"github.com/dbunt1tled/go-api/internal/lib/jsonerror"
+	"github.com/dbunt1tled/go-api/internal/util/hasher"
+	"github.com/dbunt1tled/go-api/internal/util/helper"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"

@@ -2,8 +2,8 @@ package interceptor
 
 import (
 	"context"
-	"go_echo/internal/config/env"
-	"go_echo/internal/config/logger"
+	"github.com/dbunt1tled/go-api/internal/config/env"
+	"github.com/dbunt1tled/go-api/internal/config/logger"
 	"log/slog"
 	"time"
 

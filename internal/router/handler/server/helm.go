@@ -1,7 +1,7 @@
 package server
 
 import (
-	"go_echo/internal/util/helper"
+	"github.com/dbunt1tled/go-api/internal/util/helper"
 	"net/http"
 
 	"github.com/labstack/echo/v4"

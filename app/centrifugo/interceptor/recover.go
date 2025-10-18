@@ -3,7 +3,7 @@ package interceptor
 import (
 	"context"
 	"fmt"
-	"go_echo/internal/config/logger"
+	"github.com/dbunt1tled/go-api/internal/config/logger"
 	"runtime"
 
 	"google.golang.org/grpc"
@@ -17,7 +17,7 @@ func RecoverInterceptor() grpc.UnaryServerInterceptor {
 				stack := make([]byte, 64<<10)
 				stack = stack[:runtime.Stack(stack, false)]
 				err = &PanicError{Method: info.FullMethod, Panic: r, Stack: stack}
-				log.ErrorContext(ctx, "RecoverInterceptor Panic",err)
+				log.ErrorContext(ctx, "RecoverInterceptor Panic", err)
 			}
 		}()
 

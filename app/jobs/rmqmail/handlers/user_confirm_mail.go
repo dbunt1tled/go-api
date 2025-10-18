@@ -3,11 +3,11 @@ package handlers
 import (
 	"context"
 	"fmt"
-	"go_echo/app/user/model/user"
-	"go_echo/app/user/service"
-	"go_echo/internal/lib/mailservice"
-	"go_echo/internal/rmq"
-	"go_echo/internal/util/helper"
+	"github.com/dbunt1tled/go-api/app/user/model/user"
+	"github.com/dbunt1tled/go-api/app/user/service"
+	"github.com/dbunt1tled/go-api/internal/lib/mailservice"
+	"github.com/dbunt1tled/go-api/internal/rmq"
+	"github.com/dbunt1tled/go-api/internal/util/helper"
 
 	"github.com/bytedance/sonic"
 )

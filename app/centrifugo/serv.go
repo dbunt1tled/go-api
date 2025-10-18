@@ -2,14 +2,14 @@ package centrifugo
 
 import (
 	"context"
-	"go_echo/app/centrifugo/param"
-	"go_echo/app/centrifugo/server"
-	"go_echo/app/user/model/user"
-	"go_echo/app/user/service"
-	"go_echo/internal/config/logger"
-	proxyproto "go_echo/internal/grpc"
-	"go_echo/internal/util/helper"
-	"go_echo/internal/util/jwt"
+	"github.com/dbunt1tled/go-api/app/centrifugo/param"
+	"github.com/dbunt1tled/go-api/app/centrifugo/server"
+	"github.com/dbunt1tled/go-api/app/user/model/user"
+	"github.com/dbunt1tled/go-api/app/user/service"
+	"github.com/dbunt1tled/go-api/internal/config/logger"
+	proxyproto "github.com/dbunt1tled/go-api/internal/grpc"
+	"github.com/dbunt1tled/go-api/internal/util/helper"
+	"github.com/dbunt1tled/go-api/internal/util/jwt"
 	"log/slog"
 	"strconv"
 

@@ -1,7 +1,7 @@
 package cntrfgclient
 
 import (
-	"go_echo/internal/config/env"
+	"github.com/dbunt1tled/go-api/internal/config/env"
 	"sync"
 
 	"github.com/centrifugal/gocent/v3"

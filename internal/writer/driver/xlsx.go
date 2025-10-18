@@ -1,7 +1,7 @@
 package driver
 
 import (
-	"go_echo/internal/writer/data"
+	"github.com/dbunt1tled/go-api/internal/writer/data"
 
 	"github.com/pkg/errors"
 	"github.com/xuri/excelize/v2"

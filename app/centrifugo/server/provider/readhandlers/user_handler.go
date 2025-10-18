@@ -2,8 +2,8 @@ package readhandlers
 
 import (
 	"context"
-	"go_echo/app/usernotification/model/usernotification"
-	"go_echo/app/usernotification/service"
+	"github.com/dbunt1tled/go-api/app/usernotification/model/usernotification"
+	"github.com/dbunt1tled/go-api/app/usernotification/service"
 
 	"github.com/bytedance/sonic"
 	"github.com/pkg/errors"

@@ -1,9 +1,9 @@
 package middlewares
 
 import (
-	"go_echo/internal/config/app_error"
-	"go_echo/internal/config/env"
-	"go_echo/internal/lib/jsonerror"
+	"github.com/dbunt1tled/go-api/internal/config/app_error"
+	"github.com/dbunt1tled/go-api/internal/config/env"
+	"github.com/dbunt1tled/go-api/internal/lib/jsonerror"
 	"net/http"
 	"strings"
 

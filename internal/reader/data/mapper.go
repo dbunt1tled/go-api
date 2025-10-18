@@ -2,7 +2,7 @@ package data
 
 import (
 	"fmt"
-	"go_echo/internal/util/helper"
+	"github.com/dbunt1tled/go-api/internal/util/helper"
 	"regexp"
 	"strconv"
 	"strings"

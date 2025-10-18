@@ -2,10 +2,10 @@ package centservice
 
 import (
 	"context"
-	"go_echo/app/usernotification/model/usernotification"
-	"go_echo/app/usernotification/service"
-	"go_echo/internal/config/cntrfgclient"
-	"go_echo/internal/util/helper"
+	"github.com/dbunt1tled/go-api/app/usernotification/model/usernotification"
+	"github.com/dbunt1tled/go-api/app/usernotification/service"
+	"github.com/dbunt1tled/go-api/internal/config/cntrfgclient"
+	"github.com/dbunt1tled/go-api/internal/util/helper"
 	"strconv"
 
 	"github.com/bytedance/sonic"
