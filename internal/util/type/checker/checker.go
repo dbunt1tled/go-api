@@ -1,8 +1,9 @@
 package checker
 
 import (
-	"github.com/dbunt1tled/go-api/internal/util/builder/page"
 	"reflect"
+
+	"github.com/dbunt1tled/go-api/internal/util/builder/page"
 )
 
 func IsVarType(value interface{}, targetType reflect.Type) bool {

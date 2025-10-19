@@ -4,13 +4,14 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"strings"
+	"time"
+
 	"github.com/dbunt1tled/go-api/app/usernotification/model/usernotification"
 	"github.com/dbunt1tled/go-api/internal/util/builder"
 	"github.com/dbunt1tled/go-api/internal/util/builder/page"
 	"github.com/dbunt1tled/go-api/internal/util/helper"
 	"github.com/dbunt1tled/go-api/internal/util/type/json"
-	"strings"
-	"time"
 
 	"github.com/pkg/errors"
 )

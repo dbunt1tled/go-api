@@ -2,6 +2,9 @@ package centrifugo
 
 import (
 	"context"
+	"log/slog"
+	"strconv"
+
 	"github.com/dbunt1tled/go-api/app/centrifugo/param"
 	"github.com/dbunt1tled/go-api/app/centrifugo/server"
 	"github.com/dbunt1tled/go-api/app/user/model/user"
@@ -10,8 +13,6 @@ import (
 	proxyproto "github.com/dbunt1tled/go-api/internal/grpc"
 	"github.com/dbunt1tled/go-api/internal/util/helper"
 	"github.com/dbunt1tled/go-api/internal/util/jwt"
-	"log/slog"
-	"strconv"
 
 	"github.com/bytedance/sonic"
 	"google.golang.org/grpc"

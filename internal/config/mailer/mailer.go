@@ -1,8 +1,9 @@
 package mailer
 
 import (
-	"github.com/dbunt1tled/go-api/internal/config/env"
 	"sync"
+
+	"github.com/dbunt1tled/go-api/internal/config/env"
 
 	"github.com/wneessen/go-mail"
 )

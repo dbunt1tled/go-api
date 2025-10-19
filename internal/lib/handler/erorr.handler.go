@@ -2,10 +2,11 @@ package handler
 
 import (
 	"errors"
+	"net/http"
+
 	"github.com/dbunt1tled/go-api/internal/config/logger"
 	"github.com/dbunt1tled/go-api/internal/lib/jsonerror"
 	"github.com/dbunt1tled/go-api/internal/util/helper"
-	"net/http"
 
 	"github.com/labstack/echo/v4"
 )

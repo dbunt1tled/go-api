@@ -3,14 +3,15 @@ package logger
 import (
 	"context"
 	"fmt"
-	"github.com/dbunt1tled/go-api/internal/config/env"
-	"github.com/dbunt1tled/go-api/internal/lib/logger"
-	"github.com/dbunt1tled/go-api/internal/lib/logger/handlers/pretty"
 	"io"
 	"log/slog"
 	"os"
 	"path/filepath"
 	"sync"
+
+	"github.com/dbunt1tled/go-api/internal/config/env"
+	"github.com/dbunt1tled/go-api/internal/lib/logger"
+	"github.com/dbunt1tled/go-api/internal/lib/logger/handlers/pretty"
 )
 
 // Environment constants

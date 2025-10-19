@@ -2,6 +2,12 @@ package main
 
 import (
 	"context"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
 	"github.com/dbunt1tled/go-api/internal/cache"
 	"github.com/dbunt1tled/go-api/internal/config/env"
 	"github.com/dbunt1tled/go-api/internal/config/locale"
@@ -14,11 +20,6 @@ import (
 	"github.com/dbunt1tled/go-api/internal/storage"
 	"github.com/dbunt1tled/go-api/internal/util/helper"
 	"github.com/dbunt1tled/go-api/internal/util/sanitizer"
-	"net/http"
-	"os"
-	"os/signal"
-	"syscall"
-	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/pkg/errors"

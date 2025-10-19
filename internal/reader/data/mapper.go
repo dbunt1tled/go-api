@@ -2,11 +2,12 @@ package data
 
 import (
 	"fmt"
-	"github.com/dbunt1tled/go-api/internal/util/helper"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/dbunt1tled/go-api/internal/util/helper"
 )
 
 var specialRegex = regexp.MustCompile(`_#([a-zA-Z\s\d_]+)#_`)

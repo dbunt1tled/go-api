@@ -1,6 +1,8 @@
 package authhandler
 
 import (
+	"net/http"
+
 	"github.com/dbunt1tled/go-api/app/auth/model/token"
 	"github.com/dbunt1tled/go-api/app/auth/service/auth"
 	"github.com/dbunt1tled/go-api/app/user/model/user"
@@ -10,7 +12,6 @@ import (
 	"github.com/dbunt1tled/go-api/internal/lib/jsonerror"
 	"github.com/dbunt1tled/go-api/internal/util/hasher"
 	"github.com/dbunt1tled/go-api/internal/util/helper"
-	"net/http"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"

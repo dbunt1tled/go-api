@@ -1,9 +1,10 @@
 package userhandler
 
 import (
+	"net/http"
+
 	"github.com/dbunt1tled/go-api/app/user/model/user"
 	"github.com/dbunt1tled/go-api/internal/util/helper"
-	"net/http"
 
 	"github.com/labstack/echo/v4"
 )

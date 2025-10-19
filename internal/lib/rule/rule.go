@@ -3,11 +3,12 @@ package rule
 import (
 	sql2 "database/sql"
 	"fmt"
-	"github.com/dbunt1tled/go-api/internal/util/builder"
-	"github.com/dbunt1tled/go-api/internal/util/helper"
 	"regexp"
 	"strings"
 	"unicode"
+
+	"github.com/dbunt1tled/go-api/internal/util/builder"
+	"github.com/dbunt1tled/go-api/internal/util/helper"
 
 	"github.com/go-playground/validator/v10"
 )

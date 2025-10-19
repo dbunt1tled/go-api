@@ -4,14 +4,15 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"strings"
+	"time"
+
 	"github.com/dbunt1tled/go-api/app/user/model/user"
 	"github.com/dbunt1tled/go-api/internal/util/builder"
 	"github.com/dbunt1tled/go-api/internal/util/builder/page"
 	"github.com/dbunt1tled/go-api/internal/util/hasher"
 	"github.com/dbunt1tled/go-api/internal/util/helper"
 	"github.com/dbunt1tled/go-api/internal/util/type/roles"
-	"strings"
-	"time"
 
 	"github.com/pkg/errors"
 )

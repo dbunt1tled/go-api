@@ -2,16 +2,17 @@ package rmq
 
 import (
 	"fmt"
-	"github.com/dbunt1tled/go-api/internal/config/env"
-	"github.com/dbunt1tled/go-api/internal/config/logger"
-	"github.com/dbunt1tled/go-api/internal/util/hasher"
-	"github.com/dbunt1tled/go-api/internal/util/helper"
 	"os"
 	"os/signal"
 	"strings"
 	"sync"
 	"syscall"
 	"time"
+
+	"github.com/dbunt1tled/go-api/internal/config/env"
+	"github.com/dbunt1tled/go-api/internal/config/logger"
+	"github.com/dbunt1tled/go-api/internal/util/hasher"
+	"github.com/dbunt1tled/go-api/internal/util/helper"
 
 	"github.com/wagslane/go-rabbitmq"
 )

@@ -1,6 +1,9 @@
 package authhandler
 
 import (
+	"net/http"
+	"time"
+
 	"github.com/dbunt1tled/go-api/app/auth/service/auth"
 	"github.com/dbunt1tled/go-api/app/user/model/user"
 	"github.com/dbunt1tled/go-api/app/user/service"
@@ -9,8 +12,6 @@ import (
 	"github.com/dbunt1tled/go-api/internal/lib/jsonerror"
 	"github.com/dbunt1tled/go-api/internal/util/helper"
 	"github.com/dbunt1tled/go-api/internal/util/jwt"
-	"net/http"
-	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"

@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/dbunt1tled/go-api/app/jobs/rmqmail"
 	"github.com/dbunt1tled/go-api/internal/config/env"
 	"github.com/dbunt1tled/go-api/internal/config/locale"
@@ -12,7 +14,6 @@ import (
 	"github.com/dbunt1tled/go-api/internal/lib/profiler"
 	"github.com/dbunt1tled/go-api/internal/rmq"
 	"github.com/dbunt1tled/go-api/internal/storage"
-	"time"
 
 	"github.com/pkg/errors"
 	"github.com/wagslane/go-rabbitmq"

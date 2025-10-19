@@ -4,9 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/dbunt1tled/go-api/internal/config/env"
 	"sync"
 	"time"
+
+	"github.com/dbunt1tled/go-api/internal/config/env"
 
 	"github.com/redis/go-redis/v9"
 )

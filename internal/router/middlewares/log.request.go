@@ -1,10 +1,11 @@
 package middlewares
 
 import (
-	"github.com/dbunt1tled/go-api/internal/config/env"
-	"github.com/dbunt1tled/go-api/internal/util/helper"
 	"slices"
 	"strings"
+
+	"github.com/dbunt1tled/go-api/internal/config/env"
+	"github.com/dbunt1tled/go-api/internal/util/helper"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"

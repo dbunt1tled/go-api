@@ -3,11 +3,12 @@ package jsonerror
 import (
 	"errors"
 	"fmt"
+	"net/http"
+	"runtime"
+
 	"github.com/dbunt1tled/go-api/internal/config/app_error"
 	"github.com/dbunt1tled/go-api/internal/config/env"
 	"github.com/dbunt1tled/go-api/internal/util/helper"
-	"net/http"
-	"runtime"
 
 	"github.com/labstack/echo/v4"
 )

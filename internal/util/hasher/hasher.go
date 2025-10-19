@@ -5,9 +5,10 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"github.com/dbunt1tled/go-api/internal/util/rand"
 	"strconv"
 	"strings"
+
+	"github.com/dbunt1tled/go-api/internal/util/rand"
 
 	"github.com/cespare/xxhash/v2"
 	"github.com/google/uuid"

@@ -2,9 +2,10 @@ package writer
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/dbunt1tled/go-api/internal/writer/data"
 	"github.com/dbunt1tled/go-api/internal/writer/driver"
-	"strings"
 )
 
 type FileWriter struct {

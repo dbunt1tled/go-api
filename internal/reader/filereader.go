@@ -3,9 +3,10 @@ package reader
 import (
 	"errors"
 	"fmt"
+	"strings"
+
 	"github.com/dbunt1tled/go-api/internal/reader/data"
 	"github.com/dbunt1tled/go-api/internal/reader/driver"
-	"strings"
 
 	"github.com/bytedance/sonic"
 )

@@ -1,11 +1,12 @@
 package middlewares
 
 import (
+	"net/http"
+	"strings"
+
 	"github.com/dbunt1tled/go-api/internal/config/app_error"
 	"github.com/dbunt1tled/go-api/internal/config/env"
 	"github.com/dbunt1tled/go-api/internal/lib/jsonerror"
-	"net/http"
-	"strings"
 
 	"github.com/labstack/echo/v4"
 	"github.com/pkg/errors"

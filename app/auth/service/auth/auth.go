@@ -1,11 +1,12 @@
 package auth
 
 import (
+	"time"
+
 	"github.com/dbunt1tled/go-api/app/auth/model/token"
 	"github.com/dbunt1tled/go-api/app/user/model/user"
 	"github.com/dbunt1tled/go-api/internal/config/env"
 	"github.com/dbunt1tled/go-api/internal/util/jwt"
-	"time"
 )
 
 const (

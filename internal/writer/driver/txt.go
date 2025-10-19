@@ -2,9 +2,10 @@ package driver
 
 import (
 	"bufio"
+	"os"
+
 	"github.com/dbunt1tled/go-api/internal/util/helper"
 	"github.com/dbunt1tled/go-api/internal/writer/data"
-	"os"
 
 	"github.com/pkg/errors"
 )

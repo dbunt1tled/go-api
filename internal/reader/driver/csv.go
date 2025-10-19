@@ -4,10 +4,11 @@ import (
 	"bufio"
 	"encoding/csv"
 	"fmt"
-	"github.com/dbunt1tled/go-api/internal/reader/data"
 	"io"
 	"os"
 	"strings"
+
+	"github.com/dbunt1tled/go-api/internal/reader/data"
 
 	"github.com/pkg/errors"
 )

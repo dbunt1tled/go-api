@@ -3,8 +3,9 @@ package logger
 import (
 	"errors"
 	"fmt"
-	"github.com/dbunt1tled/go-api/internal/config/app_error"
 	"log/slog"
+
+	"github.com/dbunt1tled/go-api/internal/config/app_error"
 )
 
 func Error(err error) []slog.Attr {

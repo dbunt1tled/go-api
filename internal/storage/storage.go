@@ -2,9 +2,10 @@ package storage
 
 import (
 	"database/sql"
-	"github.com/dbunt1tled/go-api/internal/config/env"
 	"sync"
 	"time"
+
+	"github.com/dbunt1tled/go-api/internal/config/env"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/pkg/errors"

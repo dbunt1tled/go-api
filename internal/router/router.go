@@ -1,6 +1,10 @@
 package router
 
 import (
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/dbunt1tled/go-api/app/auth/authhandler"
 	"github.com/dbunt1tled/go-api/app/general/generalhandler"
 	"github.com/dbunt1tled/go-api/app/user/userhandler"
@@ -9,9 +13,6 @@ import (
 	apiServer "github.com/dbunt1tled/go-api/internal/router/handler/server"
 	"github.com/dbunt1tled/go-api/internal/router/middlewares"
 	"github.com/dbunt1tled/go-api/internal/util/hasher"
-	"strconv"
-	"strings"
-	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"

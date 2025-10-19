@@ -3,11 +3,12 @@ package pretty
 import (
 	"context"
 	"fmt"
-	"github.com/dbunt1tled/go-api/internal/util/type/checker"
 	"io"
 	stdLog "log"
 	"log/slog"
 	"reflect"
+
+	"github.com/dbunt1tled/go-api/internal/util/type/checker"
 
 	"github.com/bytedance/sonic"
 	"github.com/fatih/color"

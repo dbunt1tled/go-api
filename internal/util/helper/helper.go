@@ -3,11 +3,6 @@ package helper
 import (
 	"bytes"
 	"fmt"
-	"github.com/dbunt1tled/go-api/internal/config/env"
-	"github.com/dbunt1tled/go-api/internal/config/logger"
-	"github.com/dbunt1tled/go-api/internal/util/builder/page"
-	"github.com/dbunt1tled/go-api/internal/util/type/checker"
-	jf "github.com/dbunt1tled/go-api/internal/util/type/json"
 	"html/template"
 	"reflect"
 	"regexp"
@@ -15,6 +10,12 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/dbunt1tled/go-api/internal/config/env"
+	"github.com/dbunt1tled/go-api/internal/config/logger"
+	"github.com/dbunt1tled/go-api/internal/util/builder/page"
+	"github.com/dbunt1tled/go-api/internal/util/type/checker"
+	jf "github.com/dbunt1tled/go-api/internal/util/type/json"
 
 	"github.com/bytedance/sonic"
 	"github.com/go-playground/validator/v10"

@@ -2,10 +2,11 @@ package interceptor
 
 import (
 	"context"
-	"github.com/dbunt1tled/go-api/internal/config/env"
-	"github.com/dbunt1tled/go-api/internal/config/logger"
 	"log/slog"
 	"time"
+
+	"github.com/dbunt1tled/go-api/internal/config/env"
+	"github.com/dbunt1tled/go-api/internal/config/logger"
 
 	"google.golang.org/grpc"
 )

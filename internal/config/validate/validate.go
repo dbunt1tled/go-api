@@ -1,8 +1,9 @@
 package validate
 
 import (
-	"github.com/dbunt1tled/go-api/internal/lib/rule"
 	"sync"
+
+	"github.com/dbunt1tled/go-api/internal/lib/rule"
 
 	"github.com/go-playground/validator/v10"
 )

@@ -2,8 +2,9 @@ package driver
 
 import (
 	"fmt"
-	"github.com/dbunt1tled/go-api/internal/reader/data"
 	"strings"
+
+	"github.com/dbunt1tled/go-api/internal/reader/data"
 
 	"github.com/pkg/errors"
 	"github.com/thedatashed/xlsxreader"

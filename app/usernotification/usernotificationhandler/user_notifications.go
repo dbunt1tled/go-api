@@ -1,6 +1,8 @@
 package usernotificationhandler
 
 import (
+	"net/http"
+
 	"github.com/dbunt1tled/go-api/app/user/model/user"
 	"github.com/dbunt1tled/go-api/app/usernotification/model/usernotification"
 	"github.com/dbunt1tled/go-api/app/usernotification/service"
@@ -11,7 +13,6 @@ import (
 	"github.com/dbunt1tled/go-api/internal/util/builder"
 	"github.com/dbunt1tled/go-api/internal/util/builder/page"
 	"github.com/dbunt1tled/go-api/internal/util/helper"
-	"net/http"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"

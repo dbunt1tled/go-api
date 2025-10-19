@@ -1,10 +1,11 @@
 package user
 
 import (
+	"strings"
+
 	"github.com/dbunt1tled/go-api/internal/util/type/dbtype"
 	"github.com/dbunt1tled/go-api/internal/util/type/roles"
 	"github.com/dbunt1tled/go-api/internal/util/type/timestamp"
-	"strings"
 )
 
 type User struct {

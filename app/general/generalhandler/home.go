@@ -2,10 +2,11 @@ package generalhandler
 
 import (
 	"bytes"
+	"net/http"
+
 	"github.com/dbunt1tled/go-api/internal/config/app_error"
 	"github.com/dbunt1tled/go-api/internal/lib/jsonerror"
 	"github.com/dbunt1tled/go-api/internal/util/helper"
-	"net/http"
 
 	"github.com/labstack/echo/v4"
 	"github.com/pkg/errors"

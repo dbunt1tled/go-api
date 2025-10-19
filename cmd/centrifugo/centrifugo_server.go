@@ -2,6 +2,12 @@ package main
 
 import (
 	"crypto/tls"
+	"net"
+	"os"
+	"os/signal"
+	"reflect"
+	"syscall"
+
 	"github.com/dbunt1tled/go-api/app/centrifugo"
 	"github.com/dbunt1tled/go-api/app/centrifugo/interceptor"
 	"github.com/dbunt1tled/go-api/internal/config/env"
@@ -12,11 +18,6 @@ import (
 	"github.com/dbunt1tled/go-api/internal/lib/profiler"
 	"github.com/dbunt1tled/go-api/internal/storage"
 	"github.com/dbunt1tled/go-api/internal/util/helper"
-	"net"
-	"os"
-	"os/signal"
-	"reflect"
-	"syscall"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"

@@ -3,8 +3,9 @@ package interceptor
 import (
 	"context"
 	"fmt"
-	"github.com/dbunt1tled/go-api/internal/config/logger"
 	"runtime"
+
+	"github.com/dbunt1tled/go-api/internal/config/logger"
 
 	"google.golang.org/grpc"
 )
