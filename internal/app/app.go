@@ -64,13 +64,17 @@ func NewApp(cfg *config.ServiceConfig) *App {
 	}))
 
 	if config.Get().Static.URL != "" && config.Get().Static.Directory != "" {
-		engine.Static("/"+config.Get().Static.URL, config.Get().Static.Directory)
+		engine.Static(config.Get().Static.URL, config.Get().Static.Directory)
 	}
 
 	return &App{
 		cfg:    cfg,
 		engine: engine,
 	}
+}
+
+func (a *App) Engine() *echo.Echo {
+	return a.engine
 }
 
 func (a *App) Run(ctx context.Context) {

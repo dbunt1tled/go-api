@@ -28,5 +28,6 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	application := app.NewApp(cfg)
+	app.Router(application)
 	application.Run(ctx)
 }

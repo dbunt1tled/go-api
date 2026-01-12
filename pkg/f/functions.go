@@ -62,6 +62,17 @@ func IsNil(v interface{}) bool {
 	}
 }
 
+func CallIfExists(obj any, method string) {
+	v := reflect.ValueOf(obj)
+
+	m := v.MethodByName(method)
+	if !m.IsValid() {
+		return
+	}
+
+	m.Call(nil)
+}
+
 func StructToMap(obj interface{}) (map[string]interface{}, error) {
 	newMap := make(map[string]interface{})
 	data, err := sonic.ConfigFastest.Marshal(obj)

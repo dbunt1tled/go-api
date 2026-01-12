@@ -20,10 +20,9 @@ func APIErrorHandler(c *echo.Context, err error) {
 	var (
 		er    error
 		errNo *e.ErrNo
-		he    *echo.HTTPError
 	)
-	if errors.As(err, &he) {
-		status = he.Code
+	if h, ok := err.(echo.HTTPStatusCoder); ok {
+		status = h.StatusCode()
 	}
 
 	if errors.As(err, &errNo) {
@@ -37,7 +36,9 @@ func APIErrorHandler(c *echo.Context, err error) {
 		er = c.JSON(status, dto.Document{
 			Errors: vErr,
 		})
-		log.Logger().ErrorWithStack(er.Error(), er)
+		if er != nil {
+			log.Logger().ErrorWithStack(er.Error(), er)
+		}
 
 		return
 	}
@@ -47,7 +48,9 @@ func APIErrorHandler(c *echo.Context, err error) {
 		er = c.JSON(status, dto.Document{
 			Errors: []e.ErrNo{{Status: status, Msg: message, Code: code, Stack: stack}},
 		})
-		log.Logger().ErrorWithStack(er.Error(), er)
+		if er != nil {
+			log.Logger().ErrorWithStack(er.Error(), er)
+		}
 
 		return
 	}
@@ -55,5 +58,7 @@ func APIErrorHandler(c *echo.Context, err error) {
 	er = c.JSON(status, dto.Document{
 		Errors: []e.ErrNo{{Status: status, Msg: message, Code: code}},
 	})
-	log.Logger().ErrorWithStack(er.Error(), er)
+	if er != nil {
+		log.Logger().ErrorWithStack(er.Error(), er)
+	}
 }
