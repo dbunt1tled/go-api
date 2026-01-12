@@ -6,36 +6,21 @@ build_api:
 	@go build -o bin cmd/api/api.go
 build_opt_api:
 	@go build -ldflags "-s -w"  -o bin cmd/api/api.go
-run_mail:
-	@go run cmd/consumer/mail.go
-build_mail:
-	@go build -o bin cmd/consumer/mail.go
-build_opt_mail:
-	@go build -ldflags "-s -w"  -o bin cmd/consumer/mail.go
-run_centrifugo:
-	@go run cmd/centrifugo/centrifugo_server.go
-build_centrifugo:
-	@go build -o bin/api cmd/centrifugo/centrifugo_server.go
-build_opt_centrifugo:
-	@go build -ldflags "-s -w"  -o bin cmd/centrifugo/centrifugo_server.go
-gen_proto:
-	@protoc --proto_path=proto proto/*.proto  --go-grpc_out=./internal/grpc --go_out=./internal/grpc
-gen_clean:
-	@rm -rf ./internal/grpc/*.pb.go
 install_govulncheck:
 	@go install golang.org/x/vuln/cmd/govulncheck@latest
 check_vulnerabilities:
 	@govulncheck ./...
-#  MIGRATION_NAME=create_table_users make migration_sql
+
+# MIGRATION_NAME=create_table_user make migration_sql
 migration_sql:
-	@GOOSE_DRIVER="${GOOSE_DRIVER}" GOOSE_DBSTRING="${GOOSE_DBSTRING}" goose -dir ./internal/database/migrations create $(MIGRATION_NAME) sql
+	@GOOSE_DRIVER="${GOOSE_DRIVER}" GOOSE_DBSTRING="${GOOSE_DBSTRING}" GOOSE_MIGRATION_DIR="${GOOSE_MIGRATION_DIR}" goose create $(MIGRATION_NAME) sql
 migration_go:
-	@GOOSE_DRIVER="${GOOSE_DRIVER}" GOOSE_DBSTRING="${GOOSE_DBSTRING}" goose -dir ./internal/database/migrations create $(MIGRATION_NAME) go
+	@GOOSE_DRIVER="${GOOSE_DRIVER}" GOOSE_DBSTRING="${GOOSE_DBSTRING}" GOOSE_MIGRATION_DIR="${GOOSE_MIGRATION_DIR}" goose create $(MIGRATION_NAME) go
 migrate_up:
-	@GOOSE_DRIVER="${GOOSE_DRIVER}" GOOSE_DBSTRING="${GOOSE_DBSTRING}" goose -dir ./internal/database/migrations up
+	@GOOSE_DRIVER="${GOOSE_DRIVER}" GOOSE_DBSTRING="${GOOSE_DBSTRING}" GOOSE_MIGRATION_DIR="${GOOSE_MIGRATION_DIR}" goose  up
 migrate_down:
-	@GOOSE_DRIVER="${GOOSE_DRIVER}" GOOSE_DBSTRING="${GOOSE_DBSTRING}" goose -dir ./internal/database/migrations down
+	@GOOSE_DRIVER="${GOOSE_DRIVER}" GOOSE_DBSTRING="${GOOSE_DBSTRING}" GOOSE_MIGRATION_DIR="${GOOSE_MIGRATION_DIR}" goose down
 migrate_status:
-	@GOOSE_DRIVER="${GOOSE_DRIVER}" GOOSE_DBSTRING="${GOOSE_DBSTRING}" goose -dir ./internal/database/migrations status
+	@GOOSE_DRIVER="${GOOSE_DRIVER}" GOOSE_DBSTRING="${GOOSE_DBSTRING}" GOOSE_MIGRATION_DIR="${GOOSE_MIGRATION_DIR}" goose status
 
 .PHONY: run_api build_api build_opt_api gen_proto gen_clean migration_sql migration_go migrate_up migrate_down migrate_status

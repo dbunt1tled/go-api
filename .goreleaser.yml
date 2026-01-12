@@ -1,9 +1,9 @@
 version: 2
 
 builds:
-  - id: go_api
+  - id: fib_api
     main: ./cmd/api/api.go
-    binary: go_api
+    binary: fib_api
     env:
       - GOGC=150
     goos:
@@ -22,7 +22,7 @@ builds:
       - -tags=!netpoll
 
 archives:
-  - id: go_api
+  - id: fib_api
     name_template: >-
       {{- .ProjectName }}_
       {{- title .Os }}_
@@ -55,7 +55,7 @@ changelog:
 release:
   github:
     owner: 'dbunt1tled'
-    name: 'go-api'
+    name: 'fiber-go-api'
   draft: false
   prerelease: auto
 
