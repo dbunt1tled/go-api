@@ -2,6 +2,8 @@ package postgres
 
 import (
 	"database/sql"
+	"log"
+	"runtime"
 	"time"
 
 	"github.com/uptrace/bun"
@@ -15,8 +17,6 @@ type Postgres struct {
 
 const (
 	timeout         = 5 * time.Second
-	maxOpenConns    = 10
-	maxIdleConns    = 10
 	connMaxLifetime = time.Hour
 )
 
@@ -28,9 +28,15 @@ func New(dsn string) *Postgres {
 		pgdriver.WithReadTimeout(timeout),
 		pgdriver.WithWriteTimeout(timeout),
 	))
+	maxOpenConns := 4 * runtime.GOMAXPROCS(0) //nolint:mnd // prod
 	sqldb.SetMaxOpenConns(maxOpenConns)
-	sqldb.SetMaxIdleConns(maxIdleConns)
-	sqldb.SetConnMaxLifetime(connMaxLifetime)
+	sqldb.SetMaxIdleConns(maxOpenConns)
+	sqldb.SetConnMaxLifetime(timeout)         // Connection lifetime
+	sqldb.SetConnMaxIdleTime(connMaxLifetime) // Idle connection timeout
+
+	if err := sqldb.Ping(); err != nil {
+		log.Fatal("Failed to connect to database:", err)
+	}
 	return &Postgres{db: bun.NewDB(sqldb, pgdialect.New())}
 }
 

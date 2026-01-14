@@ -45,16 +45,16 @@ type PaginationInfo interface {
 }
 
 type Paginator[T any] struct {
-	Items      []T   `json:"items"`
-	Total      int64 `json:"total"`
-	Page       int   `json:"page"`
-	PerPage    int   `json:"perPage"`
-	TotalPages int   `json:"totalPages"`
-	HasNext    bool  `json:"next"`
-	HasPrev    bool  `json:"prev"`
+	Items      []*T `json:"items"`
+	Total      int  `json:"total"`
+	Page       int  `json:"page"`
+	PerPage    int  `json:"perPage"`
+	TotalPages int  `json:"totalPages"`
+	HasNext    bool `json:"next"`
+	HasPrev    bool `json:"prev"`
 }
 
-func (p *Paginator[T]) GetTotal() int64 {
+func (p *Paginator[T]) GetTotal() int {
 	return p.Total
 }
 
