@@ -30,9 +30,25 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	if err := migrator.Lock(ctx); err != nil {
+		panic(err)
+	}
+	defer func(migrator *migrate.Migrator, ctx context.Context) {
+		err := migrator.Unlock(ctx)
+		if err != nil {
+			panic(err)
+		}
+	}(migrator, ctx)
+
 	group, err = migrator.Migrate(ctx)
 	if err != nil {
 		panic(err)
 	}
+
+	if group == nil {
+		log.Logger().Error("No migration apply.", nil)
+	}
+
 	log.Logger().Infof("Success migration %v", group)
 }
