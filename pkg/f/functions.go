@@ -120,3 +120,10 @@ func MultiRunFunc(msg string, log *log.AppLogger, ops ...func() error) {
 		}
 	}
 }
+
+func Must[T any](t T, err error) T {
+	if err != nil {
+		panic(err)
+	}
+	return t
+}

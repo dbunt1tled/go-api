@@ -36,7 +36,7 @@ type Filter struct {
 }
 
 type PaginationInfo interface {
-	GetTotal() int64
+	GetTotal() int
 	GetPage() int
 	GetPerPage() int
 	GetTotalPages() int
@@ -45,7 +45,7 @@ type PaginationInfo interface {
 }
 
 type Paginator[T any] struct {
-	Items      []*T `json:"items"`
+	Items      []T  `json:"items"`
 	Total      int  `json:"total"`
 	Page       int  `json:"page"`
 	PerPage    int  `json:"perPage"`

@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/dbunt1tled/go-api/internal/config"
+	"github.com/dbunt1tled/go-api/internal/modules/user"
 	"github.com/dbunt1tled/go-api/pkg/f"
 	"github.com/dbunt1tled/go-api/pkg/hasher"
 	h "github.com/dbunt1tled/go-api/pkg/http"
@@ -23,8 +24,9 @@ import (
 )
 
 type App struct {
-	cfg    *config.ServiceConfig
-	engine *echo.Echo
+	cfg            *config.ServiceConfig
+	engine         *echo.Echo
+	UserController *user.Controller
 }
 
 func NewApp(cfg *config.ServiceConfig) *App {
@@ -67,9 +69,17 @@ func NewApp(cfg *config.ServiceConfig) *App {
 		engine.Static(config.Get().Static.URL, config.Get().Static.Directory)
 	}
 
+	userService := user.NewUserService(cfg.DB.DB())
+	// hashService := f.Must(hasher.NewHasher(
+	// 	config.Get().Server.JWT.Algorithm,
+	// 	config.Get().Server.JWT.PublicKey,
+	// 	config.Get().Server.JWT.PrivateKey,
+	// ))
+
 	return &App{
-		cfg:    cfg,
-		engine: engine,
+		cfg:            cfg,
+		engine:         engine,
+		UserController: user.NewUserController(userService),
 	}
 }
 

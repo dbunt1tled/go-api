@@ -1,11 +1,17 @@
 package user
 
 type Status int
+type Role string
 
 const (
 	Pending Status = 0
 	Active  Status = 1
 	Blocked Status = 2
+)
+
+const (
+	Admin  Role = "admin"
+	Person Role = "person"
 )
 
 func (s Status) String() string {

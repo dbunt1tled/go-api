@@ -16,43 +16,45 @@ func NewRepository[T Model](db *bun.DB) *Repository[T] {
 	return &Repository[T]{db: db}
 }
 
-func (r *Repository[T]) ById(ctx context.Context, id any) (*T, error) {
+func (r *Repository[T]) ByID(ctx context.Context, id any) (T, error) {
 	var model T
-	err := r.db.NewSelect().Model(&model).Where("id = ?", id).Scan(ctx)
+	err := r.db.NewSelect().Model(model).Where("id = ?", id).Scan(ctx)
 
-	return &model, err
+	return model, err
 }
 
-func (r *Repository[T]) Create(ctx context.Context, model *T) (*T, error) {
+func (r *Repository[T]) Create(ctx context.Context, model T) (T, error) {
+	var zero T
 	_, err := r.db.NewInsert().Model(model).Returning("*").Exec(ctx)
 
 	if err != nil {
-		return nil, err
+		return zero, err
 	}
 
 	return model, nil
 }
 
-func (r *Repository[T]) Update(ctx context.Context, model *T) (*T, error) {
+func (r *Repository[T]) Update(ctx context.Context, model T) (T, error) {
+	var zero T
 	_, err := r.db.NewUpdate().Model(model).WherePK().Returning("*").Exec(ctx)
 
 	if err != nil {
-		return nil, err
+		return zero, err
 	}
 
 	return model, nil
 }
 
-func (r *Repository[T]) BulkCreate(ctx context.Context, models []*T) error {
+func (r *Repository[T]) BulkCreate(ctx context.Context, models []T) error {
 	if len(models) == 0 {
 		return nil
 	}
 
-	_, err := r.db.NewInsert().Model(&models).Exec(ctx)
+	_, err := r.db.NewInsert().Model(models).Exec(ctx)
 	return err
 }
 
-func (r *Repository[T]) One(ctx context.Context, opts ...QueryOption) (*T, error) {
+func (r *Repository[T]) One(ctx context.Context, opts ...QueryOption) (T, error) {
 	var model T
 
 	cfg := &queryConfig{}
@@ -60,21 +62,21 @@ func (r *Repository[T]) One(ctx context.Context, opts ...QueryOption) (*T, error
 		opt(cfg)
 	}
 
-	q := r.db.NewSelect().Model(&model)
+	q := r.db.NewSelect().Model(model)
 	q = applyFilter(q, r.buildFilter(cfg))
 
 	err := q.Limit(1).Scan(ctx)
 
-	return &model, err
+	return model, err
 }
 
-func (r *Repository[T]) List(ctx context.Context, opts ...QueryOption) ([]*T, error) {
-	var items []*T
+func (r *Repository[T]) List(ctx context.Context, opts ...QueryOption) ([]T, error) {
+	var items []T
 	cfg := &queryConfig{}
 	for _, opt := range opts {
 		opt(cfg)
 	}
-	q := r.db.NewSelect().Model(&items)
+	q := r.db.NewSelect().Model(items)
 	q = applyFilter(q, r.buildFilter(cfg))
 	if err := q.Scan(ctx); err != nil {
 		return nil, err
@@ -91,7 +93,7 @@ func (r *Repository[T]) Paginate(
 	page, perPage = NormalizePagination(page, perPage)
 
 	var (
-		items      []*T
+		items      []T
 		totalCount int
 		totalPages int
 	)
@@ -106,7 +108,7 @@ func (r *Repository[T]) Paginate(
 		cfg.limit = perPage
 		cfg.offset = (page - 1) * perPage
 
-		q := r.db.NewSelect().Model(&items)
+		q := r.db.NewSelect().Model(items)
 		q = applyFilter(q, r.buildFilter(cfg))
 		return q.Scan(cx)
 	})
@@ -121,7 +123,7 @@ func (r *Repository[T]) Paginate(
 		cfg.offset = 0
 		cfg.orderBy = make([]Sort, 0)
 
-		q := r.db.NewSelect().Model(&items)
+		q := r.db.NewSelect().Model(items)
 		q = applyFilter(q, r.buildFilter(cfg))
 		totalCount, err = q.Count(cx)
 

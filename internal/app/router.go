@@ -14,7 +14,7 @@ func Router(application *App) {
 func ApiRoutes(application *App) {
 	app := application.Engine()
 	api := app.Group("api")
-	apiRoutes(api)
+	apiRoutes(api, application)
 }
 func WebRoutes(application *App) {
 	app := application.Engine()
@@ -27,8 +27,11 @@ func WebRoutes(application *App) {
 	})
 }
 
-func apiRoutes(api *echo.Group) {
-	api.GET("", func(c *echo.Context) error {
-		return c.String(http.StatusOK, "Hello, World!222")
-	})
+func apiRoutes(api *echo.Group, app *App) {
+	user := api.Group("users")
+	usersRoutes(user, app)
+}
+
+func usersRoutes(user *echo.Group, app *App) {
+	user.GET("", app.UserController.List)
 }
