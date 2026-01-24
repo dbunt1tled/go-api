@@ -11,7 +11,7 @@ const (
 
 const (
 	Admin  Role = "admin"
-	Person Role = "person"
+	Client Role = "client"
 )
 
 func (s Status) String() string {

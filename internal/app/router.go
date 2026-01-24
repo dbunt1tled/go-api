@@ -28,10 +28,17 @@ func WebRoutes(application *App) {
 }
 
 func apiRoutes(api *echo.Group, app *App) {
-	user := api.Group("users")
-	usersRoutes(user, app)
+	usersRoutes(api, app)
+	authRoutes(api, app)
 }
 
-func usersRoutes(user *echo.Group, app *App) {
-	user.GET("", app.UserController.List)
+func usersRoutes(api *echo.Group, app *App) {
+	user := api.Group("/users")
+	user.GET("/", app.UserController.List)
+}
+
+func authRoutes(api *echo.Group, app *App) {
+	auth := api.Group("/auth")
+	auth.POST("/register", app.AuthController.Register)
+	auth.POST("/login", app.AuthController.Login)
 }

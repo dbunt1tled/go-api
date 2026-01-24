@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/dbunt1tled/go-api/internal/config"
+	"github.com/dbunt1tled/go-api/internal/modules/auth"
 	"github.com/dbunt1tled/go-api/internal/modules/user"
 	"github.com/dbunt1tled/go-api/pkg/f"
 	"github.com/dbunt1tled/go-api/pkg/hasher"
@@ -26,12 +27,13 @@ import (
 type App struct {
 	cfg            *config.ServiceConfig
 	engine         *echo.Echo
+	AuthController *auth.Controller
 	UserController *user.Controller
 }
 
 func NewApp(cfg *config.ServiceConfig) *App {
 
-	hashService, err := hasher.NewHasher(
+	hasher, err := hasher.NewHasher(
 		config.Get().Server.JWT.Algorithm,
 		config.Get().Server.JWT.PublicKey,
 		config.Get().Server.JWT.PrivateKey,
@@ -45,7 +47,7 @@ func NewApp(cfg *config.ServiceConfig) *App {
 	engine.Use(middleware.RequestIDWithConfig(middleware.RequestIDConfig{
 		Generator: func() string {
 			var u string
-			ub, e := hashService.UUIDVv7()
+			ub, e := hasher.UUIDVv7()
 			if e != nil {
 				u = strconv.FormatInt(time.Now().UnixMicro(), 10)
 			} else {
@@ -70,15 +72,11 @@ func NewApp(cfg *config.ServiceConfig) *App {
 	}
 
 	userService := user.NewUserService(cfg.DB.DB())
-	// hashService := f.Must(hasher.NewHasher(
-	// 	config.Get().Server.JWT.Algorithm,
-	// 	config.Get().Server.JWT.PublicKey,
-	// 	config.Get().Server.JWT.PrivateKey,
-	// ))
 
 	return &App{
 		cfg:            cfg,
 		engine:         engine,
+		AuthController: auth.NewAuthController(auth.NewAuthService(hasher), userService),
 		UserController: user.NewUserController(userService),
 	}
 }
