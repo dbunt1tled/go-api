@@ -27,8 +27,8 @@ func GetTemplate(templ string) (*template.Template, error) {
 	return template.New(templ).ParseFiles([]string{
 		basePath + "base/header.gohtml",
 		basePath + "base/footer.gohtml",
-		basePath + "base/layout/l_header.gohtml",
-		basePath + "base/layout/l_footer.gohtml",
+		basePath + "base/l_header.gohtml",
+		basePath + "base/l_footer.gohtml",
 		basePath + templ,
 	}...)
 }

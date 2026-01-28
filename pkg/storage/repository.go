@@ -8,38 +8,36 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-type Repository[T Model] struct {
+type Repository[T any] struct {
 	db *bun.DB
 }
 
-func NewRepository[T Model](db *bun.DB) *Repository[T] {
+func NewRepository[T any](db *bun.DB) *Repository[T] {
 	return &Repository[T]{db: db}
 }
 
-func (r *Repository[T]) ByID(ctx context.Context, id any) (T, error) {
-	var model T
+func (r *Repository[T]) ByID(ctx context.Context, id any) (*T, error) {
+	model := new(T)
 	err := r.db.NewSelect().Model(model).Where("id = ?", id).Scan(ctx)
 
 	return model, err
 }
 
-func (r *Repository[T]) Create(ctx context.Context, model T) (T, error) {
-	var zero T
+func (r *Repository[T]) Create(ctx context.Context, model *T) (*T, error) {
 	_, err := r.db.NewInsert().Model(model).Returning("*").Exec(ctx)
 
 	if err != nil {
-		return zero, err
+		return nil, err
 	}
 
 	return model, nil
 }
 
-func (r *Repository[T]) Update(ctx context.Context, model T) (T, error) {
-	var zero T
+func (r *Repository[T]) Update(ctx context.Context, model *T) (*T, error) {
 	_, err := r.db.NewUpdate().Model(model).WherePK().Returning("*").Exec(ctx)
 
 	if err != nil {
-		return zero, err
+		return nil, err
 	}
 
 	return model, nil
@@ -54,7 +52,7 @@ func (r *Repository[T]) BulkCreate(ctx context.Context, models []T) error {
 	return err
 }
 
-func (r *Repository[T]) One(ctx context.Context, opts ...QueryOption) (T, error) {
+func (r *Repository[T]) One(ctx context.Context, opts ...QueryOption) (*T, error) {
 	var model T
 
 	cfg := &queryConfig{}
@@ -67,11 +65,11 @@ func (r *Repository[T]) One(ctx context.Context, opts ...QueryOption) (T, error)
 
 	err := q.Limit(1).Scan(ctx)
 
-	return model, err
+	return &model, err
 }
 
-func (r *Repository[T]) List(ctx context.Context, opts ...QueryOption) ([]T, error) {
-	var items []T
+func (r *Repository[T]) List(ctx context.Context, opts ...QueryOption) ([]*T, error) {
+	var items []*T
 	cfg := &queryConfig{}
 	for _, opt := range opts {
 		opt(cfg)
@@ -89,11 +87,11 @@ func (r *Repository[T]) Paginate(
 	page int,
 	perPage int,
 	opts ...QueryOption,
-) (*Paginator[T], error) {
+) (*Paginator[*T], error) {
 	page, perPage = NormalizePagination(page, perPage)
 
 	var (
-		items      []T
+		items      []*T
 		totalCount int
 		totalPages int
 	)
@@ -139,7 +137,7 @@ func (r *Repository[T]) Paginate(
 		totalPages++
 	}
 
-	return &Paginator[T]{
+	return &Paginator[*T]{
 		Items:      items,
 		Total:      totalCount,
 		Page:       page,

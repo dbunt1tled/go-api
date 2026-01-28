@@ -47,6 +47,16 @@ func NewNotFoundError(msg string, code int) APIError {
 	return NewErrNo(msg, code, http.StatusNotFound)
 }
 
+func NewNotFoundErrorWrap(msg string, code int, e error) APIError {
+	var message string
+	if msg == "" {
+		message = e.Error()
+	} else {
+		message = fmt.Sprintf("%s: %s", msg, e.Error())
+	}
+	return NewNotFoundError(message, code)
+}
+
 func NewBadRequestError(msg string, code int) APIError {
 	return NewErrNo(msg, code, http.StatusBadRequest)
 }
@@ -57,7 +67,7 @@ func NewBadRequestErrorWrap(msg string, code int, e error) APIError {
 	} else {
 		message = fmt.Sprintf("%s: %s", msg, e.Error())
 	}
-	return NewErrNo(message, code, http.StatusUnprocessableEntity)
+	return NewBadRequestError(message, code)
 }
 
 func NewInternalError(msg string, code int) APIError {
@@ -87,7 +97,8 @@ func NewUnprocessableEntityErrorWrap(msg string, code int, e error) APIError {
 	} else {
 		message = fmt.Sprintf("%s: %s", msg, e.Error())
 	}
-	return NewErrNo(message, code, http.StatusUnprocessableEntity)
+
+	return NewUnprocessableEntityError(message, code)
 }
 
 func (e ErrNo) Error() string {

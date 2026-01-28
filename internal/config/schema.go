@@ -19,6 +19,7 @@ type Config struct {
 	Log       LogConfig    `koanf:"log"`
 	Mailer    MailerConfig `koanf:"mailer"`
 	Static    StaticConfig `koanf:"static"`
+	AMQP      AMQPConfig   `koanf:"amqp"`
 }
 type ServerConfig struct {
 	HTTP HTTPConfig `koanf:"http"`
@@ -114,4 +115,8 @@ type MailerConfig struct {
 type StaticConfig struct {
 	URL       string `koanf:"url"`
 	Directory string `koanf:"dir"`
+}
+
+type AMQPConfig struct {
+	URL string `koanf:"url"`
 }

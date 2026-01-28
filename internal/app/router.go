@@ -41,4 +41,5 @@ func authRoutes(api *echo.Group, app *App) {
 	auth := api.Group("/auth")
 	auth.POST("/register", app.AuthController.Register)
 	auth.POST("/login", app.AuthController.Login)
+	auth.GET("/confirm/:token", app.AuthController.Confirm)
 }

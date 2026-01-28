@@ -32,6 +32,7 @@ const (
 	Err404NotFoundDefault
 	Err404UserNotFound
 	Err404URLExpired
+	Err404UserConfirmTokenUserNotFoundError
 )
 
 const (
@@ -45,10 +46,19 @@ const (
 	Err422LoginRefreshTokenError
 	Err422RegisterValidateError
 	Err422RegisterUserCreationError
+	Err422RegisterUserGenerateConfirmMsgError
+	Err422CreateConfirmTokenMarshalError
 	Err422RegisterUserPasswordError
 	Err422LoginUserPasswordError
 	Err422LoginUserPasswordWrongError
 	Err422CreateConfirmTokenError
+	Err422UserConfirmValidateError
+	Err422UserConfirmTokenError
+	Err422UserConfirmTokenDecodeError
+	Err422UserConfirmTokenUserIdError
+	Err422UserConfirmTokenUserNotPendingError
+	Err422UserConfirmTokenUserUpdateError
+	Err422UserConfirmTokenUserNotFoundError
 	Err422SendConfirmEmailError
 	Err422ConfirmValidateError
 	Err422TokenError

@@ -41,3 +41,31 @@ func (m *Mailer) SendCtx(ctx context.Context, messages ...*mail.Msg) error {
 func (m *Mailer) Close() error {
 	return m.client.Close()
 }
+
+
+func (m *Mailer) SendEmail(
+	c context.Context,
+	to string,
+	subject string,
+	body string,
+) error {
+	e := mail.NewMsg()
+
+	err := e.From(m.fromEmail)
+	if err != nil {
+		return err
+	}
+	err = e.To(to)
+	if err != nil {
+		return err
+	}
+
+	e.Subject(subject)
+	e.SetBodyString(mail.TypeTextHTML, body)
+
+	if err = m.SendCtx(c, e); err != nil {
+		return err
+	}
+
+	return nil
+}

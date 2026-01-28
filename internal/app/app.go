@@ -33,7 +33,7 @@ type App struct {
 
 func NewApp(cfg *config.ServiceConfig) *App {
 
-	hasher, err := hasher.NewHasher(
+	hashService, err := hasher.NewHasher(
 		config.Get().Server.JWT.Algorithm,
 		config.Get().Server.JWT.PublicKey,
 		config.Get().Server.JWT.PrivateKey,
@@ -47,7 +47,7 @@ func NewApp(cfg *config.ServiceConfig) *App {
 	engine.Use(middleware.RequestIDWithConfig(middleware.RequestIDConfig{
 		Generator: func() string {
 			var u string
-			ub, e := hasher.UUIDVv7()
+			ub, e := hashService.UUIDVv7()
 			if e != nil {
 				u = strconv.FormatInt(time.Now().UnixMicro(), 10)
 			} else {
@@ -56,7 +56,7 @@ func NewApp(cfg *config.ServiceConfig) *App {
 			return u
 		},
 	}))
-	engine.Use(middleware.GzipWithConfig(middleware.GzipConfig{Level: 6}))
+	engine.Use(middleware.GzipWithConfig(middleware.GzipConfig{Level: 6})) //nolint:nolintlint,mnd
 	engine.Use(middleware.Recover())
 	engine.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins:     strings.Split(config.Get().Server.HTTP.CORS.AllowOrigins, ","),
@@ -76,7 +76,7 @@ func NewApp(cfg *config.ServiceConfig) *App {
 	return &App{
 		cfg:            cfg,
 		engine:         engine,
-		AuthController: auth.NewAuthController(auth.NewAuthService(hasher), userService),
+		AuthController: auth.NewAuthController(auth.NewAuthService(hashService), cfg.RMProducer, userService),
 		UserController: user.NewUserController(userService),
 	}
 }
@@ -86,7 +86,7 @@ func (a *App) Engine() *echo.Echo {
 }
 
 func (a *App) Run(ctx context.Context) {
-	ctx, stop := signal.NotifyContext(
+	ct, stop := signal.NotifyContext(
 		ctx,
 		syscall.SIGINT,
 		syscall.SIGTERM,
@@ -105,7 +105,7 @@ func (a *App) Run(ctx context.Context) {
 		if config.Get().Server.HTTP.TLS.IsSet() {
 			log.Logger().Debug("(っ◕‿◕)っ Start Server TLS listening on address: " + config.Get().URL)
 			err := sc.StartTLS(
-				ctx,
+				ct,
 				a.engine,
 				config.Get().Server.HTTP.TLS.GetCertData(),
 				config.Get().Server.HTTP.TLS.GetKeyData(),
@@ -115,14 +115,14 @@ func (a *App) Run(ctx context.Context) {
 			}
 		} else {
 			log.Logger().Debug("(/◔◡◔)/ Start Server listening on address: " + config.Get().URL)
-			if err := sc.Start(ctx, a.engine); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			if err := sc.Start(ct, a.engine); err != nil && !errors.Is(err, http.ErrServerClosed) {
 				log.Logger().Fatalf("¯\\_(͡° ͜ʖ ͡°)_/¯Shutting down the server: %v", err)
 			}
 		}
 	}()
-	<-ctx.Done()
+	<-ct.Done()
 	var cancel context.CancelFunc
-	ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second) //nolint:mnd // 10 seconds timeout
+	ct, cancel = context.WithTimeout(context.Background(), 10*time.Second) //nolint:mnd // 10 seconds timeout
 	defer cancel()
 	log.Logger().Warn("Quit: shutting down ...")
 	defer log.Logger().Warn("｡◕‿‿◕｡ Quit: shutdown completed")
@@ -130,6 +130,10 @@ func (a *App) Run(ctx context.Context) {
 		func() error {
 			log.Logger().Info("㋡ Quit: closing database connection")
 			return a.cfg.DB.Close()
+		},
+		func() error {
+			log.Logger().Info("㋡ Quit: closing RabbitMQ connection")
+			return a.cfg.RMProducer.Close()
 		},
 		func() error {
 			log.Logger().Info("㋡ Quit: closing mailer")

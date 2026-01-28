@@ -9,12 +9,12 @@ import (
 )
 
 type Service struct {
-	userRepository *storage.Repository[*User]
+	userRepository *storage.Repository[User]
 }
 
 func NewUserService(db *bun.DB) *Service {
 	return &Service{
-		userRepository: storage.NewRepository[*User](db),
+		userRepository: storage.NewRepository[User](db),
 	}
 }
 

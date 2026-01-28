@@ -34,5 +34,5 @@ func (r Register) ToUser() *user.User {
 }
 
 type Confirm struct {
-	Token string `params:"token" json:"token" validate:"required,min=8" example:"random string"`
+	Token string `param:"token" json:"token" validate:"required,min=8" example:"random string"`
 }

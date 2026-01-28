@@ -5,9 +5,11 @@ import (
 
 	"github.com/dbunt1tled/go-api/internal/app"
 	"github.com/dbunt1tled/go-api/internal/config"
+	"github.com/dbunt1tled/go-api/pkg/f"
 	"github.com/dbunt1tled/go-api/pkg/log"
 	"github.com/dbunt1tled/go-api/pkg/mailer"
 	"github.com/dbunt1tled/go-api/pkg/postgres"
+	"github.com/dbunt1tled/go-api/pkg/rmq"
 )
 
 func main() {
@@ -22,8 +24,9 @@ func main() {
 		config.Get().Mailer.Password,
 		config.Get().Mailer.Address,
 	)
+	rmp := f.Must(rmq.NewProducer(config.Get().AMQP.URL, 0))
 
-	cfg := config.NewServiceConfig(db, mail)
+	cfg := config.NewServiceConfig(db, mail, rmp)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
