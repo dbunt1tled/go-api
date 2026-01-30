@@ -32,7 +32,7 @@ type HTTPConfig struct {
 	Timeout   time.Duration `koanf:"timeout"`
 	Prefork   bool          `koanf:"prefork"`
 	CORS      CORSConfig    `koanf:"cors"`
-	BodyLimit int           `koanf:"bodylimit"`
+	BodyLimit int64         `koanf:"bodylimit"`
 	TLS       TLSConfig     `koanf:"tls"`
 }
 

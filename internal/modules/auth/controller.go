@@ -6,6 +6,7 @@ import (
 	"github.com/dbunt1tled/go-api/internal/jobs/rmqmail/handlers"
 	"github.com/dbunt1tled/go-api/internal/modules/user"
 	"github.com/dbunt1tled/go-api/pkg/e"
+	"github.com/dbunt1tled/go-api/pkg/hasher"
 	"github.com/dbunt1tled/go-api/pkg/http"
 	"github.com/dbunt1tled/go-api/pkg/log"
 	"github.com/dbunt1tled/go-api/pkg/rmq"
@@ -51,7 +52,10 @@ func (ac *Controller) Login(c *echo.Context) error {
 
 	u, err = ac.userService.One(
 		c.Request().Context(),
-		storage.WithFilter(storage.NewRule("status", storage.OpEqual, user.Active)),
+		storage.WithFilter(
+			storage.NewRule("email", storage.OpEqual, req.Email),
+			storage.NewRule("status", storage.OpEqual, user.Active),
+		),
 	)
 	if err != nil {
 		return e.NewUnprocessableEntityError(
@@ -203,7 +207,7 @@ func (ac *Controller) Confirm(c *echo.Context) error {
 			err,
 		)
 	}
-	if u.Status != user.Pending {
+	if !u.IsPending() {
 		return e.NewUnprocessableEntityError(
 			"User is not in pending state.",
 			e.Err422UserConfirmTokenUserNotPendingError,
@@ -219,4 +223,55 @@ func (ac *Controller) Confirm(c *echo.Context) error {
 		)
 	}
 	return ac.JSON200(c, user.NewUserResource(u))
+}
+func (ac *Controller) Refresh(c *echo.Context) error {
+	var (
+		err                           error
+		u                             *user.User
+		isEmpty                       bool
+		access, refresh, refreshToken string
+	)
+	refreshToken, isEmpty = ac.authService.TokenFromAuthHeader(c)
+	if isEmpty {
+		return e.NewUnauthorizedError("Unauthorized", e.Err401RefreshEmptyTokenError)
+	}
+	token, err := ac.authService.DecodeToken(
+		refreshToken,
+		hasher.WithExpire(true),
+		hasher.WithSubject(hasher.RefreshTokenSubject),
+	)
+	if err != nil {
+		return err
+	}
+
+	id, err := uuid.Parse(token["iss"].(string))
+	if err != nil {
+		return e.NewUnauthorizedError("Unauthorized", e.Err401TokenRefreshUserIdError)
+	}
+
+	u, err = ac.userService.ByID(c.Request().Context(), id)
+	if err != nil {
+		return e.NewUnauthorizedError("Unauthorized", e.Err401TokenRefreshUserError)
+	}
+
+	if u == nil {
+		return e.NewUnauthorizedError("Unauthorized", e.Err401RefreshUserNotFoundError)
+	}
+
+	if !u.IsActive() {
+		return e.NewUnauthorizedError("Unauthorized", e.Err401RefreshUserNotActiveError)
+	}
+
+	access, refresh, err = ac.authService.GenerateAuthTokens(u)
+	if err != nil {
+		return e.NewUnprocessableEntityError(
+			err.Error(),
+			e.Err422LoginAccessTokenError,
+		)
+	}
+
+	return ac.JSON200(c, NewLoginResponse(map[string]interface{}{
+		"accessToken":  access,
+		"refreshToken": refresh,
+	}))
 }

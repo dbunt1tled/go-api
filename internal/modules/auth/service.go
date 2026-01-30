@@ -8,6 +8,7 @@ import (
 	"github.com/dbunt1tled/go-api/internal/modules/user"
 	"github.com/dbunt1tled/go-api/pkg/e"
 	"github.com/dbunt1tled/go-api/pkg/hasher"
+	"github.com/labstack/echo/v5"
 )
 
 const BearerSchema = "Bearer "
@@ -97,4 +98,24 @@ func (s *Service) GenerateConfirmToken(user *user.User) (string, error) {
 
 func (s *Service) DecodeConfirmToken(tokenConfirm string) (map[string]interface{}, error) {
 	return s.DecodeToken(tokenConfirm, hasher.WithSubject(hasher.ConfirmTokenSubject))
+}
+
+func (s *Service) TokenFromAuthHeader(c *echo.Context) (string, bool) {
+	authHeader := c.Request().Header.Get("Authorization")
+	if authHeader == "" {
+		return "", true
+	}
+	authToken := strings.TrimSpace(strings.Split(authHeader, BearerSchema)[1])
+	if authToken == "" {
+		return "", true
+	}
+	return authToken, false
+}
+
+func (s *Service) TokenFromQueryParam(key string, c *echo.Context) (string, bool) {
+	authToken := c.QueryParam(key)
+	if authToken == "" {
+		return "", true
+	}
+	return authToken, false
 }

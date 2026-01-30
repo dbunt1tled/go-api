@@ -15,9 +15,11 @@ import (
 	"github.com/dbunt1tled/go-api/internal/config"
 	"github.com/dbunt1tled/go-api/internal/modules/auth"
 	"github.com/dbunt1tled/go-api/internal/modules/user"
+	"github.com/dbunt1tled/go-api/internal/modules/user_notification"
 	"github.com/dbunt1tled/go-api/pkg/f"
 	"github.com/dbunt1tled/go-api/pkg/hasher"
 	h "github.com/dbunt1tled/go-api/pkg/http"
+	"github.com/dbunt1tled/go-api/pkg/http/middlewares"
 	"github.com/dbunt1tled/go-api/pkg/log"
 	"github.com/dbunt1tled/go-api/pkg/validation"
 	"github.com/labstack/echo/v5"
@@ -25,10 +27,12 @@ import (
 )
 
 type App struct {
-	cfg            *config.ServiceConfig
-	engine         *echo.Echo
-	AuthController *auth.Controller
-	UserController *user.Controller
+	cfg                        *config.ServiceConfig
+	engine                     *echo.Echo
+	AuthMiddleware             *middlewares.AuthMiddleware
+	AuthController             *auth.Controller
+	UserController             *user.Controller
+	UserNotificationController *user_notification.Controller
 }
 
 func NewApp(cfg *config.ServiceConfig) *App {
@@ -43,7 +47,7 @@ func NewApp(cfg *config.ServiceConfig) *App {
 	}
 
 	engine := engineSetup(cfg)
-
+	engine.Use(middleware.BodyLimit(config.Get().Server.HTTP.BodyLimit))
 	engine.Use(middleware.RequestIDWithConfig(middleware.RequestIDConfig{
 		Generator: func() string {
 			var u string
@@ -70,14 +74,21 @@ func NewApp(cfg *config.ServiceConfig) *App {
 	if config.Get().Static.URL != "" && config.Get().Static.Directory != "" {
 		engine.Static(config.Get().Static.URL, config.Get().Static.Directory)
 	}
-
+	authService := auth.NewAuthService(hashService)
 	userService := user.NewUserService(cfg.DB.DB())
+	userNotificationService := user_notification.NewUserNotificationService(cfg.DB.DB())
 
 	return &App{
 		cfg:            cfg,
 		engine:         engine,
-		AuthController: auth.NewAuthController(auth.NewAuthService(hashService), cfg.RMProducer, userService),
-		UserController: user.NewUserController(userService),
+		AuthMiddleware: middlewares.NewAuthMiddleware(authService, userService),
+		AuthController: auth.NewAuthController(
+			authService,
+			cfg.RMProducer,
+			userService,
+		),
+		UserController:             user.NewUserController(userService),
+		UserNotificationController: user_notification.NewUserNotificationController(userNotificationService),
 	}
 }
 
@@ -100,7 +111,7 @@ func (a *App) Run(ctx context.Context) {
 			Address:    config.Get().Server.HTTP.Host + ":" + strconv.Itoa(config.Get().Server.HTTP.Port),
 			HideBanner: true,
 
-			GracefulTimeout: 10 * time.Second,
+			GracefulTimeout: 10 * time.Second, //nolint:nolintlint,mnd
 		}
 		if config.Get().Server.HTTP.TLS.IsSet() {
 			log.Logger().Debug("(っ◕‿◕)っ Start Server TLS listening on address: " + config.Get().URL)

@@ -58,7 +58,7 @@ func (e UserConfirmationEmailJob) Handle(ctx context.Context, body []byte) error
 	if err != nil {
 		return fmt.Errorf("user: #%d not found. %s", job.UserID, err.Error())
 	}
-	if u.Status != user.Pending {
+	if !u.IsPending() {
 		log.Logger().Warn(
 			"User is not in pending state",
 			slog.String("user_id", u.ID.String()),

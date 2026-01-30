@@ -6,7 +6,7 @@ require (
 	github.com/bytedance/sonic v1.15.0
 	github.com/fatih/color v1.18.0
 	github.com/go-playground/validator/v10 v10.30.1
-	github.com/golang-jwt/jwt/v5 v5.3.0
+	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/google/uuid v1.6.0
 	github.com/jxskiss/base62 v1.1.0
 	github.com/knadh/koanf/parsers/dotenv v1.1.1
@@ -14,7 +14,7 @@ require (
 	github.com/knadh/koanf/providers/env/v2 v2.0.0
 	github.com/knadh/koanf/providers/file v1.2.1
 	github.com/knadh/koanf/v2 v2.3.2
-	github.com/labstack/echo/v5 v5.0.0
+	github.com/labstack/echo/v5 v5.0.1
 	github.com/natefinch/lumberjack/v3 v3.0.0-alpha
 	github.com/pkg/errors v0.9.1
 	github.com/rabbitmq/amqp091-go v1.10.0

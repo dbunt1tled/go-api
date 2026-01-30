@@ -50,3 +50,21 @@ func (u *User) Sanitize() {
 	u.PhoneNumber = strings.TrimSpace(u.PhoneNumber)
 	u.Password = strings.TrimSpace(u.Password)
 }
+
+func (u *User) IsActive() bool {
+	return u.Status == Active
+}
+
+func (u *User) IsPending() bool {
+	return u.Status == Pending
+}
+
+func (u *User) IsAdmin() bool {
+	for _, role := range u.Roles {
+		if role == Admin {
+			return true
+		}
+	}
+	return false
+}
+

@@ -1,9 +1,8 @@
-package user
+package user_notification
 
 import (
 	"github.com/dbunt1tled/go-api/pkg/e"
 	"github.com/dbunt1tled/go-api/pkg/http"
-	"github.com/dbunt1tled/go-api/pkg/http/authctx"
 	"github.com/dbunt1tled/go-api/pkg/storage"
 	"github.com/labstack/echo/v5"
 )
@@ -11,22 +10,22 @@ import (
 type Controller struct {
 	http.BaseController
 
-	userService *Service
+	userNotificationService *Service
 }
 
-func NewUserController(
-	userService *Service,
+func NewUserNotificationController(
+	userNotificationService *Service,
 ) *Controller {
 	return &Controller{
-		BaseController: http.NewBaseController(),
-		userService:    userService,
+		BaseController:          http.NewBaseController(),
+		userNotificationService: userNotificationService,
 	}
 }
 
 func (uc *Controller) List(c *echo.Context) error {
 	var (
 		err   error
-		users *storage.Paginator[*User]
+		users *storage.Paginator[*UserNotification]
 	)
 	req := new(ListRequest)
 
@@ -34,14 +33,12 @@ func (uc *Controller) List(c *echo.Context) error {
 		return err
 	}
 
-	users, err = uc.userService.Paginate(
+	users, err = uc.userNotificationService.Paginate(
 		c.Request().Context(),
 		req.Page.Page,
 		req.Page.Limit,
 		storage.WithFilter(
 			storage.NewRule("status", storage.OpIn, req.Status),
-			storage.NewRule("email", storage.OpEqual, req.Email),
-			storage.NewRule("roles", storage.OpContains, req.Roles),
 		),
 		storage.WithSort(req.Sort.Field, req.Sort.Order),
 	)
@@ -53,14 +50,5 @@ func (uc *Controller) List(c *echo.Context) error {
 		)
 	}
 
-	return uc.JSON200(c, NewUserListResponse(users))
-}
-
-func (uc *Controller) Profile(c *echo.Context) error {
-	u, err := authctx.AuthUser[*User](c)
-	if err != nil {
-		return err
-	}
-
-	return uc.JSON200(c, NewUserResponse(u))
+	return uc.JSON200(c, NewUserNotificationListResponse(users))
 }

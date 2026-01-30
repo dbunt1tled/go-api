@@ -53,7 +53,7 @@ func (r *Repository[T]) BulkCreate(ctx context.Context, models []T) error {
 }
 
 func (r *Repository[T]) One(ctx context.Context, opts ...QueryOption) (*T, error) {
-	var model T
+	model := new(T)
 
 	cfg := &queryConfig{}
 	for _, opt := range opts {
@@ -65,7 +65,7 @@ func (r *Repository[T]) One(ctx context.Context, opts ...QueryOption) (*T, error
 
 	err := q.Limit(1).Scan(ctx)
 
-	return &model, err
+	return model, err
 }
 
 func (r *Repository[T]) List(ctx context.Context, opts ...QueryOption) ([]*T, error) {

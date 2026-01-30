@@ -15,6 +15,8 @@ const (
 	Err401TokenSubjectError
 	Err401TokenUserIdError
 	Err401UserNotFoundError
+	Err401UserNotAuth1Error
+	Err401UserNotAuth2Error
 	Err401UserNotActiveError
 	Err401RefreshEmptyTokenError
 	Err401TokenRefreshSubjectError
