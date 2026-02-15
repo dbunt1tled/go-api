@@ -38,7 +38,7 @@ func (uc *Controller) List(c *echo.Context) error {
 		req.Page.Page,
 		req.Page.Limit,
 		storage.WithFilter(
-			storage.NewRule("status", storage.OpIn, req.Status),
+			storage.NewRule("status", storage.OpEqual, req.Status),
 		),
 		storage.WithSort(req.Sort.Field, req.Sort.Order),
 	)

@@ -17,7 +17,10 @@ func main() {
 	)
 	config.Load()
 	log.Load(config.Get().Name, config.Get().Env, config.Get().Log.Level, config.Get().Log.File)
-	db := postgres.New(config.Get().DB.Main.DSN)
+	db := postgres.New(
+		config.Get().DB.Main.DSN,
+		config.Get().Debug,
+	)
 	defer func(db *postgres.Postgres) {
 		err := db.Close()
 		if err != nil {

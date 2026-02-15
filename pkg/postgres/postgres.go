@@ -2,13 +2,13 @@ package postgres
 
 import (
 	"database/sql"
-	"log"
 	"runtime"
 	"time"
 
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/pgdialect"
 	"github.com/uptrace/bun/driver/pgdriver"
+	"github.com/uptrace/bun/extra/bundebug"
 )
 
 type Postgres struct {
@@ -20,7 +20,7 @@ const (
 	connMaxLifetime = time.Hour
 )
 
-func New(dsn string) *Postgres {
+func New(dsn string, debug bool) *Postgres {
 	sqldb := sql.OpenDB(pgdriver.NewConnector(
 		pgdriver.WithDSN(dsn),
 		pgdriver.WithTimeout(timeout),
@@ -35,9 +35,17 @@ func New(dsn string) *Postgres {
 	sqldb.SetConnMaxIdleTime(connMaxLifetime) // Idle connection timeout
 
 	if err := sqldb.Ping(); err != nil {
-		log.Fatal("Failed to connect to database:", err)
+		panic(err)
 	}
-	return &Postgres{db: bun.NewDB(sqldb, pgdialect.New())}
+
+	db := bun.NewDB(sqldb, pgdialect.New())
+	if debug {
+		db = db.WithQueryHook(
+			bundebug.NewQueryHook(bundebug.WithVerbose(true)),
+		)
+	}
+
+	return &Postgres{db: db}
 }
 
 func (p *Postgres) DB() *bun.DB {

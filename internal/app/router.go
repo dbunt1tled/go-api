@@ -38,14 +38,14 @@ func apiRoutes(api *echo.Group, app *App) {
 
 func usersRoutes(api *echo.Group, app *App) {
 	user := api.Group("/users", app.AuthMiddleware.AuthBearer)
-	user.GET("/", app.UserController.List)
+	user.GET("", app.UserController.List)
 	user.GET("/profile", app.UserController.Profile)
 	userNotificationGroup(user, app)
 }
 
 func userNotificationGroup(api *echo.Group, app *App) {
 	userNotification := api.Group("/notifications", app.AuthMiddleware.AuthBearer)
-	userNotification.GET("/", app.UserNotificationController.List)
+	userNotification.GET("", app.UserNotificationController.List)
 }
 
 func authRoutes(api *echo.Group, app *App) {

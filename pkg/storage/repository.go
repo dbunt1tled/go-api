@@ -106,7 +106,7 @@ func (r *Repository[T]) Paginate(
 		cfg.limit = perPage
 		cfg.offset = (page - 1) * perPage
 
-		q := r.db.NewSelect().Model(items)
+		q := r.db.NewSelect().Model(&items)
 		q = applyFilter(q, r.buildFilter(cfg))
 		return q.Scan(cx)
 	})
@@ -121,7 +121,7 @@ func (r *Repository[T]) Paginate(
 		cfg.offset = 0
 		cfg.orderBy = make([]Sort, 0)
 
-		q := r.db.NewSelect().Model(items)
+		q := r.db.NewSelect().Model(&items)
 		q = applyFilter(q, r.buildFilter(cfg))
 		totalCount, err = q.Count(cx)
 

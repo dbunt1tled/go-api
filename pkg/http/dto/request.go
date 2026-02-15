@@ -5,8 +5,8 @@ type SetDefaults interface {
 }
 
 type PaginationQuery struct {
-	Page *PageQuery `json:"page" query:"page" validate:"omitempty"`
-	Sort *Sorting   `json:"sort" query:"sort" validate:"omitempty"`
+	Page *PageQuery
+	Sort *Sorting
 }
 
 type PageQuery struct {
