@@ -96,6 +96,22 @@ func (s *Service) GenerateConfirmToken(user *user.User) (string, error) {
 	})
 }
 
+func (s *Service) DecodeAuthToken(tokenAuth string) (map[string]interface{}, error) {
+	return s.DecodeToken(
+		tokenAuth,
+		hasher.WithExpire(true),
+		hasher.WithSubject(hasher.AccessTokenSubject),
+	)
+}
+
+func (s *Service) DecodeRefreshToken(tokenAuth string) (map[string]interface{}, error) {
+	return s.DecodeToken(
+		tokenAuth,
+		hasher.WithExpire(true),
+		hasher.WithSubject(hasher.RefreshTokenSubject),
+	)
+}
+
 func (s *Service) DecodeConfirmToken(tokenConfirm string) (map[string]interface{}, error) {
 	return s.DecodeToken(tokenConfirm, hasher.WithSubject(hasher.ConfirmTokenSubject))
 }

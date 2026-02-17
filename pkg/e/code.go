@@ -60,6 +60,10 @@ const (
 	Err422UserConfirmTokenUserIdError
 	Err422UserConfirmTokenUserNotPendingError
 	Err422UserConfirmTokenUserUpdateError
+	Err422UserNotificationConvertToMapError
+	Err422UserNotificationSaveError
+	Err422UserNotificationMarshalError
+	Err422UserNotificationPublishError
 	Err422UserConfirmTokenUserNotFoundError
 	Err422SendConfirmEmailError
 	Err422ConfirmValidateError

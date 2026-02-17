@@ -2,24 +2,26 @@ package config
 
 import (
 	"encoding/base64"
+	"log"
 	"log/slog"
 	"os"
 	"time"
 )
 
 type Config struct {
-	Name      string       `koanf:"name"`
-	URL       string       `koanf:"url"`
-	Env       string       `koanf:"env"`
-	Debug     bool         `koanf:"debug"`
-	Profiling bool         `koanf:"profiling"`
-	Server    ServerConfig `koanf:"server"`
-	DB        DBConfig     `koanf:"db"`
-	Redis     RedisConfig  `koanf:"redis"`
-	Log       LogConfig    `koanf:"log"`
-	Mailer    MailerConfig `koanf:"mailer"`
-	Static    StaticConfig `koanf:"static"`
-	AMQP      AMQPConfig   `koanf:"amqp"`
+	Name       string           `koanf:"name"`
+	URL        string           `koanf:"url"`
+	Env        string           `koanf:"env"`
+	Debug      bool             `koanf:"debug"`
+	Profiling  bool             `koanf:"profiling"`
+	Server     ServerConfig     `koanf:"server"`
+	DB         DBConfig         `koanf:"db"`
+	Redis      RedisConfig      `koanf:"redis"`
+	Log        LogConfig        `koanf:"log"`
+	Mailer     MailerConfig     `koanf:"mailer"`
+	Static     StaticConfig     `koanf:"static"`
+	AMQP       AMQPConfig       `koanf:"amqp"`
+	Centrifugo CentrifugoConfig `koanf:"centrifugo"`
 }
 type ServerConfig struct {
 	HTTP HTTPConfig `koanf:"http"`
@@ -44,28 +46,48 @@ type TLSConfig struct {
 func (t TLSConfig) IsSet() bool {
 	return t.Key != "" && t.Cert != ""
 }
-func (t TLSConfig) GetCertData() interface{} {
-	_, err := os.Stat(t.Cert)
+func (t TLSConfig) GetCertData() []byte {
+	var (
+		err error
+		res []byte
+	)
+	_, err = os.Stat(t.Cert)
 	if err == nil {
-		return t.Cert
+		certBytes, err := ReadCert(t.Cert)
+		if err != nil {
+			log.Fatal(err)
+		}
+		return certBytes
 	}
-	res, err := base64.StdEncoding.DecodeString(t.Cert)
+	res, err = base64.StdEncoding.DecodeString(t.Cert)
 	if err == nil {
 		return res
 	}
 	return []byte(t.Cert)
 }
 
-func (t TLSConfig) GetKeyData() interface{} {
-	_, err := os.Stat(t.Key)
+func (t TLSConfig) GetKeyData() []byte {
+	var (
+		err error
+		res []byte
+	)
+	_, err = os.Stat(t.Key)
 	if err == nil {
-		return t.Key
+		certBytes, err := ReadCert(t.Key)
+		if err != nil {
+			log.Fatal(err)
+		}
+		return certBytes
 	}
-	res, err := base64.StdEncoding.DecodeString(t.Key)
+	res, err = base64.StdEncoding.DecodeString(t.Key)
 	if err == nil {
 		return res
 	}
 	return []byte(t.Key)
+}
+
+func ReadCert(path string) ([]byte, error) {
+	return os.ReadFile(path)
 }
 
 type JWTConfig struct {
@@ -119,4 +141,10 @@ type StaticConfig struct {
 
 type AMQPConfig struct {
 	URL string `koanf:"url"`
+}
+
+type CentrifugoConfig struct {
+	ServerUrl string `koanf:"server"`
+	APIKey    string `koanf:"key"`
+	APIUrl    string `koanf:"api"`
 }

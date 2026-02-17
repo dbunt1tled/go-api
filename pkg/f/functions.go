@@ -127,3 +127,11 @@ func Must[T any](t T, err error) T {
 	}
 	return t
 }
+
+func SubStr(stack string, needle string) string {
+	index := strings.Index(stack, needle)
+	if index != -1 {
+		return stack[:index]
+	}
+	return stack
+}

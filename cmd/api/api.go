@@ -5,6 +5,7 @@ import (
 
 	"github.com/dbunt1tled/go-api/internal/app"
 	"github.com/dbunt1tled/go-api/internal/config"
+	"github.com/dbunt1tled/go-api/internal/lib/cent"
 	"github.com/dbunt1tled/go-api/pkg/f"
 	"github.com/dbunt1tled/go-api/pkg/log"
 	"github.com/dbunt1tled/go-api/pkg/mailer"
@@ -28,8 +29,8 @@ func main() {
 		config.Get().Mailer.Address,
 	)
 	rmp := f.Must(rmq.NewProducer(config.Get().AMQP.URL, 0))
-
-	cfg := config.NewServiceConfig(db, mail, rmp)
+	cs := cent.NewCentrifugoService(config.Get().Centrifugo.APIKey, config.Get().Centrifugo.APIUrl)
+	cfg := config.NewServiceConfig(db, mail, rmp, cs)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()

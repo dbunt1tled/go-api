@@ -6,7 +6,6 @@ import (
 	"github.com/dbunt1tled/go-api/internal/jobs/rmqmail/handlers"
 	"github.com/dbunt1tled/go-api/internal/modules/user"
 	"github.com/dbunt1tled/go-api/pkg/e"
-	"github.com/dbunt1tled/go-api/pkg/hasher"
 	"github.com/dbunt1tled/go-api/pkg/http"
 	"github.com/dbunt1tled/go-api/pkg/log"
 	"github.com/dbunt1tled/go-api/pkg/rmq"
@@ -227,24 +226,22 @@ func (ac *Controller) Confirm(c *echo.Context) error {
 func (ac *Controller) Refresh(c *echo.Context) error {
 	var (
 		err                           error
+		id                            uuid.UUID
 		u                             *user.User
 		isEmpty                       bool
+		token                         map[string]interface{}
 		access, refresh, refreshToken string
 	)
 	refreshToken, isEmpty = ac.authService.TokenFromAuthHeader(c)
 	if isEmpty {
 		return e.NewUnauthorizedError("Unauthorized", e.Err401RefreshEmptyTokenError)
 	}
-	token, err := ac.authService.DecodeToken(
-		refreshToken,
-		hasher.WithExpire(true),
-		hasher.WithSubject(hasher.RefreshTokenSubject),
-	)
+	token, err = ac.authService.DecodeRefreshToken(refreshToken)
 	if err != nil {
 		return err
 	}
 
-	id, err := uuid.Parse(token["iss"].(string))
+	id, err = uuid.Parse(token["iss"].(string))
 	if err != nil {
 		return e.NewUnauthorizedError("Unauthorized", e.Err401TokenRefreshUserIdError)
 	}

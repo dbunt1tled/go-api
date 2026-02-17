@@ -6,7 +6,6 @@ import (
 	"github.com/dbunt1tled/go-api/internal/modules/auth"
 	"github.com/dbunt1tled/go-api/internal/modules/user"
 	"github.com/dbunt1tled/go-api/pkg/e"
-	"github.com/dbunt1tled/go-api/pkg/hasher"
 	"github.com/dbunt1tled/go-api/pkg/http/authctx"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v5"
@@ -46,11 +45,7 @@ func (a *AuthMiddleware) AuthBearer(next echo.HandlerFunc) echo.HandlerFunc {
 			}
 		}
 
-		token, err = a.authService.DecodeToken(
-			authToken,
-			hasher.WithSubject(hasher.AccessTokenSubject),
-			hasher.WithExpire(true),
-		)
+		token, err = a.authService.DecodeAuthToken(authToken)
 		if err != nil {
 			return err
 		}
