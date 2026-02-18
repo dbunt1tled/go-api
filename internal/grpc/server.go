@@ -3,7 +3,6 @@ package centrifugo
 import (
 	"context"
 	"log/slog"
-	"strconv"
 
 	"github.com/bytedance/sonic"
 	"github.com/dbunt1tled/go-api/internal/grpc/param"
@@ -123,7 +122,7 @@ func (s *Server) Connect(
 	}
 
 	data := map[string]interface{}{
-		"channels": []string{"user:#" + u.ID.String(), "read:#" + u.ID.String()},
+		"channels": []string{"user:" + u.ID.String(), "read:" + u.ID.String()},
 		"user":     u.FirstName + " " + u.SecondName,
 	}
 	dataBytes, err = sonic.ConfigFastest.Marshal(data)
@@ -156,10 +155,10 @@ func (s *Server) Subscribe(
 	var (
 		provider *server.ChannelProvider
 		err      error
-		userID   int64
+		userID   uuid.UUID
 	)
 	channel := request.GetChannel()
-	userID, err = strconv.ParseInt(request.GetUser(), 10, 64)
+	userID, err = uuid.Parse(request.GetUser())
 	if err != nil {
 		log.Logger().ErrorContext(ctx, "Centrifugo Subscribe error parse user id",
 			err,
@@ -209,12 +208,12 @@ func (s *Server) Publish(
 	var (
 		provider *server.ChannelProvider
 		err      error
-		userID   int64
+		userID   uuid.UUID
 		dt       *[]byte
 	)
 	data := request.GetData()
 	channel := request.GetChannel()
-	userID, err = strconv.ParseInt(request.GetUser(), 10, 64)
+	userID, err = uuid.Parse(request.GetUser())
 	if err != nil {
 		log.Logger().ErrorContext(ctx, "Centrifugo Publish error parse user id",
 			err,

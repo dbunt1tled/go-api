@@ -3,12 +3,12 @@ package provider
 import (
 	"context"
 	"fmt"
-	"strconv"
 
 	"github.com/bytedance/sonic"
 	"github.com/dbunt1tled/go-api/internal/grpc/server/provider/readhandlers"
 	"github.com/dbunt1tled/go-api/internal/modules/user_notification"
 	"github.com/dbunt1tled/go-api/pkg/f"
+	"github.com/google/uuid"
 	"github.com/pkg/errors"
 )
 
@@ -27,7 +27,7 @@ func NewReadProvider(
 }
 
 type ReadChannelHandler interface {
-	Handle(ctx context.Context, userID int64, data []byte) (*[]byte, error)
+	Handle(ctx context.Context, userID uuid.UUID, data []byte) (*[]byte, error)
 }
 
 type ReadChannelResolver struct {
@@ -44,14 +44,14 @@ func NewReadChannelResolver(
 	return &r
 }
 
-func (u *ReadProvider) Subscribe(ctx context.Context, channel string, userID int64) error {
-	if channel != (ChannelRead + ":#" + strconv.FormatInt(userID, 10)) {
+func (u *ReadProvider) Subscribe(ctx context.Context, channel string, userID uuid.UUID) error {
+	if channel != (ChannelRead + ":" + userID.String()) {
 		return errors.New("invalid read channel")
 	}
 	return nil
 }
 
-func (u *ReadProvider) Publish(ctx context.Context, channel string, userID int64, data []byte) (*[]byte, error) {
+func (u *ReadProvider) Publish(ctx context.Context, channel string, userID uuid.UUID, data []byte) (*[]byte, error) {
 	var (
 		err error
 		ch  string

@@ -2,8 +2,8 @@ package provider
 
 import (
 	"context"
-	"strconv"
 
+	"github.com/google/uuid"
 	"github.com/pkg/errors"
 )
 
@@ -16,13 +16,13 @@ func NewUserProvider() *UserProvider {
 	return &UserProvider{}
 }
 
-func (u *UserProvider) Subscribe(ctx context.Context, channel string, userID int64) error {
-	if channel != (ChannelUser + ":#" + strconv.FormatInt(userID, 10)) {
+func (u *UserProvider) Subscribe(ctx context.Context, channel string, userID uuid.UUID) error {
+	if channel != (ChannelUser + ":" + userID.String()) {
 		return errors.New("invalid user channel")
 	}
 	return nil
 }
 
-func (u *UserProvider) Publish(ctx context.Context, channel string, userID int64, data []byte) (*[]byte, error) {
+func (u *UserProvider) Publish(ctx context.Context, channel string, userID uuid.UUID, data []byte) (*[]byte, error) {
 	return nil, nil
 }

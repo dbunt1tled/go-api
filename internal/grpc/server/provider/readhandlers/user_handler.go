@@ -10,11 +10,8 @@ import (
 )
 
 type UserReadMessage struct {
-	ID      uuid.UUID                `json:"id"`
-	UserID  uuid.UUID                `json:"userId,omitempty"`
-	Channel string                   `json:"channel"`
-	Data    []byte                   `json:"data,omitempty"`
-	Status  user_notification.Status `json:"status"`
+	ID      uuid.UUID `json:"id"`
+	Channel string    `json:"channel"`
 }
 
 type UserReadChannelHandler struct {
@@ -30,10 +27,10 @@ func NewUserReadChannelHandler(
 }
 
 type ReadChannelHandler interface {
-	Handle(ctx context.Context, userID int64, data []byte) (*[]byte, error)
+	Handle(ctx context.Context, userID uuid.UUID, data []byte) (*[]byte, error)
 }
 
-func (u *UserReadChannelHandler) Handle(ctx context.Context, userID int64, data []byte) (*[]byte, error) {
+func (u *UserReadChannelHandler) Handle(ctx context.Context, userID uuid.UUID, data []byte) (*[]byte, error) {
 	var (
 		dt  UserReadMessage
 		un  *user_notification.UserNotification
@@ -47,7 +44,10 @@ func (u *UserReadChannelHandler) Handle(ctx context.Context, userID int64, data 
 	if err != nil {
 		return nil, errors.Wrap(err, "error getting user notification")
 	}
-	un.Status = dt.Status
+	if un.Status == user_notification.Read {
+		return nil, nil
+	}
+	un.Status = user_notification.Read
 	_, err = u.userNotificationService.Update(ctx, un)
 	if err != nil {
 		return nil, errors.Wrap(err, "error updating user notification")

@@ -21,16 +21,15 @@ func NewCentrifugoService(apiKey string, apiURL string) *CentrifugoService {
 	}
 }
 
-func (s *CentrifugoService) SendUserNotification(
+func (s *CentrifugoService) SendUserMessage(
 	ctx context.Context,
-	message Notification,
+	message *UserMessage,
 ) (*gocent.PublishResult, error) {
 	var (
 		d       []byte
 		err     error
 		publish gocent.PublishResult
 	)
-
 	d, err = sonic.ConfigFastest.Marshal(message)
 	if err != nil {
 		return nil, e.NewUnprocessableEntityErrorWrap(
@@ -39,7 +38,7 @@ func (s *CentrifugoService) SendUserNotification(
 			err,
 		)
 	}
-	publish, err = s.client.Publish(ctx, "user:#"+message.UserID.String(), d)
+	publish, err = s.client.Publish(ctx, "user:"+message.UserID.String(), d)
 	if err != nil {
 		return nil, e.NewUnprocessableEntityErrorWrap(
 			"Error publish User Notification message",
@@ -47,6 +46,5 @@ func (s *CentrifugoService) SendUserNotification(
 			err,
 		)
 	}
-
 	return &publish, nil
 }

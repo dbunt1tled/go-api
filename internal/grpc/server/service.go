@@ -6,11 +6,12 @@ import (
 
 	"github.com/dbunt1tled/go-api/internal/grpc/server/provider"
 	"github.com/dbunt1tled/go-api/internal/modules/user_notification"
+	"github.com/google/uuid"
 )
 
 type ChannelProvider interface {
-	Subscribe(ctx context.Context, channel string, userID int64) error
-	Publish(ctx context.Context, channel string, userID int64, data []byte) (*[]byte, error)
+	Subscribe(ctx context.Context, channel string, userID uuid.UUID) error
+	Publish(ctx context.Context, channel string, userID uuid.UUID, data []byte) (*[]byte, error)
 }
 
 type ChannelProviderResolver struct {
